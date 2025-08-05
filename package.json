@@ -22,7 +22,7 @@
     "commit:help": "echo 'Tipos de commit disponibles (sin límite de caracteres):' && echo 'feat(alcance): nueva funcionalidad' && echo 'fix(alcance): corrección de bug' && echo 'perf(alcance): mejora de rendimiento' && echo 'Ver .gitmessage para más ejemplos en español'",
     "update:preview": "ENVFILE=config/sae/production/.env.sae.production eas update --branch preview",
     "update:production": "eas update --branch production",
-    "build:preview": "eas build --profile preview",
+    "build:preview": "ENVFILE=config/sae/production/.env.sae.production eas build --profile preview",
     "build:preview:local": "eas build --profile preview --local",
     "build:production": "eas build --profile production"
   },
