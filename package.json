@@ -9,7 +9,7 @@
   },
   "scripts": {
     "start": "expo start --clear",
-    "start:sae:production": "APP_VARIANT=sae.production ENVFILE=config/sae/production/.env.sae.production expo start --clear",
+    "start:sae:production": "ENVFILE=config/sae/production/.env.sae.production expo start --clear",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "lint": "tsc --noEmit && eslint . --ext .ts,.tsx",
@@ -20,7 +20,7 @@
     "docs": "typedoc --options typedoc.json",
     "setup:git": "git config commit.template .gitmessage",
     "commit:help": "echo 'Tipos de commit disponibles (sin límite de caracteres):' && echo 'feat(alcance): nueva funcionalidad' && echo 'fix(alcance): corrección de bug' && echo 'perf(alcance): mejora de rendimiento' && echo 'Ver .gitmessage para más ejemplos en español'",
-    "update:preview": "APP_VARIANT=sae.production ENVFILE=config/sae/production/.env.sae.production eas update --branch preview",
+    "update:preview": "ENVFILE=config/sae/production/.env.sae.production eas update --branch preview",
     "update:production": "eas update --branch production",
     "build:preview": "eas build --profile preview",
     "build:preview:local": "eas build --profile preview --local",

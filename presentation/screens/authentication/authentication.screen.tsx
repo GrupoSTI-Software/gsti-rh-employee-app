@@ -33,6 +33,8 @@ import useAuthenticationStyle from './authentication.style'
 
 const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity)
 
+const APP_VARIANT = environment.APP_VARIANT
+
 /**
  * @description AuthenticationScreen es la pantalla que permite al usuario autenticarse con correo electrónico y contraseña
  * @returns {React.FC}
@@ -41,8 +43,7 @@ export const AuthenticationScreen: React.FC = () => {
   const controller = AuthenticationScreenController()
   const style = useAuthenticationStyle()
   const { t } = useTranslation()
-  const appVariant = environment.APP_VARIANT
-  const headBannerPath = appVariant === 'sae.production' ? require('../../../assets/sae/app-headbanner-2.png') : require('../../../assets/app-headbanner-2.png')
+  const headBannerPath = APP_VARIANT === 'sae.production' ? require('../../../assets/sae/app-headbanner-2.png') : require('../../../assets/app-headbanner-2.png')
 
   React.useEffect(() => {
     if (Platform.OS === 'ios') {
