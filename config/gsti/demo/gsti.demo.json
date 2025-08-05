@@ -1,6 +1,6 @@
 // app.config.js
-import fs from 'fs';
 import path from 'path';
+import fs from 'fs';
 
 const env = process.env.ENVFILE || '.env';
 const envFile = path.resolve(env);
@@ -14,7 +14,7 @@ export default ({ config }) => {
 
   if (appVariant) {
     try {
-      const configPath = path.resolve(__dirname, `config/sae/production/${appVariant}.json`);
+      const configPath = path.resolve(__dirname, `configs/${appVariant}.json`);
       variantConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
     } catch (error) {
       console.error(`Error loading variant config for ${appVariant}:`, error);
@@ -25,21 +25,21 @@ export default ({ config }) => {
   return {
     ...config,
     expo: {
-      name: variantConfig.name || config.name,
-      slug: variantConfig.slug || config.slug,
+      name: "GrupoSTI Demo",
+      slug: "demo-grupo-sti",
       version: "1.0.0",
       orientation: "portrait",
-      icon: variantConfig.icon || "./assets/icon.png",
+      icon: "./assets/icon.png",
       userInterfaceStyle: "light",
       newArchEnabled: true,
       splash: {
-        image: variantConfig.splash.image || "./assets/splash-icon.png",
+        image: "./assets/splash-icon.png",
         resizeMode: "contain",
-        backgroundColor: variantConfig.splash.backgroundColor || "#ffffff"
+        backgroundColor: "#ffffff"
       },
       ios: {
         supportsTablet: false,
-        bundleIdentifier: variantConfig.ios.bundleIdentifier || "",
+        bundleIdentifier: "com.gruposti.demo",
         infoPlist: {
           NSFaceIDUsageDescription: "Face ID is used to authenticate the user",
           NSLocationWhenInUseUsageDescription: "Location is required to verify employee attendance at work premises.",
@@ -51,36 +51,37 @@ export default ({ config }) => {
       },
       android: {
         adaptiveIcon: {
-          foregroundImage: variantConfig.android.adaptiveIcon.foregroundImage || "./assets/adaptive-icon.png",
-          backgroundColor: variantConfig.android.adaptiveIcon.backgroundColor || "#ffffff"
+          foregroundImage: "./assets/adaptive-icon.png",
+          backgroundColor: "#ffffff"
         },
         edgeToEdgeEnabled: true,
-        package: variantConfig.android.package || "",
+        package: "com.gruposti.demo",
         versionCode: 1,
         permissions: [
           "ACCESS_FINE_LOCATION",
           "ACCESS_COARSE_LOCATION"
         ]
       },
+      web: {
+        favicon: "./assets/favicon.png"
+      },
       extra: {
         eas: {
-          projectId: variantConfig.extra.eas.projectId || "",
+          projectId: "abbdaf55-5afc-4045-8792-b927b74af07a",
           preview: {
-            channel: variantConfig.extra.eas.preview.channel || "preview",
-            distribution: variantConfig.extra.eas.preview.distribution || "internal",
+            channel: "preview",
+            distribution: "internal",
             android: {
-              buildType: variantConfig.extra.eas.preview.android.buildType || "apk"
+              buildType: "apk"
             }
           },
           env: {
-            APP_VARIANT: appVariant,
             SAE_EMPLOYEEAPP_API_URL: process.env.SAE_EMPLOYEEAPP_API_URL,
             SAE_EMPLOYEEAPP_AUTHENTICATION_KEY: process.env.SAE_EMPLOYEEAPP_AUTHENTICATION_KEY,
             SAE_EMPLOYEEAPP_AUTHENTICATION_USER_KEY: process.env.SAE_EMPLOYEEAPP_AUTHENTICATION_USER_KEY,
             SAE_EMPLOYEEAPP_THEME_STORAGE_KEY: process.env.SAE_EMPLOYEEAPP_THEME_STORAGE_KEY
           }
         },
-        APP_VARIANT: appVariant,
         SAE_EMPLOYEEAPP_API_URL: process.env.SAE_EMPLOYEEAPP_API_URL,
         SAE_EMPLOYEEAPP_AUTHENTICATION_KEY: process.env.SAE_EMPLOYEEAPP_AUTHENTICATION_KEY,
         SAE_EMPLOYEEAPP_AUTHENTICATION_USER_KEY: process.env.SAE_EMPLOYEEAPP_AUTHENTICATION_USER_KEY,
@@ -91,7 +92,7 @@ export default ({ config }) => {
         policy: "appVersion"
       },
       updates: {
-        url: variantConfig.updates.url || "https://u.expo.dev/",
+        url: "https://u.expo.dev/abbdaf55-5afc-4045-8792-b927b74af07a",
         enabled: true,
         fallbackToCacheTimeout: 0,
         checkAutomatically: "ON_LOAD"

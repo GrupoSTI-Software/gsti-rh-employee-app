@@ -9,6 +9,7 @@
   },
   "scripts": {
     "start": "expo start --clear",
+    "start:sae:production": "APP_VARIANT=sae.production ENVFILE=config/sae/production/.env.sae.production expo start --clear",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "lint": "tsc --noEmit && eslint . --ext .ts,.tsx",
@@ -19,7 +20,7 @@
     "docs": "typedoc --options typedoc.json",
     "setup:git": "git config commit.template .gitmessage",
     "commit:help": "echo 'Tipos de commit disponibles (sin límite de caracteres):' && echo 'feat(alcance): nueva funcionalidad' && echo 'fix(alcance): corrección de bug' && echo 'perf(alcance): mejora de rendimiento' && echo 'Ver .gitmessage para más ejemplos en español'",
-    "update:preview": "eas update --branch preview",
+    "update:preview": "APP_VARIANT=sae.production ENVFILE=config/sae/production/.env.sae.production eas update --branch preview",
     "update:production": "eas update --branch production",
     "build:preview": "eas build --profile preview",
     "build:preview:local": "eas build --profile preview --local",
@@ -31,6 +32,7 @@
     "@react-navigation/native": "^7.1.9",
     "@react-navigation/native-stack": "^7.3.13",
     "axios": "^1.9.0",
+    "dotenv": "^17.2.1",
     "expo": "~53.0.9",
     "expo-constants": "^17.1.6",
     "expo-local-authentication": "^16.0.4",
@@ -44,12 +46,12 @@
     "react-i18next": "^15.5.1",
     "react-native": "0.79.2",
     "react-native-dotenv": "^3.4.11",
+    "react-native-gesture-handler": "~2.24.0",
     "react-native-paper": "^5.14.5",
+    "react-native-reanimated": "~3.17.4",
     "react-native-safe-area-context": "^5.4.0",
     "react-native-screens": "^4.10.0",
-    "react-native-svg": "^15.11.2",
-    "react-native-reanimated": "~3.17.4",
-    "react-native-gesture-handler": "~2.24.0"
+    "react-native-svg": "^15.11.2"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

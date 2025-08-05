@@ -27,6 +27,7 @@ import { Button } from '../../components/button/button.component'
 import { TextInput } from '../../components/text-input/text-input.component'
 import { Typography } from '../../components/typography/typography.component'
 
+import { environment } from '../../../config/environment'
 import { AuthenticationScreenController } from './authentication-screen.controller'
 import useAuthenticationStyle from './authentication.style'
 
@@ -40,6 +41,8 @@ export const AuthenticationScreen: React.FC = () => {
   const controller = AuthenticationScreenController()
   const style = useAuthenticationStyle()
   const { t } = useTranslation()
+  const appVariant = environment.APP_VARIANT
+  const headBannerPath = appVariant === 'sae.production' ? require('../../../assets/sae/app-headbanner-2.png') : require('../../../assets/app-headbanner-2.png')
 
   React.useEffect(() => {
     if (Platform.OS === 'ios') {
@@ -53,7 +56,7 @@ export const AuthenticationScreen: React.FC = () => {
 
       <Animated.Image
         entering={FadeInUp.delay(100).duration(400)}
-        source={require('../../../assets/app-headbanner-2.png')}
+        source={headBannerPath}
         style={style.logoImage}
       />
 
