@@ -60,7 +60,7 @@ const AuthenticationScreenController = () => {
    * @returns {Promise<void>}
    */
   const initUserData = async () => {
-    setSettedAPIUrl(environment.SAE_EMPLOYEEAPP_API_URL || 'NOT ASSIGNED')
+    setSettedAPIUrl(environment.API_URL || 'NOT ASSIGNED')
     await Promise.all([initBiometricAvailability(), setAuthStateData()])
   }
 

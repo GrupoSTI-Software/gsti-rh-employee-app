@@ -124,7 +124,7 @@ export const AttendanceCheckScreen: React.FC = React.memo(() => {
       <AuthenticatedLayout>
         <View style={styles.backgroundWrapper}>
           <SafeAreaView style={styles.container}>
-            <StatusBar style={controller.themeType === 'light' ? 'light' : 'light'} />
+            <StatusBar style={controller.themeType === 'light' ? 'dark' : 'light'} />
 
             <ScrollView 
               style={styles.scrollContainer}

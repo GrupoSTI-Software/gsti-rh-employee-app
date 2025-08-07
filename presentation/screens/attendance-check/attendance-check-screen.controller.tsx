@@ -80,7 +80,7 @@ const AttendanceCheckScreenController = () => {
         throw new Error('Token de autenticación no encontrado')
       }
       
-      const response = await axios.get(`${environment.SAE_EMPLOYEEAPP_API_URL}/v1/assists?date=${dateToGet}&date-end=${dateEnd}&employeeId=412`, {
+      const response = await axios.get(`${environment.API_URL}/v1/assists?date=${dateToGet}&date-end=${dateEnd}&employeeId=412`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -269,7 +269,7 @@ const AttendanceCheckScreenController = () => {
         assistLongitude: longitude
       }
 
-      const response = await axios.post(`${environment.SAE_EMPLOYEEAPP_API_URL}/v1/assists`, payload, {
+      const response = await axios.post(`${environment.API_URL}/v1/assists`, payload, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

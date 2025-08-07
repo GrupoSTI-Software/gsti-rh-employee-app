@@ -1,0 +1,15 @@
+{
+  "name": "GrupoSTI Demo",
+  "slug": "demo-grupo-sti",
+  "icon": "./assets/icon.png",
+  "splash": {
+    "image": "./assets/splash-icon.png",
+    "backgroundColor": "#ffffff"
+  },
+  "android": {
+    "adaptiveIcon": {
+      "foregroundImage": "./assets/adaptive-icon.png",
+      "backgroundColor": "#ffffff"
+    }
+  }
+}

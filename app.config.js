@@ -1,23 +1,22 @@
-// app.config.js
-import fs from 'fs';
-import path from 'path';
+import fs from 'fs'
+import path from 'path'
 
-const env = process.env.ENVFILE || '.env';
-const envFile = path.resolve(env);
+const env = process.env.ENVFILE || '.env'
+const envFile = path.resolve(env)
 
-require('dotenv').config({ path: envFile });
+require('dotenv').config({ path: envFile })
 
 export default ({ config }) => {
 
-  let variantConfig = {};
-  const appVariant = process.env.APP_VARIANT;
+  let variantConfig = {}
+  const appVariant = process.env.APP_VARIANT
 
   if (appVariant) {
     try {
-      const configPath = path.resolve(__dirname, `config/sae/production/${appVariant}.json`);
-      variantConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+      const configPath = path.resolve(__dirname, `config/${appVariant}/app-config.json`)
+      variantConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'))
     } catch (error) {
-      console.error(`Error loading variant config for ${appVariant}:`, error);
+      console.error(`Error loading variant config for ${appVariant}:`, error)
     }
   }
 
@@ -29,17 +28,17 @@ export default ({ config }) => {
       slug: variantConfig.slug || config.slug,
       version: "1.0.0",
       orientation: "portrait",
-      icon: variantConfig.icon || "./assets/icon.png",
+      icon: variantConfig.icon || "",
       userInterfaceStyle: "light",
       newArchEnabled: true,
       splash: {
-        image: variantConfig.splash.image || "./assets/splash-icon.png",
+        image: variantConfig.splash.image || "",
         resizeMode: "contain",
         backgroundColor: variantConfig.splash.backgroundColor || "#ffffff"
       },
       ios: {
         supportsTablet: false,
-        bundleIdentifier: variantConfig.ios.bundleIdentifier || "",
+        bundleIdentifier: process.env.IOS_BUNDLE_IDENTIFIER,
         infoPlist: {
           NSFaceIDUsageDescription: "Face ID is used to authenticate the user",
           NSLocationWhenInUseUsageDescription: "Location is required to verify employee attendance at work premises.",
@@ -55,7 +54,7 @@ export default ({ config }) => {
           backgroundColor: variantConfig.android.adaptiveIcon.backgroundColor || "#ffffff"
         },
         edgeToEdgeEnabled: true,
-        package: variantConfig.android.package || "",
+        package: process.env.ANDROID_PACKAGE_NAME,
         versionCode: 1,
         permissions: [
           "ACCESS_FINE_LOCATION",
@@ -64,38 +63,38 @@ export default ({ config }) => {
       },
       extra: {
         eas: {
-          projectId: variantConfig.extra.eas.projectId || "",
+          projectId: process.env.EAS_PROJECT_ID,
           preview: {
-            channel: variantConfig.extra.eas.preview.channel || "preview",
-            distribution: variantConfig.extra.eas.preview.distribution || "internal",
+            channel: "preview",
+            distribution: "internal",
             android: {
-              buildType: variantConfig.extra.eas.preview.android.buildType || "apk"
+              buildType: "apk"
             }
           },
           env: {
             APP_VARIANT: process.env.APP_VARIANT,
-            SAE_EMPLOYEEAPP_API_URL: process.env.SAE_EMPLOYEEAPP_API_URL,
-            SAE_EMPLOYEEAPP_AUTHENTICATION_KEY: process.env.SAE_EMPLOYEEAPP_AUTHENTICATION_KEY,
-            SAE_EMPLOYEEAPP_AUTHENTICATION_USER_KEY: process.env.SAE_EMPLOYEEAPP_AUTHENTICATION_USER_KEY,
-            SAE_EMPLOYEEAPP_THEME_STORAGE_KEY: process.env.SAE_EMPLOYEEAPP_THEME_STORAGE_KEY
+            API_URL: process.env.API_URL,
+            AUTHENTICATION_KEY: process.env.AUTHENTICATION_KEY,
+            AUTHENTICATION_USER_KEY: process.env.AUTHENTICATION_USER_KEY,
+            THEME_STORAGE_KEY: process.env.THEME_STORAGE_KEY
           }
         },
         APP_VARIANT: process.env.APP_VARIANT,
-        SAE_EMPLOYEEAPP_API_URL: process.env.SAE_EMPLOYEEAPP_API_URL,
-        SAE_EMPLOYEEAPP_AUTHENTICATION_KEY: process.env.SAE_EMPLOYEEAPP_AUTHENTICATION_KEY,
-        SAE_EMPLOYEEAPP_AUTHENTICATION_USER_KEY: process.env.SAE_EMPLOYEEAPP_AUTHENTICATION_USER_KEY,
-        SAE_EMPLOYEEAPP_THEME_STORAGE_KEY: process.env.SAE_EMPLOYEEAPP_THEME_STORAGE_KEY
+        API_URL: process.env.API_URL,
+        AUTHENTICATION_KEY: process.env.AUTHENTICATION_KEY,
+        AUTHENTICATION_USER_KEY: process.env.AUTHENTICATION_USER_KEY,
+        THEME_STORAGE_KEY: process.env.THEME_STORAGE_KEY
       },
       owner: "wilvardosae",
       runtimeVersion: {
         policy: "appVersion"
       },
       updates: {
-        url: variantConfig.updates.url || "https://u.expo.dev/",
+        url: process.env.EAS_PREVIEW_URL,
         enabled: true,
         fallbackToCacheTimeout: 0,
         checkAutomatically: "ON_LOAD"
       }
     }
-  };
-};
+  }
+}

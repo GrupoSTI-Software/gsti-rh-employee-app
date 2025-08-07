@@ -10,6 +10,14 @@ const wp = (percentage: number) => (screenWidth * percentage) / 100
 
 const createBiometricsConfigScreenStyle = (theme: IAppTheme) =>
   StyleSheet.create({
+    safeAreaContent: {
+      flex: 1
+    },
+    scrollContent: {
+      flexGrow: 1,
+      paddingHorizontal: 20,
+      paddingBottom: 20
+    },
     container: {
       flex: 1,
       backgroundColor: theme.colors.background,

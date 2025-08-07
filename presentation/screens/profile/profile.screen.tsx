@@ -14,7 +14,6 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 
 import { Typography } from '../../components/typography/typography.component'
 import AuthenticatedLayout from '../../layouts/authenticated-layout/authenticated.layout'
-import { EThemeType } from '../../theme/types/theme-type.enum'
 import { ProfileScreenController } from './profile-screen.controller'
 import useProfileStyle from './profile.style'
 
@@ -34,7 +33,7 @@ export const ProfileScreen: React.FC = () => {
       <AuthenticatedLayout>
         <View style={style.container}>
           <StatusBar
-            style={controller.themeType === EThemeType.DARK ? 'light' : 'light'}
+            style={controller.themeType === 'light' ? 'dark' : 'light'}
           />
           <View style={style.loadingContainer}>
             <ActivityIndicator
@@ -58,7 +57,7 @@ export const ProfileScreen: React.FC = () => {
       <AuthenticatedLayout>
         <View style={style.container}>
           <StatusBar
-            style={controller.themeType === EThemeType.DARK ? 'light' : 'light'}
+            style={controller.themeType === 'light' ? 'dark' : 'light'}
           />
           <View style={style.errorContainer}>
             <Icon name="alert-circle" size={48} color={style.errorText.color} />
@@ -103,7 +102,7 @@ export const ProfileScreen: React.FC = () => {
     <AuthenticatedLayout>
       <View style={style.container}>
         <StatusBar
-          style={controller.themeType === EThemeType.DARK ? 'light' : 'light'}
+          style={controller.themeType === 'light' ? 'dark' : 'light'}
         />
 
         <SafeAreaView style={style.safeAreaContent}>

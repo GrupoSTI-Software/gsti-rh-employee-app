@@ -1,21 +1,21 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
-import * as SecureStore from 'expo-secure-store'
-import { AuthenticationEntity } from '../../domain/entities/authentication-entity'
-import i18next from 'i18next'
-import { IAuthentication } from '../../domain/types/authentication.interface'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { IEmployee } from '../../../employee/domain/types/employee.interface'
-import { IUser } from '../../../user/domain/types/user.interface'
-import { IPerson } from '../../../person/domain/types/person.interface'
-import { EmployeeEntity } from '../../../employee/domain/entiities/employee.entity'
-import { PersonEntity } from '../../../person/domain/entities/person.entity'
-import { UserEntity } from '../../../user/domain/entities/user.entity'
+import * as SecureStore from 'expo-secure-store'
+import i18next from 'i18next'
 import { environment } from '../../../../../config/environment'
+import { EmployeeEntity } from '../../../employee/domain/entiities/employee.entity'
+import { IEmployee } from '../../../employee/domain/types/employee.interface'
+import { PersonEntity } from '../../../person/domain/entities/person.entity'
+import { IPerson } from '../../../person/domain/types/person.interface'
+import { UserEntity } from '../../../user/domain/entities/user.entity'
+import { IUser } from '../../../user/domain/types/user.interface'
+import { AuthenticationEntity } from '../../domain/entities/authentication-entity'
+import { IAuthentication } from '../../domain/types/authentication.interface'
 
-const SAE_EMPLOYEEAPP_AUTHENTICATION_KEY = environment.SAE_EMPLOYEEAPP_AUTHENTICATION_KEY
-const SAE_EMPLOYEEAPP_AUTHENTICATION_USER_KEY = environment.SAE_EMPLOYEEAPP_AUTHENTICATION_USER_KEY
+const AUTHENTICATION_KEY = environment.AUTHENTICATION_KEY
+const AUTHENTICATION_USER_KEY = environment.AUTHENTICATION_USER_KEY
 
 /**
  * Clase para gestionar el almacenamiento seguro de información del usuario
@@ -47,7 +47,7 @@ export class AuthenticationLocalStorageService {
 
     try {
       await SecureStore.setItemAsync(
-        SAE_EMPLOYEEAPP_AUTHENTICATION_KEY,
+        AUTHENTICATION_KEY,
         JSON.stringify(secureAuthenticationCredentials)
       )
     } catch (error) {
@@ -83,7 +83,7 @@ export class AuthenticationLocalStorageService {
 
     try {
       await AsyncStorage.setItem(
-        SAE_EMPLOYEEAPP_AUTHENTICATION_USER_KEY,
+        AUTHENTICATION_USER_KEY,
         JSON.stringify(secureAuthenticationEntity)
       )
     } catch (error) {
@@ -98,7 +98,7 @@ export class AuthenticationLocalStorageService {
    */
   async localGetAuthenticationState(): Promise<AuthenticationEntity | null> {
     try {
-      const authenticationStored = await AsyncStorage.getItem(SAE_EMPLOYEEAPP_AUTHENTICATION_USER_KEY)
+      const authenticationStored = await AsyncStorage.getItem(AUTHENTICATION_USER_KEY)
       const authenticationObject = authenticationStored ? JSON.parse(authenticationStored) : null
 
       if (authenticationObject) {
@@ -137,14 +137,14 @@ export class AuthenticationLocalStorageService {
         }
       }
 
-      await SecureStore.deleteItemAsync(SAE_EMPLOYEEAPP_AUTHENTICATION_KEY)
-      await AsyncStorage.removeItem(SAE_EMPLOYEEAPP_AUTHENTICATION_USER_KEY)
+      await SecureStore.deleteItemAsync(AUTHENTICATION_KEY)
+      await AsyncStorage.removeItem(AUTHENTICATION_USER_KEY)
 
       return null
     } catch (error) {
       console.error(error)
-      await SecureStore.deleteItemAsync(SAE_EMPLOYEEAPP_AUTHENTICATION_KEY)
-      await AsyncStorage.removeItem(SAE_EMPLOYEEAPP_AUTHENTICATION_USER_KEY)
+      await SecureStore.deleteItemAsync(AUTHENTICATION_KEY)
+      await AsyncStorage.removeItem(AUTHENTICATION_USER_KEY)
     }
 
     return null
@@ -156,7 +156,7 @@ export class AuthenticationLocalStorageService {
    */
   async localGetAuthenticationCredentials(): Promise<AuthenticationEntity | null> {
     try {
-      const authenticationStored = await SecureStore.getItemAsync(SAE_EMPLOYEEAPP_AUTHENTICATION_KEY)
+      const authenticationStored = await SecureStore.getItemAsync(AUTHENTICATION_KEY)
       const authenticationCredentials = authenticationStored ? JSON.parse(authenticationStored) : null
 
       if (authenticationCredentials) {
@@ -170,14 +170,14 @@ export class AuthenticationLocalStorageService {
         }
       }
 
-      await SecureStore.deleteItemAsync(SAE_EMPLOYEEAPP_AUTHENTICATION_KEY)
-      await AsyncStorage.removeItem(SAE_EMPLOYEEAPP_AUTHENTICATION_USER_KEY)
+      await SecureStore.deleteItemAsync(AUTHENTICATION_KEY)
+      await AsyncStorage.removeItem(AUTHENTICATION_USER_KEY)
 
       return null
     } catch (error) {
       console.error(error)
-      await SecureStore.deleteItemAsync(SAE_EMPLOYEEAPP_AUTHENTICATION_KEY)
-      await AsyncStorage.removeItem(SAE_EMPLOYEEAPP_AUTHENTICATION_USER_KEY)
+      await SecureStore.deleteItemAsync(AUTHENTICATION_KEY)
+      await AsyncStorage.removeItem(AUTHENTICATION_USER_KEY)
     }
 
     return null
@@ -190,17 +190,17 @@ export class AuthenticationLocalStorageService {
    */
   async localClearAuthenticationState(): Promise<void> {
     try {
-      const authenticationStored = await AsyncStorage.getItem(SAE_EMPLOYEEAPP_AUTHENTICATION_USER_KEY)
+      const authenticationStored = await AsyncStorage.getItem(AUTHENTICATION_USER_KEY)
       const authenticationStoredObject = authenticationStored ? JSON.parse(authenticationStored) : null
 
       if (authenticationStoredObject) {
         authenticationStoredObject.properties.authState.isAuthenticated = false
-        await AsyncStorage.setItem(SAE_EMPLOYEEAPP_AUTHENTICATION_USER_KEY, JSON.stringify(authenticationStoredObject))
+        await AsyncStorage.setItem(AUTHENTICATION_USER_KEY, JSON.stringify(authenticationStoredObject))
       }
     } catch (error) {
       console.error(error)
-      await SecureStore.deleteItemAsync(SAE_EMPLOYEEAPP_AUTHENTICATION_KEY)
-      await AsyncStorage.removeItem(SAE_EMPLOYEEAPP_AUTHENTICATION_USER_KEY)
+      await SecureStore.deleteItemAsync(AUTHENTICATION_KEY)
+      await AsyncStorage.removeItem(AUTHENTICATION_USER_KEY)
     }
   }
 

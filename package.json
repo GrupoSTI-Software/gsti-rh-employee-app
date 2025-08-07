@@ -9,7 +9,21 @@
   },
   "scripts": {
     "start": "expo start --clear",
-    "start:sae:production": "ENVFILE=config/sae/production/.env.sae.production expo start --clear",
+
+    "start:sae:production": "ENVFILE=config/sae-production/.env expo start --clear",
+    "build:sae:preview": "ENVFILE=config/sae-production/.env eas build --profile preview",
+    "build:sae:preview:local": "ENVFILE=config/sae-production/.env eas build --profile preview --local",
+    "build:sae:production": "ENVFILE=config/sae-production/.env eas build --profile production",
+    "update:sae:preview": "ENVFILE=config/sae-production/.env eas update --branch preview",
+    "update:sae:production": "ENVFILE=config/sae-production/.env eas update --branch production",
+
+    "start:gsti-demo:production": "ENVFILE=config/gsti-demo-production/.env expo start --clear",
+    "build:gsti-demo:preview": "ENVFILE=config/gsti-demo-production/.env eas build --profile preview",
+    "build:gsti-demo:preview:local": "ENVFILE=config/gsti-demo-production/.env eas build --profile preview --local",
+    "build:gsti-demo:production": "ENVFILE=config/gsti-demo-production/.env eas build --profile production",
+    "update:gsti-demo:preview": "ENVFILE=config/gsti-demo-production/.env eas update --branch preview",
+    "update:gsti-demo:production": "ENVFILE=config/gsti-demo-production/.env eas update --branch production",
+
     "android": "expo start --android",
     "ios": "expo start --ios",
     "lint": "tsc --noEmit && eslint . --ext .ts,.tsx",
@@ -17,14 +31,7 @@
     "lint:watch": "nodemon --config nodemon.json",
     "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
     "prepare": "husky install",
-    "docs": "typedoc --options typedoc.json",
-    "setup:git": "git config commit.template .gitmessage",
-    "commit:help": "echo 'Tipos de commit disponibles (sin límite de caracteres):' && echo 'feat(alcance): nueva funcionalidad' && echo 'fix(alcance): corrección de bug' && echo 'perf(alcance): mejora de rendimiento' && echo 'Ver .gitmessage para más ejemplos en español'",
-    "update:preview": "ENVFILE=config/sae/production/.env.sae.production eas update --branch preview",
-    "update:production": "eas update --branch production",
-    "build:preview": "ENVFILE=config/sae/production/.env.sae.production eas build --profile preview",
-    "build:preview:local": "eas build --profile preview --local",
-    "build:production": "eas build --profile production"
+    "docs": "typedoc --options typedoc.json"
   },
   "dependencies": {
     "@gorhom/bottom-sheet": "^5.1.6",

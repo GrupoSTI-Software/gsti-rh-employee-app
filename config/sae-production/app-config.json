@@ -1,0 +1,15 @@
+{
+  "name": "Empleados SAE",
+  "slug": "sae-empleados",
+  "icon": "./assets/sae/icon.png",
+  "splash": {
+    "image": "./assets/sae/splash-icon.png",
+    "backgroundColor": "#303e67"
+  },
+  "android": {
+    "adaptiveIcon": {
+      "foregroundImage": "./assets/sae/adaptive-icon.png",
+      "backgroundColor": "#093057"
+    }
+  }
+}

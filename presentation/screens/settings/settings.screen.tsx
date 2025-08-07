@@ -19,7 +19,6 @@ import { FingerprintIcon } from '../../icons/fingerprint-icon/fingerprint.icon'
 import { ThemeIcon } from '../../icons/theme-icon/theme.icon'
 import { TranslateIcon } from '../../icons/translate-icon/translate.icon'
 import AuthenticatedLayout from '../../layouts/authenticated-layout/authenticated.layout'
-import { EThemeType } from '../../theme/types/theme-type.enum'
 import { SettingsScreenController } from './settings-screen.controller'
 import useSettingsStyle from './settings.style'
 
@@ -37,7 +36,7 @@ export const SettingsScreen: React.FC = () => {
   return (
     <AuthenticatedLayout>
       <View style={style.container}>
-        <StatusBar style={controller.themeType === EThemeType.DARK ? 'light' : 'light'} />
+        <StatusBar style={controller.themeType === 'light' ? 'dark' : 'light'} />
         
         <SafeAreaView style={style.safeAreaContent}>
           <ScrollView

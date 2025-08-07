@@ -1,7 +1,7 @@
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
 import { environment } from '../../../../config/environment'
-import axios, { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios'
 
-const SAE_EMPLOYEEAPP_API_URL = environment.SAE_EMPLOYEEAPP_API_URL
+const API_URL = environment.API_URL
 
 /**
  * Servicio HTTP para realizar solicitudes a la API
@@ -17,9 +17,9 @@ class HttpServiceClass {
    * Constructor de la clase HttpServiceClass
    */
   private constructor() {
-    this.apiUrl = SAE_EMPLOYEEAPP_API_URL
+    this.apiUrl = API_URL
     this.apiClient = axios.create({
-      baseURL: `${SAE_EMPLOYEEAPP_API_URL}`,
+      baseURL: `${API_URL}`,
       headers: {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         'Content-Type': 'application/json',
