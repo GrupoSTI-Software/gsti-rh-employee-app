@@ -1,10 +1,13 @@
 import BottomSheet, { BottomSheetBackdrop } from '@gorhom/bottom-sheet'
+import { useNavigation } from '@react-navigation/native'
+import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import axios, { AxiosError } from 'axios'
 import { DateTime } from 'luxon'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert, Linking, Platform } from 'react-native'
 import { environment } from '../../../config/environment'
+import { RootStackParamList } from '../../../navigation/types/types'
 import { AuthStateController } from '../../../src/features/authentication/infrastructure/controllers/auth-state.controller'
 import { ClearSessionController } from '../../../src/features/authentication/infrastructure/controllers/clear-seassion.controller'
 import { BiometricsService } from '../../../src/features/authentication/infrastructure/services/biometrics.service'
@@ -30,6 +33,7 @@ interface IAttendanceData {
  * @returns {Object} Objeto con los datos y funciones accesibles desde la pantalla de registro de asistencia
  */
 const AttendanceCheckScreenController = () => {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>()
   const [isButtonLocked, setIsButtonLocked] = useState(false)
   // const [checkInTime, setCheckInTime] = useState<string | null>(null)
   const [currentLocation, setCurrentLocation] = useState<ILocationCoordinates | null>(null)
@@ -80,7 +84,13 @@ const AttendanceCheckScreenController = () => {
         throw new Error('Token de autenticación no encontrado')
       }
       
-      const response = await axios.get(`${environment.API_URL}/v1/assists?date=${dateToGet}&date-end=${dateEnd}&employeeId=412`, {
+      if (!token) {
+        throw new Error('Token de autenticación no encontrado')
+      }
+
+      const employeeId = authState?.props.authState?.user?.props.person?.props.employee?.props?.id?.value || null
+      
+      const response = await axios.get(`${environment.API_URL}/v1/assists?date=${dateToGet}&date-end=${dateEnd}&employeeId=${employeeId}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -149,8 +159,7 @@ const AttendanceCheckScreenController = () => {
               {
                 text: t('common.ok'),
                 onPress: () => {
-                  // El AppNavigator detectará automáticamente que el usuario no está autenticado
-                  // y redirigirá al login screen
+                  navigation.replace('authenticationScreen')
                 }
               }
             ]
@@ -257,7 +266,7 @@ const AttendanceCheckScreenController = () => {
         throw new Error('Token de autenticación no encontrado')
       }
 
-      const employeeId = authState?.props.authState?.user?.props.person?.props.employee?.props.id || null
+      const employeeId = authState?.props.authState?.user?.props.person?.props.employee?.props?.id?.value || null
 
       if (!employeeId) {
         throw new Error('Employee ID no encontrado')

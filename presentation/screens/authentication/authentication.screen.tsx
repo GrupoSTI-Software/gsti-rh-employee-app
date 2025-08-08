@@ -67,7 +67,7 @@ export const AuthenticationScreen: React.FC = () => {
 
   return (
     <View style={[style.container]}>
-      <StatusBar style={themeType === 'light' ? 'dark' : 'light'} translucent={true} />
+      <StatusBar style={themeType === 'light' ? 'light' : 'light'} translucent={true} />
 
       <Animated.Image
         entering={FadeInUp.delay(100).duration(400)}

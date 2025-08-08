@@ -21,10 +21,10 @@ import { ILocationCoordinates, LocationService } from '../../../src/features/aut
 const AuthenticationScreenController = () => {
   const [loginButtonLoading, setLoginButtonLoading] = useState(false)
   const [userName, setUserName] = useState('')
-  const [email, setEmail] = useState('wramirez@siler-mx.com')
-  const [password, setPassword] = useState('xab@ubm0qyn0BPK5cpj')
-  // const [email, setEmail] = useState('')
-  // const [password, setPassword] = useState('')
+  // const [email, setEmail] = useState('wramirez@siler-mx.com')
+  // const [password, setPassword] = useState('xab@ubm0qyn0BPK5cpj')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [biometricAvailable, setBiometricAvailable] = useState(false)
   const [hasStoredCredentials, setHasStoredCredentials] = useState(false)
   const [securityAlert, setSecurityAlert] = useState<string | null>(null)
@@ -144,7 +144,7 @@ const AuthenticationScreenController = () => {
       }
 
       setHasStoredCredentials(!!authState?.props.authState?.user?.props)
-      setEmail(authState?.props.loginCredentials?.email || '')
+      // setEmail(authState?.props.loginCredentials?.email || '')
       
       // Set biometric enabled state from preferences
       setBiometricEnabled(!!authState?.props.biometricsPreferences?.isEnabled)
