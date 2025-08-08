@@ -1,14 +1,14 @@
 {
   "name": "GrupoSTI Demo",
-  "slug": "demo-grupo-sti",
-  "icon": "./assets/icon.png",
+  "slug": "demo-rh-attendance",
+  "icon": "./assets/gsti/icon.png",
   "splash": {
-    "image": "./assets/splash-icon.png",
+    "image": "./assets/gsti/splash-icon.png",
     "backgroundColor": "#ffffff"
   },
   "android": {
     "adaptiveIcon": {
-      "foregroundImage": "./assets/adaptive-icon.png",
+      "foregroundImage": "./assets/gsti/adaptive-icon.png",
       "backgroundColor": "#ffffff"
     }
   }
