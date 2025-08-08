@@ -26,7 +26,7 @@ export default ({ config }) => {
     expo: {
       name: variantConfig.name || config.name,
       slug: variantConfig.slug || config.slug,
-      version: "1.0.0",
+      version: "1.1.0",
       orientation: "portrait",
       icon: variantConfig.icon || "",
       userInterfaceStyle: "light",
@@ -70,6 +70,10 @@ export default ({ config }) => {
             android: {
               buildType: "apk"
             }
+          },
+          production: {
+            channel: "production",
+            distribution: "store"
           },
           env: {
             APP_VARIANT: process.env.APP_VARIANT,
