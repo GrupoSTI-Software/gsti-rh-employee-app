@@ -108,7 +108,7 @@
   "gitlens.gitCommands.commit.messageTemplate": "${type}(${scope}): ${description}",
   "conventionalCommits.scopes": [
     "asistencia",
-    "autenticación", 
+    "autenticación",
     "pantalla",
     "controlador",
     "componente",
@@ -121,7 +121,8 @@
     "ubicación",
     "api",
     "datos",
-    "validación"
+    "validación",
+    "25SAEAE0100M005044 Clean code e implementación de entorno de la app"
   ],
   "search.exclude": {
     "**/node_modules": true,
