@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next'
 import { Alert, Linking, Platform } from 'react-native'
 import { environment } from '../../../config/environment'
 import { RootStackParamList } from '../../../navigation/types/types'
+//import { AttendanceController } from '../../../src/features/attendance/infraestructure/controllers/auth-credentials.controller'
 import { AuthStateController } from '../../../src/features/authentication/infrastructure/controllers/auth-state.controller'
 import { ClearSessionController } from '../../../src/features/authentication/infrastructure/controllers/clear-seassion.controller'
 import { BiometricsService } from '../../../src/features/authentication/infrastructure/services/biometrics.service'
@@ -73,6 +74,10 @@ const AttendanceCheckScreenController = () => {
   // Definir setShiftDateData antes de usarlo en useEffect
   const setShiftDateData = useCallback(async (): Promise<string> => {
     try {
+      //const attendanceController = new AttendanceController()
+      
+      //const attendance =  await attendanceController.getAttendance()
+      //console.log(attendance)
       const dateToGet = DateTime.now().setLocale('es').toISODate()
       const dateEnd = DateTime.now().setLocale('es').toISODate()
       

@@ -172,7 +172,9 @@ export default [
         // Propiedades en camelCase
         {
           selector: 'property',
-          format: ['camelCase']
+          format: ['camelCase'],
+          leadingUnderscore: 'allow',
+          filter: { regex: '.*', match: false }, // ignora string literals
         },
         // Parámetros en camelCase
         {

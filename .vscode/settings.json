@@ -122,6 +122,7 @@
     "api",
     "datos",
     "validación",
+    "25SAEAE0100M005044 Clean code e implementación de entorno de la app",
     "25SAEAE0100M005044 Clean code e implementación de entorno de la app"
   ],
   "search.exclude": {
@@ -140,7 +141,7 @@
     "vivaxy.vscode-conventional-commits"
   ],
   "[typescript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.defaultFormatter": "vscode.typescript-language-features",
     "editor.codeActionsOnSave": {
       "source.organizeImports": "explicit",
       "source.fixAll.eslint": "explicit"
