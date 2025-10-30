@@ -1,14 +1,14 @@
 import BottomSheet, { BottomSheetBackdrop } from '@gorhom/bottom-sheet'
 import { useNavigation } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import axios, { AxiosError } from 'axios'
+import { AxiosError } from 'axios'
 import { DateTime } from 'luxon'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert, Linking, Platform } from 'react-native'
-import { environment } from '../../../config/environment'
 import { RootStackParamList } from '../../../navigation/types/types'
-//import { AttendanceController } from '../../../src/features/attendance/infraestructure/controllers/auth-credentials.controller'
+import { AssistanceController } from '../../../src/features/attendance/infraestructure/controllers/assistance.controller'
+import { AttendanceController } from '../../../src/features/attendance/infraestructure/controllers/attendance.controller'
 import { AuthStateController } from '../../../src/features/authentication/infrastructure/controllers/auth-state.controller'
 import { ClearSessionController } from '../../../src/features/authentication/infrastructure/controllers/clear-seassion.controller'
 import { BiometricsService } from '../../../src/features/authentication/infrastructure/services/biometrics.service'
@@ -73,12 +73,11 @@ const AttendanceCheckScreenController = () => {
 
   // Definir setShiftDateData antes de usarlo en useEffect
   const setShiftDateData = useCallback(async (): Promise<string> => {
+    
     try {
-      //const attendanceController = new AttendanceController()
-      
-      //const attendance =  await attendanceController.getAttendance()
-      //console.log(attendance)
-      const dateToGet = DateTime.now().setLocale('es').toISODate()
+      const attendanceController = new AttendanceController()
+      const attendance =  await attendanceController.getAttendance()
+      /*  const dateToGet = DateTime.now().setLocale('es').toISODate()
       const dateEnd = DateTime.now().setLocale('es').toISODate()
       
       // Obtener el token de autenticación
@@ -106,10 +105,11 @@ const AttendanceCheckScreenController = () => {
       }
 
       const responseData = response.data.data.employeeCalendar[0].assist
-      const shiftInfo: string = responseData?.dateShift?.shiftName || '---'
+      const shiftInfo: string = responseData?.dateShift?.shiftName || '---' */
 
       // Éxito: limpiar error de conexión
       setHasConnectionError(false)
+      const shiftInfo = attendance?.props.shiftInfo ? attendance?.props.shiftInfo : ''
       setShiftDate(shiftInfo)
 
       // Extraer hora de salida del turno del shiftName
@@ -121,29 +121,22 @@ const AttendanceCheckScreenController = () => {
           return null
         }
       }
-
-      const endTime = extractEndTime(shiftInfo)
-      setShiftEndTime(endTime)
-
-      // Extraer datos de asistencia
-      const formatTime = (dateString: string | null): string | null => {
-        if (!dateString) return null
-        try {
-          return DateTime.fromISO(dateString).setZone('UTC-6').setLocale('es').toFormat('HH:mm:ss')
-        } catch {
-          return null
-        }
+      
+      if (shiftInfo) {
+        const endTime = extractEndTime(shiftInfo)
+        setShiftEndTime(endTime)
       }
 
+      const attendanceProps: Partial<IAttendanceData> = attendance?.props ?? {}
       const newAttendanceData: IAttendanceData = {
-        checkInTime: formatTime(responseData?.checkIn?.assistPunchTimeUtc as string | null),
-        checkOutTime: formatTime(responseData?.checkOut?.assistPunchTimeUtc as string | null),
-        checkEatInTime: formatTime(responseData?.checkEatIn?.assistPunchTimeUtc as string | null),
-        checkEatOutTime: formatTime(responseData?.checkEatOut?.assistPunchTimeUtc as string | null),
-        checkInStatus: (responseData?.checkInStatus as string) || null,
-        checkOutStatus: (responseData?.checkOutStatus as string) || null,
-        checkEatInStatus: (responseData?.checkEatInStatus as string) || null,
-        checkEatOutStatus: (responseData?.checkEatOutStatus as string) || null
+        checkInTime: attendanceProps.checkInTime ?? '',
+        checkOutTime: attendanceProps.checkOutTime ?? '',
+        checkEatInTime: attendanceProps.checkEatInTime ?? '',
+        checkEatOutTime: attendanceProps.checkEatOutTime ?? '',
+        checkInStatus: attendanceProps.checkInStatus ?? '',
+        checkOutStatus: attendanceProps.checkOutStatus ?? '',
+        checkEatInStatus: attendanceProps.checkEatInStatus ?? '',
+        checkEatOutStatus: attendanceProps.checkEatOutStatus ?? ''
       }
 
       setAttendanceData(newAttendanceData)
@@ -261,10 +254,19 @@ const AttendanceCheckScreenController = () => {
    * @param {number} longitude - Longitud de la ubicación  
    * @returns {Promise<boolean>} True si la petición fue exitosa
    */
-  const registerAttendance = useCallback(async (latitude: number, longitude: number): Promise<boolean> => {
+  const registerAttendance = useCallback(async (latitude: number, longitude: number): Promise<Boolean> => {
     try {
-      // Obtener el token de autenticación y employeeId
-      const authState = await authStateController.getAuthState()
+      const assistanceController = new AssistanceController()
+      const storeAssistance =  await assistanceController.storeAssist(latitude, longitude)
+      return storeAssistance
+    } catch (error) {
+      console.error('Error registrando asistencia:', error)
+      return false
+    }
+    
+    // try {
+    // Obtener el token de autenticación y employeeId
+    /*   const authState = await authStateController.getAuthState()
       const token = authState?.props.authState?.token
       
       if (!token) {
@@ -324,8 +326,8 @@ const AttendanceCheckScreenController = () => {
           `${t('screens.attendanceCheck.registrationError')}: ${errorMessage}`
         )
       }
-      return false
-    }
+      return false */
+    // }
   }, [authStateController, clearSessionController, t])
 
   /**

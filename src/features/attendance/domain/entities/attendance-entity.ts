@@ -2,19 +2,19 @@ import { IAttendance } from '../types/attendance.interface'
 
 
 /**
- * Entidad que representa la asistencia de un usuario
+ * Entidad que representa las asistencias de un usuario
  * @class AttendanceEntity
  */
 export class AttendanceEntity {
   /**
-   * Constructor de la entidad de asistencia
-   * @param {IAttendance} properties - Propiedades de la asistencia
+   * Constructor de la entidad de asistencias
+   * @param {IAttendance} properties - Propiedades de las asistencias
    */
   constructor(private readonly properties: IAttendance) {}
 
   /**
-   * Obtiene las propiedades de la asistencia
-   * @returns {IAttendance} Propiedades de la asistencia
+   * Obtiene las propiedades de las asistencias
+   * @returns {IAttendance} Propiedades de las asistencias
    */
   get props(): IAttendance {
     return this.properties

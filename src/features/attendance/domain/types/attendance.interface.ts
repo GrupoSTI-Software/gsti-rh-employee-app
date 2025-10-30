@@ -51,4 +51,10 @@ export interface IAttendance {
    */
   readonly checkEatOutStatus: string | null
 
+  /**
+   * Información del turno
+   * @type {string}
+   */
+  readonly shiftInfo: string | null
+
 }
