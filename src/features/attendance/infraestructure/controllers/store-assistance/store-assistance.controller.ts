@@ -1,12 +1,12 @@
-import { StoreAssistanceUsecase } from '../../application/store-assistance/store-assistance.usecase'
-import { AssistanceRepository } from '../repositories/store-assistance/assistance.repository'
+import { StoreAssistanceUsecase } from '../../../application/store-assistance/store-assistance.usecase'
+import { AssistanceRepository } from '../../repositories/store-assistance/assistance.repository'
 
 
 /**
  * Controlador para registrar las asistencias del usuario
- * @class AttendanceController
+ * @class StoreAssistanceController
  */
-export class AssistanceController {
+export class StoreAssistanceController {
   private readonly repository: AssistanceRepository
   private readonly usecase: StoreAssistanceUsecase
 

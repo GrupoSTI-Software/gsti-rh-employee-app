@@ -1,13 +1,13 @@
-import { GetAttendanceUsecase } from '../../application/get-attendance/get-attendance.usecase'
-import { AttendanceEntity } from '../../domain/entities/attendance-entity'
-import { AttendanceRepository } from '../repositories/get-attendance/attendance.repository'
+import { GetAttendanceUsecase } from '../../../application/get-attendance/get-attendance.usecase'
+import { AttendanceEntity } from '../../../domain/entities/attendance-entity'
+import { AttendanceRepository } from '../../repositories/get-attendance/attendance.repository'
 
 
 /**
  * Controlador para obtener las asistencias del usuario
- * @class AttendanceController
+ * @class GetAttendanceController
  */
-export class AttendanceController {
+export class GetAttendanceController {
   private readonly repository: AttendanceRepository
   private readonly usecase: GetAttendanceUsecase
 
