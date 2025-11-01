@@ -1,4 +1,3 @@
-// attendance.utils.ts
 import { DateTime } from 'luxon'
 
 /**
@@ -21,3 +20,4 @@ export const isCheckOutTimeReached = (shiftEndTime?: string): boolean => {
     return true
   }
 }
+

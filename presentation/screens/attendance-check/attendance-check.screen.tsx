@@ -1,6 +1,6 @@
 import BottomSheet from '@gorhom/bottom-sheet'
 import { StatusBar } from 'expo-status-bar'
-import React, { useCallback, useMemo } from 'react'
+import React, { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   ActivityIndicator,
@@ -24,6 +24,10 @@ import AuthenticatedLayout from '../../layouts/authenticated-layout/authenticate
 import { AttendanceCheckScreenController } from './attendance-check-screen.controller'
 import useAttendanceCheckStyle from './attendance-check.style'
 import { PasswordBottomSheet } from './password-bottom-sheet.component'
+import { getIconColor } from './utils/get-icon-color'
+import { getIndicatorStyles } from './utils/get-indicator-styles'
+import { getLabelStyles } from './utils/get-label-styles'
+import { getValueStyles } from './utils/get-value-styles'
 
 const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity)
 
@@ -55,69 +59,6 @@ export const AttendanceCheckScreen: React.FC = React.memo(() => {
   const buttonIconColor = useMemo(() => 
     controller.isButtonDisabled ? styles.checkButtonIconLocked.color : styles.checkButtonIcon.color, [controller.isButtonDisabled, styles.checkButtonIconLocked.color, styles.checkButtonIcon.color]
   )
-
-  // Función para obtener el color del icono según el estatus
-  const getIconColor = useCallback((status: string | null) => {
-    const statusColor = controller.getStatusColor(status)
-    return statusColor || styles.checkIconIndicator.color
-  }, [controller.getStatusColor, styles.checkIconIndicator.color])
-
-  // Función para obtener estilos de indicador según el estatus
-  const getIndicatorStyles = useCallback((status: string | null, hasTime: boolean) => {
-    const statusColor = controller.getStatusColor(status)
-    const baseStyles = [
-      styles.indicator, 
-      // (controller.checkInTime || hasTime) && styles.indicatorActive
-      hasTime && styles.indicatorActive
-    ]
-    
-    if (statusColor) {
-      return [
-        ...baseStyles,
-        { borderLeftColor: statusColor, borderLeftWidth: 4 }
-      ]
-    }
-    
-    return baseStyles
-  }, [controller.getStatusColor, styles.indicator, styles.indicatorActive])
-
-  // Función para obtener estilos de label según el estatus
-  const getLabelStyles = useCallback((status: string | null, hasTime: boolean) => {
-    const statusColor = controller.getStatusColor(status)
-    const baseStyles = [
-      styles.indicatorLabel, 
-      // (controller.checkInTime || hasTime) && styles.indicatorLabelActive
-      hasTime && styles.indicatorLabelActive
-    ]
-    
-    if (statusColor) {
-      return [
-        ...baseStyles,
-        { color: statusColor }
-      ]
-    }
-    
-    return baseStyles.filter(Boolean)
-  }, [controller.getStatusColor, styles.indicatorLabel, styles.indicatorLabelActive])
-
-  // Función para obtener estilos de valor según el estatus
-  const getValueStyles = useCallback((status: string | null, hasTime: boolean) => {
-    const statusColor = controller.getStatusColor(status)
-    const baseStyles = [
-      styles.indicatorValue, 
-      // (controller.checkInTime || hasTime) && styles.indicatorValueActive
-      hasTime && styles.indicatorValueActive
-    ]
-    
-    if (statusColor) {
-      return [
-        ...baseStyles,
-        { color: statusColor }
-      ]
-    }
-    
-    return baseStyles.filter(Boolean)
-  }, [controller.getStatusColor, styles.indicatorValue, styles.indicatorValueActive])
 
   return (
     <GestureHandlerRootView>
