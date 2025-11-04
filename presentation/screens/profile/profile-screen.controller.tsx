@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { IAuthState } from '../../../src/features/authentication/domain/types/auth-state.interface'
 import { AuthStateController } from '../../../src/features/authentication/infrastructure/controllers/auth-state.controller'
-import { EmailVO } from '../../../src/shared/domain/value-objects/email.vo'
 import { useAppTheme } from '../../theme/theme-context'
 import { EThemeType } from '../../theme/types/theme-type.enum'
 
@@ -75,24 +74,6 @@ export const ProfileScreenController = () => {
     }
   }
 
-  /**
-   * Obtiene un valor seguro con fallback a "---"
-   * @param {string | null | undefined} value - Valor a verificar
-   * @returns {string} Valor o "---" si está vacío
-   */
-  const getSafeValue = (value: string | null | undefined): string => {
-    return value && value.trim() !== '' ? value : '---'
-  }
-
-  /**
-   * Obtiene un valor seguro de email
-   * @param {EmailVO | null | undefined} email - Email a verificar
-   * @returns {string} Valor del email o "---" si está vacío
-   */
-  const getSafeEmailValue = (email: EmailVO | null | undefined): string => {
-    return email?.value && email.value.trim() !== '' ? email.value : '---'
-  }
-
   return {
     // Estado
     authState,
@@ -102,8 +83,6 @@ export const ProfileScreenController = () => {
     
     // Funciones
     loadUserProfile,
-    formatDate,
-    getSafeValue,
-    getSafeEmailValue
+    formatDate
   }
 } 
