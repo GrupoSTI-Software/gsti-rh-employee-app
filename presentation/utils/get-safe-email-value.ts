@@ -1,4 +1,4 @@
-import { EmailVO } from '../../../../src/shared/domain/value-objects/email.vo'
+import { EmailVO } from '../../src/shared/domain/value-objects/email.vo'
 
 /**
  * Obtiene un valor seguro de email

@@ -14,10 +14,10 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 
 import { Typography } from '../../components/typography/typography.component'
 import AuthenticatedLayout from '../../layouts/authenticated-layout/authenticated.layout'
+import { getSafeEmailValue } from '../../utils/get-safe-email-value'
+import { getSafeValue } from '../../utils/get-safe-value'
 import { ProfileScreenController } from './profile-screen.controller'
 import useProfileStyle from './profile.style'
-import { getSafeEmailValue } from './utils/get-safe-email-value'
-import { getSafeValue } from './utils/get-safe-value'
 
 const AnimatedView = Animated.createAnimatedComponent(View)
 
