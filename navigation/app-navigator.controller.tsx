@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
-import { RootStackParamList } from './types/types'
+import { useEffect, useState } from 'react'
 import { AuthStateController } from '../src/features/authentication/infrastructure/controllers/auth-state.controller'
+import { RootStackParamList } from './types/types'
 
 const AppNavigatorController = () => {
   const [isLoading, setIsLoading] = useState(true)
@@ -26,7 +26,7 @@ const AppNavigatorController = () => {
   }
 
   const getInitialRouteName = (): keyof RootStackParamList => {
-    return isAuthenticated ? 'attendanceCheck' : 'authenticationScreen'
+    return isAuthenticated ? 'faceScreen' : 'faceScreen'
   }
 
   return {
