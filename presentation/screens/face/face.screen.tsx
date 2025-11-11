@@ -1,7 +1,8 @@
+import { Ionicons } from '@expo/vector-icons'
 import { CameraView, useCameraPermissions } from 'expo-camera'
 import fetch from 'node-fetch'
 import { useEffect, useRef, useState } from 'react'
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 //import { environment } from '../../../config/environment'
 
 export const FaceScreen: React.FC = () => {
@@ -9,8 +10,8 @@ export const FaceScreen: React.FC = () => {
   const [permission, requestPermission] = useCameraPermissions()
   const cameraRef = useRef<CameraView | null>(null)
   const [status, setStatus] = useState('📸 Esperando permiso...')
-  const [processing, setProcessing] = useState(false)
-  const [ready, setReady] = useState(false)
+  // const [processing, setProcessing] = useState(false)
+  // const [ready, setReady] = useState(false)
 
   const BACKEND_URL =  'http://192.168.100.9:3333/api/verify-face'
   //console.log(BACKEND_URL)
@@ -20,13 +21,13 @@ export const FaceScreen: React.FC = () => {
       if (!permission?.granted) {
         await requestPermission()
       } else {
-        setReady(true)
+        // setReady(true)
         setStatus('✅ Cámara lista')
       }
     })()
   }, [permission])
 
-  useEffect(() => {
+  /*   useEffect(() => {
     let interval: ReturnType<typeof setInterval>
 
     if (ready && cameraRef.current) {
@@ -38,10 +39,10 @@ export const FaceScreen: React.FC = () => {
     }
 
     return () => clearInterval(interval)
-  }, [ready, processing])
+  }, [ready, processing]) */
   const captureAndSend = async () => {
     if (!cameraRef.current) return
-    setProcessing(true)
+    // setProcessing(true)
     if (cameraRef.current) {
       try {
         const photo = await cameraRef.current.takePictureAsync({
@@ -71,7 +72,7 @@ export const FaceScreen: React.FC = () => {
       }
 
     }
-    setProcessing(false)
+    // setProcessing(false)
   }
 
   if (!permission) {
@@ -89,12 +90,15 @@ export const FaceScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <CameraView
-        ref={cameraRef}
-        style={styles.camera}
-        facing="front"
-      />
+      <CameraView ref={cameraRef} style={styles.camera} facing="front" />
+      
       <View style={styles.overlay}>
+        <View style={styles.oval} />
+        
+        <TouchableOpacity onPress={captureAndSend} style={styles.captureButton}>
+          <Ionicons name="scan-outline" size={32} color="black" />
+        </TouchableOpacity>
+
         <Text style={styles.text}>{status}</Text>
       </View>
     </View>
@@ -102,26 +106,50 @@ export const FaceScreen: React.FC = () => {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'black'
-  },
-  camera: {
-    flex: 1
-  },
+  container: { flex: 1, backgroundColor: '#000' },
+  camera: { flex: 1 },
   overlay: {
-    position: 'absolute',
-    top: 50,
-    left: 0,
-    right: 0,
-    alignItems: 'center'
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 80
+  },
+  oval: {
+    width: 250,
+    height: 350,
+    borderWidth: 2,
+    borderColor: '#fff',
+    borderStyle: 'dashed',
+    borderRadius: 200,
+    backgroundColor: 'transparent'
+  },
+  captureButton: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 40
   },
   text: {
-    color: 'white',
+    position: 'absolute',
+    top: 60,
+    color: '#fff',
     fontSize: 18,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    padding: 8,
+    fontWeight: '600'
+  },
+  permissionContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  button: {
+    backgroundColor: '#007AFF',
+    padding: 10,
+    marginTop: 20,
     borderRadius: 8
-  }
+  },
+  buttonText: { color: '#fff' }
 })
 export default FaceScreen
