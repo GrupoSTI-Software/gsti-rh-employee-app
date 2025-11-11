@@ -7,13 +7,14 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 export const FaceScreen: React.FC = () => {
   //const API_URL = environment.API_URL
+  // const [isLoading, setIsLoading] = useState(false)
   const [permission, requestPermission] = useCameraPermissions()
   const cameraRef = useRef<CameraView | null>(null)
   const [status, setStatus] = useState('📸 Esperando permiso...')
   // const [processing, setProcessing] = useState(false)
   // const [ready, setReady] = useState(false)
 
-  const BACKEND_URL =  'http://192.168.100.9:3333/api/verify-face'
+  const BACKEND_URL =  'http://192.168.100.13:3333/api/verify-face'
   //console.log(BACKEND_URL)
 
   useEffect(() => {
@@ -44,35 +45,57 @@ export const FaceScreen: React.FC = () => {
     if (!cameraRef.current) return
     // setProcessing(true)
     if (cameraRef.current) {
+     
       try {
+
+        /*     const frames = [];
+        for (let i = 0; i < 3; i++) {
+          const photo = await cameraRef.current.takePictureAsync({ base64: true });
+          frames.push(photo.base64);
+          await new Promise(r => setTimeout(r, 500)); // espera medio segundo
+        }
+
+        // luego comparas diferencias de brillo/píxeles
+        const diff = compareFrames(frames);
+        if (diff < umbral) {
+          alert("Parece que estás mostrando una foto. Intenta moverte un poco.");
+        } */
+
+
         const photo = await cameraRef.current.takePictureAsync({
           base64: true,
           quality: 0.4
         })
-
+        // setProcessing(true)
+        // setIsLoading(true)
         setStatus('⏳ Enviando al servidor...')
+        // console.log('enviando al servidor')
         //console.log(photo.base64)
         const response = await fetch(BACKEND_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ imageBase64: photo.base64 })
         })
-        //console.log(response)
+        // console.log(response)
         const data = await response.json()
 
-        //console.log(data)
+        // console.log(data)
         if (data.match) {
           setStatus(`✅ Misma persona (distancia: ${Number(data?.distance).toFixed(2)})`)
         } else {
           setStatus(`❌ Persona diferente (distancia: ${Number(data?.distance).toFixed(2) ?? 'N/A'})`)
         }
       } catch (err) {
-        //console.error(err)
+        console.error(err)
         setStatus('⚠️ Error enviando imagen ' + err)
       }
 
     }
+    // setIsLoading(false)
     // setProcessing(false)
+  }
+  const goBack = () => {
+    setStatus('⏳ Atras...')
   }
 
   if (!permission) {
@@ -87,16 +110,28 @@ export const FaceScreen: React.FC = () => {
       </View>
     )
   }
+  /*  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#003366" />
+      </View>
+    )
+  }  */
 
   return (
     <View style={styles.container}>
       <CameraView ref={cameraRef} style={styles.camera} facing="front" />
       
       <View style={styles.overlay}>
+        <TouchableOpacity onPress={goBack} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={32} color="black" />
+        </TouchableOpacity>
+        
         <View style={styles.oval} />
         
         <TouchableOpacity onPress={captureAndSend} style={styles.captureButton}>
-          <Ionicons name="scan-outline" size={32} color="black" />
+          <Ionicons name="scan-outline" size={65} color="black" />
+          <View style={styles.innerDot} />
         </TouchableOpacity>
 
         <Text style={styles.text}>{status}</Text>
@@ -107,6 +142,11 @@ export const FaceScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#000' },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
   camera: { flex: 1 },
   overlay: {
     ...StyleSheet.absoluteFillObject,
@@ -115,22 +155,43 @@ const styles = StyleSheet.create({
     paddingVertical: 80
   },
   oval: {
-    width: 250,
-    height: 350,
-    borderWidth: 2,
+    width: 280,
+    height: 550,          
+    borderWidth: 3,
     borderColor: '#fff',
     borderStyle: 'dashed',
     borderRadius: 200,
-    backgroundColor: 'transparent'
+    backgroundColor: 'transparent',
+    alignSelf: 'center',
+    marginTop: 30
   },
   captureButton: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 110,
+    height: 110,
+    borderRadius: 90,
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 40
+    marginBottom: 0,
+    borderColor: '#000',
+    borderWidth: 1
+  },
+  innerDot: {
+    position: 'absolute',
+    width: 20,
+    height: 20,
+    borderRadius: 15,
+    backgroundColor: 'black'
+  },
+  backButton: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    backgroundColor: '#fff',
+    padding: 10,
+    borderRadius: 50,
+    borderColor: '#000',
+    borderWidth: 1
   },
   text: {
     position: 'absolute',
@@ -143,6 +204,12 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center'
+  },
+  innerCircle: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: 'black'
   },
   button: {
     backgroundColor: '#007AFF',
