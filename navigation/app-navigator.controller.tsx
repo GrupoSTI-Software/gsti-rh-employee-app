@@ -26,7 +26,7 @@ const AppNavigatorController = () => {
   }
 
   const getInitialRouteName = (): keyof RootStackParamList => {
-    return isAuthenticated ? 'faceScreen' : 'faceScreen'
+    return isAuthenticated ? 'attendanceCheck' : 'authenticationScreen'
   }
 
   return {

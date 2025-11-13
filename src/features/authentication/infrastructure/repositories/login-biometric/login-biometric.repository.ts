@@ -1,25 +1,24 @@
-import { AuthenticationEntity } from '../../../domain/entities/authentication-entity'
-import { AuthenticationPorts } from '../../../domain/ports/authentication.ports'
-import { RequiredFieldException } from '../../../../../shared/domain/exceptions/required-field.exception'
-import { InvalidFieldFormatException } from '../../../../../shared/domain/exceptions/invalid-field-format.exception'
-import { RequiredAllFieldsException } from '../../../../../shared/domain/exceptions/required-all-fields.exception'
-import { HttpService } from '../../../../../shared/infrastructure/services/http-service'
-import { AuthenticationLocalStorageService } from '../../services/authentication-local-storage.service'
 import { AxiosError } from 'axios'
 import i18next from 'i18next'
-import { BiometricsService } from '../../services/biometrics.service'
-import { GetAuthCredentialsUsecase } from '../../../application/get-auth-credentials/get-auth-credentials.usecase'
-import { LocalAuthCredentialsRepository } from '../local-auth-credentials/local-auth-credentials.repository'
-import { IntegerIdVO } from '../../../../../shared/domain/value-objects/integer-id.vo'
-import { EmailVO } from '../../../../../shared/domain/value-objects/email.vo'
+import { InvalidFieldFormatException } from '../../../../../shared/domain/exceptions/invalid-field-format.exception'
+import { RequiredAllFieldsException } from '../../../../../shared/domain/exceptions/required-all-fields.exception'
+import { RequiredFieldException } from '../../../../../shared/domain/exceptions/required-field.exception'
 import { ActiveVO } from '../../../../../shared/domain/value-objects/active.vo'
-import { UserEntity } from '../../../../user/domain/entities/user.entity'
-import { IEmployee } from '../../../../employee/domain/types/employee.interface'
+import { EmailVO } from '../../../../../shared/domain/value-objects/email.vo'
+import { IntegerIdVO } from '../../../../../shared/domain/value-objects/integer-id.vo'
+import { HttpService } from '../../../../../shared/infrastructure/services/http-service'
 import { EmployeeEntity } from '../../../../employee/domain/entiities/employee.entity'
-import { IPerson } from '../../../../person/domain/types/person.interface'
+import { IEmployee } from '../../../../employee/domain/types/employee.interface'
 import { PersonEntity } from '../../../../person/domain/entities/person.entity'
-import { IUser } from '../../../../user/domain/types/user.interface'
+import { IPerson } from '../../../../person/domain/types/person.interface'
 import { UserApiDTO } from '../../../../user/domain/entities/user-api.dto'
+import { UserEntity } from '../../../../user/domain/entities/user.entity'
+import { IUser } from '../../../../user/domain/types/user.interface'
+import { GetAuthCredentialsUsecase } from '../../../application/get-auth-credentials/get-auth-credentials.usecase'
+import { AuthenticationEntity } from '../../../domain/entities/authentication-entity'
+import { AuthenticationPorts } from '../../../domain/ports/authentication.ports'
+import { AuthenticationLocalStorageService } from '../../services/authentication-local-storage.service'
+import { LocalAuthCredentialsRepository } from '../local-auth-credentials/local-auth-credentials.repository'
 
 interface LoginResponse {
   status: number
@@ -77,7 +76,7 @@ export class LoginBiometricRepository implements Pick<AuthenticationPorts, 'logi
    */
   async login(): Promise<AuthenticationEntity> {
     try {
-      const biometricService = new BiometricsService()
+      /*  const biometricService = new BiometricsService()
       const isBiometricAvailable = await biometricService.isBiometricAvailable()
 
       if (!isBiometricAvailable) {
@@ -88,7 +87,7 @@ export class LoginBiometricRepository implements Pick<AuthenticationPorts, 'logi
 
       if (!biometricAuth) {
         throw new Error(i18next.t('errors.biometricAuthenticationError'))
-      }
+      } */
 
       const authCredentials = await this.authCredentials.run()
 

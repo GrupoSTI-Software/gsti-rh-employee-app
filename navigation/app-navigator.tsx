@@ -8,7 +8,7 @@ import { RootStackParamList } from './types/types'
 import { AttendanceCheckScreen } from '../presentation/screens/attendance-check/attendance-check.screen'
 import AuthenticationScreen from '../presentation/screens/authentication/authentication.screen'
 import { BiometricsConfigScreen } from '../presentation/screens/biometrics/biometrics-config.screen'
-import { FaceScreen } from '../presentation/screens/face/face.screen'
+import { FaceAuthenticationScreen } from '../presentation/screens/face/face-authentication.screen'
 import { ProfileScreen } from '../presentation/screens/profile'
 import { SettingsScreen } from '../presentation/screens/settings/settings.screen'
 
@@ -53,8 +53,8 @@ export const AppNavigator: React.FC = () => {
           component={ProfileScreen}
         />
         <Stack.Screen
-          name="faceScreen"
-          component={FaceScreen}
+          name="faceAuthenticationScreen"
+          component={FaceAuthenticationScreen}
         />
       </Stack.Navigator>
     </NavigationContainer>

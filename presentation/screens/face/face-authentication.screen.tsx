@@ -3,9 +3,11 @@ import { CameraView, useCameraPermissions } from 'expo-camera'
 import fetch from 'node-fetch'
 import { useEffect, useRef, useState } from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { FaceAuthenticationScreenController } from './face-authentication-screen.controller'
 //import { environment } from '../../../config/environment'
 
-export const FaceScreen: React.FC = () => {
+export const FaceAuthenticationScreen: React.FC = () => {
+  const controller = FaceAuthenticationScreenController()
   //const API_URL = environment.API_URL
   // const [isLoading, setIsLoading] = useState(false)
   const [permission, requestPermission] = useCameraPermissions()
@@ -82,6 +84,10 @@ export const FaceScreen: React.FC = () => {
         // console.log(data)
         if (data.match) {
           setStatus(`✅ Misma persona (distancia: ${Number(data?.distance).toFixed(2)})`)
+          
+          await controller.loginHandler?.('biometric')
+       
+        
         } else {
           setStatus(`❌ Persona diferente (distancia: ${Number(data?.distance).toFixed(2) ?? 'N/A'})`)
         }
@@ -219,4 +225,4 @@ const styles = StyleSheet.create({
   },
   buttonText: { color: '#fff' }
 })
-export default FaceScreen
+export default FaceAuthenticationScreen
