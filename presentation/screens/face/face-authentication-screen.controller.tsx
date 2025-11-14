@@ -91,6 +91,7 @@ const FaceAuthenticationScreenController = () => {
         )
         return
       }
+      
 
       const authLoginController = new LoginController()
 

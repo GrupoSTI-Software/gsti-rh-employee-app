@@ -18,6 +18,7 @@ import { GetAuthCredentialsUsecase } from '../../../application/get-auth-credent
 import { AuthenticationEntity } from '../../../domain/entities/authentication-entity'
 import { AuthenticationPorts } from '../../../domain/ports/authentication.ports'
 import { AuthenticationLocalStorageService } from '../../services/authentication-local-storage.service'
+import { BiometricsService } from '../../services/biometrics.service'
 import { LocalAuthCredentialsRepository } from '../local-auth-credentials/local-auth-credentials.repository'
 
 interface LoginResponse {
@@ -76,7 +77,7 @@ export class LoginBiometricRepository implements Pick<AuthenticationPorts, 'logi
    */
   async login(): Promise<AuthenticationEntity> {
     try {
-      /*  const biometricService = new BiometricsService()
+      const biometricService = new BiometricsService()
       const isBiometricAvailable = await biometricService.isBiometricAvailable()
 
       if (!isBiometricAvailable) {
@@ -87,7 +88,7 @@ export class LoginBiometricRepository implements Pick<AuthenticationPorts, 'logi
 
       if (!biometricAuth) {
         throw new Error(i18next.t('errors.biometricAuthenticationError'))
-      } */
+      }
 
       const authCredentials = await this.authCredentials.run()
 
@@ -105,7 +106,6 @@ export class LoginBiometricRepository implements Pick<AuthenticationPorts, 'logi
       }
 
       this.validateCredentials(credentials.email, credentials.password)
-
       const response: LoginResponse = await HttpService.post('/auth/login', {
         userEmail: credentials.email,
         userPassword: credentials.password

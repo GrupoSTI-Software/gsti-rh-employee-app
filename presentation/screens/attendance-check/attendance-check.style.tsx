@@ -203,7 +203,84 @@ const createAttendanceCheckStyle = (theme: IAppTheme) =>
       textAlign: 'center',
       width: '100%',
       marginTop: hp(0.5)
-    }
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center'
+    },
+    cameraContainer: { flex: 1, backgroundColor: '#000' },
+    camera: { flex: 1 },
+    overlay: {
+      ...StyleSheet.absoluteFillObject,
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: 80
+    },
+    oval: {
+      width: 280,
+      height: 550,          
+      borderWidth: 3,
+      borderColor: '#fff',
+      borderStyle: 'dashed',
+      borderRadius: 200,
+      backgroundColor: 'transparent',
+      alignSelf: 'center',
+      marginTop: 30
+    },
+    captureButton: {
+      width: 110,
+      height: 110,
+      borderRadius: 90,
+      backgroundColor: '#fff',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: 0,
+      borderColor: '#000',
+      borderWidth: 1
+    },
+    innerDot: {
+      position: 'absolute',
+      width: 20,
+      height: 20,
+      borderRadius: 15,
+      backgroundColor: 'black'
+    },
+    backButton: {
+      position: 'absolute',
+      top: 50,
+      left: 20,
+      backgroundColor: '#fff',
+      padding: 10,
+      borderRadius: 50,
+      borderColor: '#000',
+      borderWidth: 1
+    },
+    text: {
+      position: 'absolute',
+      top: 60,
+      color: '#fff',
+      fontSize: 18,
+      fontWeight: '600'
+    },
+    permissionContainer: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center'
+    },
+    innerCircle: {
+      width: 20,
+      height: 20,
+      borderRadius: 10,
+      backgroundColor: 'black'
+    },
+    button: {
+      backgroundColor: '#007AFF',
+      padding: 10,
+      marginTop: 20,
+      borderRadius: 8
+    },
+    buttonText: { color: '#fff' }
   })
 
 const useAttendanceCheckStyle = () => {
