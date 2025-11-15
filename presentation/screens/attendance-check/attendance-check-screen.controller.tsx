@@ -3,7 +3,6 @@ import { useNavigation } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { AxiosError } from 'axios'
 import { CameraView, useCameraPermissions } from 'expo-camera'
-import fetch from 'node-fetch'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
@@ -15,6 +14,7 @@ import { ClearSessionController } from '../../../src/features/authentication/inf
 import { BiometricsService } from '../../../src/features/authentication/infrastructure/services/biometrics.service'
 import { ILocationCoordinates, LocationService } from '../../../src/features/authentication/infrastructure/services/location.service'
 import { PasswordPromptService } from '../../../src/features/authentication/infrastructure/services/password-prompt.service'
+import { HttpService } from '../../../src/shared/infrastructure/services/http-service'
 import { useAppTheme } from '../../theme/theme-context'
 import { isCheckOutTimeReached } from './utils/is-checkout-time-reached.util'
 import { openLocationSettings } from './utils/open-location-settings'
@@ -79,15 +79,15 @@ const AttendanceCheckScreenController = () => {
   // Camera
   const [permission, requestPermission] = useCameraPermissions()
   const cameraRef = useRef<CameraView | null>(null)
-  const [status, setStatus] = useState('📸 Esperando permiso...')
+  const [status, setStatus] = useState(`📷 ${t('screens.attendanceCheck.waitingPermission')}`)
   const [isLoading, setIsLoading] = useState(false)
+  const [attendanceSuccess, setIsAttendanceSucess] = useState(false)
   useEffect(() => {
     void (async () => {
       if (!permission?.granted) {
         await requestPermission()
       } else {
-        // setReady(true)
-        setStatus('📷 Cámara lista')
+        setStatus(`📷 ${t('screens.attendanceCheck.cameraReady')}`)
       }
     })()
   }, [permission])
@@ -266,7 +266,7 @@ const AttendanceCheckScreenController = () => {
    */
   const performCheckIn = useCallback(async () => {
     try {
-      setStatus('📷 Centra tu rostro y acércalo a la cámara')
+      setStatus(`📷 ${t('screens.attendanceCheck.centerFaceAndMoveCloser')}`)
       setIsLoading(false)
       setShowFaceScreen(true)
     } catch (error) {
@@ -447,75 +447,61 @@ const AttendanceCheckScreenController = () => {
   // Camera
   const captureAndSend = async () => {
     if (!currentLocation) {
-      setStatus('❌ No se pudo acceder a la ubicación')
+      setStatus(`❌ ${t('screens.attendanceCheck.locationAccessFailed')}`)
       return
     }
     if (!cameraRef.current) return
-    // setProcessing(true)
     if (cameraRef.current) {
-      setIsLoading(true)
+     
       try {
-
         const photo = await cameraRef.current.takePictureAsync({
           base64: true,
           quality: 0.4
         })
-        // setProcessing(true)
-        // setIsLoading(true)
-        setStatus('⏳ Enviando al servidor...')
-        const BACKEND_URL =  'http://192.168.100.13:3333/api/verify-face'
-        const response = await fetch(BACKEND_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ imageBase64: photo.base64 })
+        setIsLoading(true)
+        setStatus(`⏳ ${t('screens.attendanceCheck.verifying')}`)
+        const response = await HttpService.post('/verify-face', {
+          imageBase64: photo.base64
         })
-        const data = await response.json()
-
+             
+        const data = typeof response === 'string' ? JSON.parse(response).data : response.data
         if (data.match) {
-          setStatus(`✅ Misma persona (distancia: ${Number(data?.distance).toFixed(2)})`)
-        
           setIsButtonLocked(true)
-          setShowFaceScreen(false)
           // Registrar asistencia en el servidor
           const registrationSuccess = await registerAttendance(currentLocation.latitude, currentLocation.longitude)
         
           if (registrationSuccess) {
             // Si el registro fue exitoso, actualizar los datos locales
-            // setCheckInTime(DateTime.now().setLocale('es').toFormat('HH:mm:ss'))
             
             // Recargar los datos de asistencia desde el servidor
             try {
               await setShiftDateData()
-              Alert.alert(
-                'Éxito',
-                'Asistencia registrada correctamente ✅',
-                [{ text: 'OK' }]
-              )
+              setShowFaceScreen(false)
+              setIsAttendanceSucess(true)
+             
             } catch (reloadError) {
               console.error('Error recargando datos de asistencia:', reloadError)
               // No mostramos error al usuario, ya que el registro fue exitoso
             }
           }
-
           setTimeout(() => {
             setIsButtonLocked(false)
           }, (2 * 1000))
         } else {
-          setStatus(`❌ Persona diferente (distancia: ${Number(data?.distance).toFixed(2) ?? 'N/A'})`)
+          setStatus(`❌ ${t('screens.attendanceCheck.identityNotVerified')}`)
         }
       } catch (err) {
         console.error(err)
-        setStatus('⚠️ Error enviando imagen ' + err)
+        setStatus(`⚠️ ${t('screens.attendanceCheck.imageSendError')} ${err}`)
       }
-
     }
     setIsLoading(false)
-    // setProcessing(false)
   }
   const goBack = () => {
-    setStatus('⏳ Atras...')
+    setStatus(`📷 ${t('screens.attendanceCheck.centerFaceAndMoveCloser')}`)
+    setIsLoading(false)
+    setShowFaceScreen(false)
   }
-
   // Memorizar el objeto de retorno completo para evitar recreaciones innecesarias
   const controllerValue = useMemo(() => ({
     themeType,
@@ -529,7 +515,9 @@ const AttendanceCheckScreenController = () => {
     requestPermission,
     cameraRef,
     status,
+    attendanceSuccess,
     captureAndSend,
+    setIsAttendanceSucess,
     goBack,
     handleCheckIn,
     // checkInTime,
@@ -567,6 +555,16 @@ const AttendanceCheckScreenController = () => {
     shiftDate,
     isButtonLocked,
     isLoadingLocation,
+    isLoading,
+    showFaceScreen,
+    permission,
+    requestPermission,
+    cameraRef,
+    status,
+    attendanceSuccess,
+    captureAndSend,
+    setIsAttendanceSucess,
+    goBack,
     handleCheckIn,
     // checkInTime,
     currentLocation,

@@ -106,7 +106,14 @@
         "message": "Tu sesión ha expirado. Por favor, inicia sesión nuevamente."
       },
       "registrationError": "Error al registrar asistencia",
-      "deviceSettingsError": "No se pudo abrir la configuración del dispositivo"
+      "deviceSettingsError": "No se pudo abrir la configuración del dispositivo",
+      "verifying": "Verificando...",
+      "centerFaceAndMoveCloser": "Centra tu rostro y acércalo a la cámara",
+      "locationAccessFailed": "No se pudo acceder a la ubicación",
+      "waitingPermission": "Esperando permiso...",
+      "cameraReady": "Cámara lista",
+      "identityNotVerified": "No ha sido posible verificar tu identidad. Inténtalo nuevamente.",
+      "imageSendError": "Error enviando imagen"
     },
     "profile": {
       "title": "Mi Perfil",

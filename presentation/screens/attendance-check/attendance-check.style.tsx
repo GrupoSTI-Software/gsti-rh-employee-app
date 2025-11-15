@@ -256,12 +256,15 @@ const createAttendanceCheckStyle = (theme: IAppTheme) =>
       borderColor: '#000',
       borderWidth: 1
     },
-    text: {
+    textStatus: {
       position: 'absolute',
-      top: 60,
+      backgroundColor: '#00000095',
+      top: 663,
       color: '#fff',
       fontSize: 18,
-      fontWeight: '600'
+      fontWeight: '600',
+      padding: 7,
+      textAlign: 'center'
     },
     permissionContainer: {
       flex: 1,

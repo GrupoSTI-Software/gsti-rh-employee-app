@@ -20,6 +20,7 @@ import Animated, {
   ZoomIn
 } from 'react-native-reanimated'
 import { Clock } from '../../components/clock/clock.component'
+import CustomAlert from '../../components/custom-alert/custom-alert'
 import { Typography } from '../../components/typography/typography.component'
 import { CheckInIcon } from '../../icons/check-in-icon/check-in.icon'
 import { CheckOutIcon } from '../../icons/check-out-icon/check-out.icon'
@@ -62,9 +63,24 @@ export const AttendanceCheckScreen: React.FC = React.memo(() => {
   const buttonIconColor = useMemo(() => 
     controller.isButtonDisabled ? styles.checkButtonIconLocked.color : styles.checkButtonIcon.color, [controller.isButtonDisabled, styles.checkButtonIconLocked.color, styles.checkButtonIcon.color]
   )
+  if (controller.attendanceSuccess) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center' }}>
+
+        <CustomAlert
+          visible={controller.attendanceSuccess}
+          title="Éxito"
+          message="Asistencia registrada correctamente ✅"
+          onClose={() => controller.setIsAttendanceSucess(false) }
+        />
+      </View>
+    )
+  }
+ 
   if (controller.isLoading) {
     return (
       <View style={styles.loadingContainer}>
+        <Text style={styles.textStatus}>{controller.status}</Text>
         <ActivityIndicator size="large" color="#003366" />
       </View>
     )
@@ -93,12 +109,12 @@ export const AttendanceCheckScreen: React.FC = React.memo(() => {
           
           <View style={styles.oval} />
           
+          <Text style={styles.textStatus}>{controller.status}</Text>
           <TouchableOpacity onPress={controller.captureAndSend} style={styles.captureButton}>
             <Ionicons name="scan-outline" size={65} color="black" />
             <View style={styles.innerDot} />
           </TouchableOpacity>
 
-          <Text style={styles.text}>{controller.status}</Text>
         </View>
       </View>
     )
