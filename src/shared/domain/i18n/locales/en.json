@@ -113,7 +113,10 @@
       "waitingPermission": "Waiting for permission...",
       "cameraReady": "Camera ready",
       "identityNotVerified": "Your identity could not be verified. Please try again.",
-      "imageSendError": "Error sending image"
+      "imageSendError": "Error sending image",
+      "requestingPermissions": "Requesting permissions...",
+      "permissions": "Permissions",
+      "permissionDeniedPermanent": "You did not grant permissions and the system does not allow requesting them again. Please enable them from Settings."
     },
     "profile": {
       "title": "My Profile",

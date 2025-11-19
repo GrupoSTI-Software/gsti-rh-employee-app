@@ -78,19 +78,46 @@ const AttendanceCheckScreenController = () => {
   const snapPoints = useMemo(() => ['65%'], [])
   // Camera
   const [permission, requestPermission] = useCameraPermissions()
+  const [permissionDeniedMessage, setPermissionDeniedMessage] = useState(false)
+  const [permissionDenied, setPermissionDenied] = useState(false)
   const cameraRef = useRef<CameraView | null>(null)
   const [status, setStatus] = useState(`📷 ${t('screens.attendanceCheck.waitingPermission')}`)
   const [isLoading, setIsLoading] = useState(false)
   const [attendanceSuccess, setIsAttendanceSucess] = useState(false)
+
   useEffect(() => {
-    void (async () => {
-      if (!permission?.granted) {
+    const checkPermission = async () => {
+      if (!permission) return
+      // Primera vez no solicitado
+      if (permission.status === 'undetermined') {
         await requestPermission()
-      } else {
-        setStatus(`📷 ${t('screens.attendanceCheck.cameraReady')}`)
+        return
       }
-    })()
+
+      // Usuario negó, pero se puede preguntar otra vez -> preguntar de nuevo
+      if (permission.status === 'denied' && permission.canAskAgain) {
+        await requestPermission()
+        return
+      }
+
+      // Usuario negó y NO se puede volver a pedir
+      if (permission.status === 'denied' && !permission.canAskAgain) {
+        setPermissionDenied(true)
+        setPermissionDeniedMessage(true)
+        return
+      }
+
+      // Permisos otorgados
+      if (permission.status === 'granted') {
+        setPermissionDenied(false)
+        setPermissionDeniedMessage(false)
+      }
+    }
+    void checkPermission()
+    
   }, [permission])
+
+
   // Definir setShiftDateData antes de usarlo en useEffect
   const setShiftDateData = useCallback(async (): Promise<string> => {
     
@@ -286,10 +313,15 @@ const AttendanceCheckScreenController = () => {
    */
   const handleCheckIn = useCallback(async () => {    
     if (isButtonLocked || isLoadingLocation) return
-
+    if (permissionDenied) {
+      setPermissionDeniedMessage(true)
+      return
+    }
+    setIsLoading(true)
     setIsLoadingLocation(true)
 
     try {
+     
       // Primero validar la ubicación antes de proceder con la autenticación
       const locationResult = await validateLocationInBackground()
       
@@ -298,8 +330,9 @@ const AttendanceCheckScreenController = () => {
       
       // Ejecutar el check-in con la ubicación validada
       await performCheckIn()
-
+      setIsLoading(false)
     } catch (error) {
+      setIsLoading(false)
       // Verificar si es error de ubicación
       const errorMessage = error instanceof Error ? error.message : ''
       // Verificar si el error es de precisión o autorización
@@ -331,7 +364,7 @@ const AttendanceCheckScreenController = () => {
     } finally {
       setIsLoadingLocation(false)
     }
-  }, [isButtonLocked, isLoadingLocation, t, validateLocationInBackground, performCheckIn])
+  }, [isButtonLocked, isLoadingLocation, t, validateLocationInBackground, performCheckIn, permissionDenied,setPermissionDeniedMessage])
 
   /**
    * Formatea las coordenadas para mostrarlas en pantalla
@@ -382,7 +415,6 @@ const AttendanceCheckScreenController = () => {
   // Filtrar datos de salida basándose en la hora del turno
   const filteredAttendanceData = useMemo(() => {
     const shouldShowCheckOut = !shiftEndTime || isCheckOutTimeReached(shiftEndTime)
-    
 
     return {
       ...attendanceData,
@@ -498,9 +530,10 @@ const AttendanceCheckScreenController = () => {
     setIsLoading(false)
   }
   const goBack = () => {
-    setStatus(`📷 ${t('screens.attendanceCheck.centerFaceAndMoveCloser')}`)
+    setStatus(`${t('common.loading')}`)
     setIsLoading(false)
     setShowFaceScreen(false)
+    setPermissionDeniedMessage(false)
   }
   // Memorizar el objeto de retorno completo para evitar recreaciones innecesarias
   const controllerValue = useMemo(() => ({
@@ -513,6 +546,8 @@ const AttendanceCheckScreenController = () => {
     showFaceScreen,
     permission,
     requestPermission,
+    permissionDeniedMessage,
+    permissionDenied,
     cameraRef,
     status,
     attendanceSuccess,
@@ -558,6 +593,8 @@ const AttendanceCheckScreenController = () => {
     isLoading,
     showFaceScreen,
     permission,
+    permissionDeniedMessage,
+    permissionDenied,
     requestPermission,
     cameraRef,
     status,

@@ -69,9 +69,22 @@ export const AttendanceCheckScreen: React.FC = React.memo(() => {
 
         <CustomAlert
           visible={controller.attendanceSuccess}
-          title="Éxito"
-          message="Asistencia registrada correctamente ✅"
+          title={`${t('common.success')}`}
+          message={`✅ ${t('screens.attendanceCheck.attendanceRegisteredSuccessfully')}`}
           onClose={() => controller.setIsAttendanceSucess(false) }
+        />
+      </View>
+    )
+  }
+  if (controller.permissionDeniedMessage) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center' }}>
+
+        <CustomAlert
+          visible={controller.permissionDeniedMessage}
+          title={`${t('screens.attendanceCheck.permissions')}`}
+          message={`🚫 ${t('screens.attendanceCheck.permissionDeniedPermanent')}`}
+          onClose={() => controller.goBack() }
         />
       </View>
     )
@@ -86,18 +99,6 @@ export const AttendanceCheckScreen: React.FC = React.memo(() => {
     )
   } 
   if (controller.showFaceScreen) {
-    if (!controller.permission) {
-      return <View style={styles.container}><Text>Solicitando permisos...</Text></View>
-    }
-  
-    if (!controller.permission.granted) {
-      return (
-        <View style={styles.container}>
-          <Text>No hay acceso a la cámara.</Text>
-          <Text onPress={controller.requestPermission}>Tocar para permitir</Text>
-        </View>
-      )
-    }
     return (
       <View style={styles.cameraContainer}>
         <CameraView ref={controller.cameraRef} style={styles.camera} facing="front" />

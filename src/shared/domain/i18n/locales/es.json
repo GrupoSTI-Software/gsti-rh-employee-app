@@ -113,7 +113,11 @@
       "waitingPermission": "Esperando permiso...",
       "cameraReady": "Cámara lista",
       "identityNotVerified": "No ha sido posible verificar tu identidad. Inténtalo nuevamente.",
-      "imageSendError": "Error enviando imagen"
+      "imageSendError": "Error enviando imagen",
+      "requestingPermissions": "Solicitando permisos...",
+      "attendanceRegisteredSuccessfully": "Asistencia registrada correctamente",
+      "permissions": "Permisos",
+      "permissionDeniedPermanent": "No otorgaste permisos y el sistema no permite volver a pedir. Actívalos desde Configuración."
     },
     "profile": {
       "title": "Mi Perfil",
