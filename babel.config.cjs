@@ -1,8 +1,15 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
 module.exports = function (api) {
-  api.cache(true)
+  api.cache(true);
   return {
-    presets: ['babel-preset-expo'],
+    presets: [
+      [
+        'babel-preset-expo',
+        {
+          jsxRuntime: 'automatic',
+          reactRuntime: 'automatic',
+        },
+      ],
+    ],
     plugins: [
       'react-native-reanimated/plugin',
       [
@@ -10,12 +17,8 @@ module.exports = function (api) {
         {
           moduleName: '@env',
           path: '.env',
-          blacklist: null,
-          whitelist: null,
-          safe: false,
-          allowUndefined: true
-        }
-      ]
-    ]
-  }
-} 
+        },
+      ],
+    ],
+  };
+};
