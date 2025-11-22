@@ -1,6 +1,18 @@
-import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import { Modal, Pressable, StyleSheet, Text, View } from 'react-native'
 
-export default function CustomAlert({ visible, title, message, onClose }) {
+interface CustomAlertProps {
+  visible: boolean
+  title: string
+  message: string
+  onClose: () => void
+}
+
+export default function CustomAlert({
+  visible,
+  title,
+  message,
+  onClose
+}: CustomAlertProps) {
   return (
     <Modal transparent visible={visible} animationType="fade">
       <View style={styles.overlay}>
@@ -14,46 +26,46 @@ export default function CustomAlert({ visible, title, message, onClose }) {
         </View>
       </View>
     </Modal>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "transparent",  // 👈 sin gris
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: 'transparent',
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   box: {
-    width: "90%",             // 👈 más grande
-    height: "85%",            // 👈 casi toda la pantalla
-    backgroundColor: "white",
+    width: '90%',
+    height: '85%',
+    backgroundColor: 'white',
     padding: 25,
     borderRadius: 15,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   title: {
     fontSize: 28,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginBottom: 15,
-    textAlign: "center",
+    textAlign: 'center'
   },
   message: {
     fontSize: 18,
-    textAlign: "center",
-    marginBottom: 30,
+    textAlign: 'center',
+    marginBottom: 30
   },
   button: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: '#4CAF50',
     paddingVertical: 15,
     paddingHorizontal: 30,
     borderRadius: 12,
-    marginTop: 20,
+    marginTop: 20
   },
   buttonText: {
-    color: "white",
+    color: 'white',
     fontSize: 18,
-    fontWeight: "bold",
-  },
-});
+    fontWeight: 'bold'
+  }
+})

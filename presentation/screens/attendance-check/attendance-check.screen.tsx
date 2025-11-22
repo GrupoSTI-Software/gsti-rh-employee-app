@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons'
-import BottomSheet from '@gorhom/bottom-sheet'
+// import BottomSheet from '@gorhom/bottom-sheet'
 import { CameraView } from 'expo-camera'
 import { StatusBar } from 'expo-status-bar'
 import React, { useMemo } from 'react'
@@ -27,7 +27,7 @@ import { CheckOutIcon } from '../../icons/check-out-icon/check-out.icon'
 import AuthenticatedLayout from '../../layouts/authenticated-layout/authenticated.layout'
 import { AttendanceCheckScreenController } from './attendance-check-screen.controller'
 import useAttendanceCheckStyle from './attendance-check.style'
-import { PasswordBottomSheet } from './password-bottom-sheet.component'
+// import { PasswordBottomSheet } from './password-bottom-sheet.component'
 import { getIconColor } from './utils/get-icon-color'
 import { getIndicatorStyles } from './utils/get-indicator-styles'
 import { getLabelStyles } from './utils/get-label-styles'
@@ -327,8 +327,7 @@ export const AttendanceCheckScreen: React.FC = React.memo(() => {
               </ScrollView>
             </SafeAreaView>
           </View>
-
-          <BottomSheet
+          {/*<BottomSheet
             ref={controller.bottomSheetRef}
             index={-1}
             snapPoints={controller.snapPoints}
@@ -343,7 +342,7 @@ export const AttendanceCheckScreen: React.FC = React.memo(() => {
               onCancel={controller.onConfirmPasswordDrawer}
               error={controller.passwordError}
             />
-          </BottomSheet>
+          </BottomSheet> */}
         </AuthenticatedLayout>
       </GestureHandlerRootView>
     )
