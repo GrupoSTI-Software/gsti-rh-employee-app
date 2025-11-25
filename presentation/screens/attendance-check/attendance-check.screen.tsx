@@ -209,55 +209,45 @@ export const AttendanceCheckScreen: React.FC = React.memo(() => {
                       </TouchableOpacity>
                     </View>
                     <View style={styles.containerButtons}>
-                      {/* Botón ATRÁS */}
-                      <TouchableOpacity style={[styles.arrowsButton, styles.leftArrow]}>
+                      {/* Izquierda */}
+                      <TouchableOpacity style={styles.arrowButton}>
                         <MaterialIcons name="chevron-left" size={30} color="#7288A2" />
                       </TouchableOpacity>
-                      {/* Botón principal con animación */}
-                      <Animated.View 
-                        entering={ZoomIn.delay(200).duration(400)}
-                        style={[
-                          styles.checkInContainer,
-                          { zIndex: 10 }
-                        ]}
-                      >
-                        <View style={[
-                          buttonWrapperStyles,
-                          { zIndex: 10 }
-                        ]}>
-                          <AnimatedTouchableOpacity
-                            style={[
-                              buttonStyles,
-                              { zIndex: 10 }
-                            ]}
-                            onPress={controller.handleCheckIn}
-                            disabled={controller.isButtonDisabled}
-                            activeOpacity={0.8}
-                          >
-                            {controller.isLoadingLocation ? (
-                              <ActivityIndicator 
-                                size={48} 
-                                color={styles.checkButtonIcon.color} 
-                              />
-                            ) : (
-                              <CheckInIcon
-                                size={48}
-                                color={buttonIconColor}
-                              />
-                            )}
-                            <Typography variant="body" style={buttonTextStyles as any}>
-                              {controller.buttonText}
-                            </Typography>
-                          </AnimatedTouchableOpacity>
-                        </View>
-                      </Animated.View>
 
-                      {/* Botón ADELANTE */}
-                      <TouchableOpacity style={[styles.arrowsButton, styles.rightArrow]}>
+                      {/* Centro (tu diseño intacto) */}
+                      <View style={styles.centerWrapper}>
+                        <Animated.View 
+                          entering={ZoomIn.delay(200).duration(400)}
+                          style={[styles.checkInContainer, { zIndex: 10 }]}
+                        >
+                          <View style={[buttonWrapperStyles, { zIndex: 10 }]}>
+                            <AnimatedTouchableOpacity
+                              style={[buttonStyles, { zIndex: 10 }]}
+                              onPress={controller.handleCheckIn}
+                              disabled={controller.isButtonDisabled}
+                              activeOpacity={0.8}
+                            >
+                              {controller.isLoadingLocation ? (
+                                <ActivityIndicator size={48} color={styles.checkButtonIcon.color} />
+                              ) : (
+                                <CheckInIcon size={48} color={buttonIconColor} />
+                              )}
+                              <Typography variant="body" style={buttonTextStyles as any}>
+                                {controller.buttonText}
+                              </Typography>
+                            </AnimatedTouchableOpacity>
+                          </View>
+                        </Animated.View>
+                      </View>
+
+                      {/* Derecha */}
+                      <TouchableOpacity style={styles.arrowButton}>
                         <MaterialIcons name="chevron-right" size={30} color="#7288A2" />
                       </TouchableOpacity>
+
                     </View>
-    
+
+
                     {/* Tarjeta del reloj con animación */}
                     <Animated.View 
                       entering={ZoomIn.delay(250).duration(400)}

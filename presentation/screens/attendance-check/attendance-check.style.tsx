@@ -284,18 +284,14 @@ const createAttendanceCheckStyle = (theme: IAppTheme) =>
       borderRadius: 8
     },
     containerCalendar: {
-      position:'absolute',
-      right:0,
-      top:10,
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center'
+      width: '100%'
     },
     buttonText: { color: '#fff' },
     iconButton: {
       padding: 10
     },
     calendarButton: {
+      alignSelf: 'flex-end',
       width: 70,
       height: 70,
       borderRadius: 16,
@@ -312,13 +308,14 @@ const createAttendanceCheckStyle = (theme: IAppTheme) =>
     },
     containerButtons: {
       flexDirection: 'row',
-      justifyContent: 'space-between',
       alignItems: 'center',
-      paddingHorizontal: 20
+      justifyContent: 'space-between',
+      paddingHorizontal: 0,
+      width: '100%',
+      marginTop: -30
     },
-    arrowsButton: {
-      position:'absolute',
-      width: 80,
+    arrowButton: {
+      width: 60,
       height: 60,
       borderRadius: 12,
       backgroundColor: '#FFFFFF',
@@ -326,21 +323,18 @@ const createAttendanceCheckStyle = (theme: IAppTheme) =>
       borderColor: 'rgba(150, 180, 220, 0.3)',
       justifyContent: 'center',
       alignItems: 'center',
-      marginTop: 100,
       shadowColor: '#9BB0CC',
       shadowOpacity: 0.15,
       shadowRadius: 8,
       shadowOffset: { width: 0, height: 4 },
-      elevation: 4
+      elevation: 4,
+      marginTop: 70
     },
-    leftArrow: {
-      position: 'absolute',
-      marginLeft: -85
-    },
-    rightArrow: {
-      position:'absolute',
-      marginLeft:205
+    centerWrapper: {
+      flex: 1,
+      alignItems: 'center'
     }
+
   })
 
 const useAttendanceCheckStyle = () => {
