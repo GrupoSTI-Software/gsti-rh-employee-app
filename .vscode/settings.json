@@ -138,7 +138,8 @@
     "25SAEAE0100M005045 Captura de FaceID en dispositivo",
     "25SAEAE0100M005045 Captura de FaceID en dispositivo",
     "25SAEAE0100M005045 Captura de FaceID en dispositivo",
-    "25SAEAE0100M005045 Captura de FaceID en dispositivo"
+    "25SAEAE0100M005045 Captura de FaceID en dispositivo",
+    "GSTIRHAPPEMP1764006310 UI Control de tiempo en checador"
   ],
   "search.exclude": {
     "**/node_modules": true,
