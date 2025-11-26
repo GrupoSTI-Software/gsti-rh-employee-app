@@ -14,12 +14,14 @@ export class AttendanceRepository implements Pick<AttendancePorts, 'getAttendanc
 {
   /**
    * Obtiene las asistencias del usuario
+   * @param {string} dateStart - Fecha inicial
+   * @param {string} dateEnd - Fecha final
    * @returns {Promise<AttendanceEntity | null>} Asistencias del usuario o null si no existe
    */
-  async getAttendance(): Promise<AttendanceEntity | null> {
+  async getAttendance(dateStart: string, dateEnd: string): Promise<AttendanceEntity | null> {
     const authStateController = new AuthStateController()
-    const dateToGet = DateTime.now().setLocale('es').toISODate()
-    const dateEnd = DateTime.now().setLocale('es').toISODate()
+    // const dateToGet = DateTime.now().setLocale('es').toISODate()
+    // const dateEnd = DateTime.now().setLocale('es').toISODate()
     // Obtener el token de autenticación
     const authState = await authStateController.getAuthState()
     const token = authState?.props.authState?.token
@@ -34,7 +36,7 @@ export class AttendanceRepository implements Pick<AttendancePorts, 'getAttendanc
 
     const employeeId = authState?.props.authState?.user?.props.person?.props.employee?.props?.id?.value || null
     
-    const response = await axios.get(`${environment.API_URL}/v1/assists?date=${dateToGet}&date-end=${dateEnd}&employeeId=${employeeId}`, {
+    const response = await axios.get(`${environment.API_URL}/v1/assists?date=${dateStart}&date-end=${dateEnd}&employeeId=${employeeId}`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }

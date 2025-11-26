@@ -7,9 +7,11 @@ import { AttendanceEntity } from '../entities/attendance-entity'
 export interface AttendancePorts {
   /**
    * Obtiene las asistencias de hoy del usuario
+   * @param {string} dateStart - Fecha inicial
+   * @param {string} dateEnd - Fecha final
    * @returns {Promise<AttendanceEntity | null>} Promesa que resuelve las asistencias de hoy o null si no existe
    */
-  getAttendance(): Promise<AttendanceEntity | null>
+  getAttendance(dateStart: string, dateEnd: string): Promise<AttendanceEntity | null>
 
   /**
    * Registra la asistencia del usuario

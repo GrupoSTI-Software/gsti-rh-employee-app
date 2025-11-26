@@ -21,9 +21,11 @@ export class GetAttendanceController {
 
   /**
    * Obtiene las asistencias del usuario
+   * @param {string} dateStart - Fecha inicial
+   * @param {string} dateEnd - Fecha final
    * @returns {Promise<AttendanceEntity | null>} Promesa que resuelve a la entidad de asistencias o null si no existe
    */
-  async getAttendance(): Promise<AttendanceEntity | null> {
-    return await this.usecase.run()
+  async getAttendance(dateStart: string, dateEnd: string): Promise<AttendanceEntity | null> {
+    return await this.usecase.run(dateStart, dateEnd)
   }
 }

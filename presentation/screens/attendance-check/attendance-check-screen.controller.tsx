@@ -1,4 +1,7 @@
 import BottomSheet, { BottomSheetBackdrop } from '@gorhom/bottom-sheet'
+import {
+  DateTimePickerEvent
+} from '@react-native-community/datetimepicker'
 import { useNavigation } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { AxiosError } from 'axios'
@@ -84,6 +87,11 @@ const AttendanceCheckScreenController = () => {
   const [status, setStatus] = useState(`📷 ${t('screens.attendanceCheck.waitingPermission')}`)
   const [isLoading, setIsLoading] = useState(false)
   const [attendanceSuccess, setIsAttendanceSucess] = useState(false)
+  const [dateSelect, setDateSelect] = useState(new Date())
+  const [showPicker, setShowPicker] = useState(false)
+  const [localDate, setLocalDate] = useState(
+    dateSelect || new Date()
+  )
 
   useEffect(() => {
     const checkPermission = async () => {
@@ -122,8 +130,9 @@ const AttendanceCheckScreenController = () => {
   const setShiftDateData = useCallback(async (): Promise<string> => {
     
     try {
+      const date = dateSelect.toISOString().split('T')[0]
       const attendanceController = new GetAttendanceController()
-      const attendance =  await attendanceController.getAttendance()
+      const attendance =  await attendanceController.getAttendance(date, date)
       // Éxito: limpiar error de conexión
       setHasConnectionError(false)
       const shiftInfo = attendance?.props.shiftInfo ? attendance?.props.shiftInfo : ''
@@ -207,7 +216,7 @@ const AttendanceCheckScreenController = () => {
       
       return fallbackDate
     }
-  }, [])
+  }, [dateSelect])
 
   // Abrir/cerrar drawer según controller
   useEffect(() => {
@@ -529,12 +538,45 @@ const AttendanceCheckScreenController = () => {
     }
     setIsLoading(false)
   }
+
   const goBack = () => {
     setStatus(`${t('common.loading')}`)
     setIsLoading(false)
     setShowFaceScreen(false)
     setPermissionDeniedMessage(false)
   }
+
+  const handleDateChange = useCallback(async ( event: DateTimePickerEvent,
+    selectedDate?: Date): Promise<void> => {
+  
+    setShowPicker(false)
+
+    if (!selectedDate) return
+
+    setLocalDate(selectedDate)
+    setDateSelect(selectedDate)
+    await setShiftDateData()
+  }, [dateSelect, setShiftDateData, setDateSelect, setLocalDate])
+
+  const handlePreviousDay  = useCallback(async (): Promise<void> => {
+    const newDate = new Date(dateSelect)
+    newDate.setDate(newDate.getDate() - 1)
+    setDateSelect(newDate)
+    setLocalDate(newDate)
+    await setShiftDateData()
+  }, [dateSelect, setShiftDateData, setDateSelect, setLocalDate])
+
+  const handleNextDay =  useCallback(async (): Promise<void> => {
+    const today = new Date()
+    const newDate = new Date(dateSelect)
+    newDate.setDate(newDate.getDate() + 1)
+
+    if (newDate <= today) {
+      setDateSelect(newDate)
+      setLocalDate(newDate)
+      await setShiftDateData()
+    }
+  }, [dateSelect, setShiftDateData, setDateSelect, setLocalDate])
   // Memorizar el objeto de retorno completo para evitar recreaciones innecesarias
   const controllerValue = useMemo(() => ({
     themeType,
@@ -584,7 +626,14 @@ const AttendanceCheckScreenController = () => {
     isCheckOutTimeReached,
     hasConnectionError,
     retryLoadData,
-    isRetrying
+    isRetrying,
+    handleDateChange,
+    dateSelect,
+    localDate,
+    showPicker,
+    setShowPicker,
+    handlePreviousDay,
+    handleNextDay
   }), [
     themeType,
     shiftDate,
@@ -634,7 +683,14 @@ const AttendanceCheckScreenController = () => {
     hasConnectionError,
     clearSessionController,
     retryLoadData,
-    isRetrying
+    isRetrying,
+    handleDateChange,
+    dateSelect,
+    localDate,
+    showPicker,
+    setShowPicker,
+    handlePreviousDay,
+    handleNextDay
   ])
 
   return controllerValue

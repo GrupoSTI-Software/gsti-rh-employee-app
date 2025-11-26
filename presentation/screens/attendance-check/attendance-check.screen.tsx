@@ -1,4 +1,5 @@
 import { Ionicons, MaterialIcons } from '@expo/vector-icons'
+import DateTimePicker from '@react-native-community/datetimepicker'
 // import BottomSheet from '@gorhom/bottom-sheet'
 import { CameraView } from 'expo-camera'
 import { StatusBar } from 'expo-status-bar'
@@ -6,6 +7,7 @@ import React, { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   ActivityIndicator,
+  Platform,
   SafeAreaView,
   ScrollView,
   Text,
@@ -190,8 +192,16 @@ export const AttendanceCheckScreen: React.FC = React.memo(() => {
                   <>
                     {/* Contenido normal cuando hay conexión */}
                     <View style={styles.containerCalendar}>
+                      <Text style={styles.calendarDateText}>
+                        {controller.localDate.toLocaleDateString('es-ES', {
+                          day: '2-digit',
+                          month: 'short',
+                          year: 'numeric'
+                        })
+                        }
+                      </Text>
                       {/* Botón central con calendario */}
-                      <TouchableOpacity style={styles.calendarButton}>
+                      <TouchableOpacity style={styles.calendarButton} onPress={() => controller.setShowPicker(true)}>
                         <Svg
                           width={20}
                           height={20}
@@ -207,10 +217,11 @@ export const AttendanceCheckScreen: React.FC = React.memo(() => {
                           <Circle cx="17" cy="15" r="1.5" fill="#88a4bf" />
                         </Svg>
                       </TouchableOpacity>
+                      
                     </View>
                     <View style={styles.containerButtons}>
                       {/* Izquierda */}
-                      <TouchableOpacity style={styles.arrowButton}>
+                      <TouchableOpacity style={styles.arrowButton} onPress={controller.handlePreviousDay}>
                         <MaterialIcons name="chevron-left" size={30} color="#7288A2" />
                       </TouchableOpacity>
 
@@ -241,7 +252,7 @@ export const AttendanceCheckScreen: React.FC = React.memo(() => {
                       </View>
 
                       {/* Derecha */}
-                      <TouchableOpacity style={styles.arrowButton}>
+                      <TouchableOpacity style={styles.arrowButton} onPress={controller.handleNextDay}>
                         <MaterialIcons name="chevron-right" size={30} color="#7288A2" />
                       </TouchableOpacity>
 
@@ -362,6 +373,14 @@ export const AttendanceCheckScreen: React.FC = React.memo(() => {
               error={controller.passwordError}
             />
           </BottomSheet> */}
+          {controller.showPicker && (
+            <DateTimePicker
+              value={controller.localDate}
+              mode="date"
+              display={Platform.OS === 'android' ? 'calendar' : 'spinner'}// 👈 forzar calendario
+              onChange={controller.handleDateChange}
+            />
+          )}
         </AuthenticatedLayout>
       </GestureHandlerRootView>
     )
