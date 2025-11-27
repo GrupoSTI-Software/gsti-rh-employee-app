@@ -20,8 +20,6 @@ export class AttendanceRepository implements Pick<AttendancePorts, 'getAttendanc
    */
   async getAttendance(dateStart: string, dateEnd: string): Promise<AttendanceEntity | null> {
     const authStateController = new AuthStateController()
-    // const dateToGet = DateTime.now().setLocale('es').toISODate()
-    // const dateEnd = DateTime.now().setLocale('es').toISODate()
     // Obtener el token de autenticación
     const authState = await authStateController.getAuthState()
     const token = authState?.props.authState?.token
@@ -35,7 +33,6 @@ export class AttendanceRepository implements Pick<AttendancePorts, 'getAttendanc
     }
 
     const employeeId = authState?.props.authState?.user?.props.person?.props.employee?.props?.id?.value || null
-    
     const response = await axios.get(`${environment.API_URL}/v1/assists?date=${dateStart}&date-end=${dateEnd}&employeeId=${employeeId}`, {
       headers: {
         'Authorization': `Bearer ${token}`
@@ -67,7 +64,7 @@ export class AttendanceRepository implements Pick<AttendancePorts, 'getAttendanc
       checkEatOutStatus: (responseData?.checkEatOutStatus as string) || null,
       shiftInfo: shiftInfo
     })
-
+    
     return attendanceEntity
   }
 }

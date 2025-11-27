@@ -226,31 +226,34 @@ export const AttendanceCheckScreen: React.FC = React.memo(() => {
                       </TouchableOpacity>
 
                       {/* Centro (tu diseño intacto) */}
-                      <View style={styles.centerWrapper}>
-                        <Animated.View 
-                          entering={ZoomIn.delay(200).duration(400)}
-                          style={[styles.checkInContainer, { zIndex: 10 }]}
-                        >
-                          <View style={[buttonWrapperStyles, { zIndex: 10 }]}>
-                            <AnimatedTouchableOpacity
-                              style={[buttonStyles, { zIndex: 10 }]}
-                              onPress={controller.handleCheckIn}
-                              disabled={controller.isButtonDisabled}
-                              activeOpacity={0.8}
-                            >
-                              {controller.isLoadingLocation ? (
-                                <ActivityIndicator size={48} color={styles.checkButtonIcon.color} />
-                              ) : (
-                                <CheckInIcon size={48} color={buttonIconColor} />
-                              )}
-                              <Typography variant="body" style={buttonTextStyles as any}>
-                                {controller.buttonText}
-                              </Typography>
-                            </AnimatedTouchableOpacity>
-                          </View>
-                        </Animated.View>
-                      </View>
-
+                      {controller.showButtonAssist ? (
+                        <View style={styles.centerWrapper}>
+                          <Animated.View 
+                            entering={ZoomIn.delay(200).duration(400)}
+                            style={[styles.checkInContainer, { zIndex: 10 }]}
+                          >
+                            <View style={[buttonWrapperStyles, { zIndex: 10 }]}>
+                              <AnimatedTouchableOpacity
+                                style={[buttonStyles, { zIndex: 10 }]}
+                                onPress={controller.handleCheckIn}
+                                disabled={controller.isButtonDisabled}
+                                activeOpacity={0.8}
+                              >
+                                {controller.isLoadingLocation ? (
+                                  <ActivityIndicator size={48} color={styles.checkButtonIcon.color} />
+                                ) : (
+                                  <CheckInIcon size={48} color={buttonIconColor} />
+                                )}
+                                <Typography variant="body" style={buttonTextStyles as any}>
+                                  {controller.buttonText}
+                                </Typography>
+                              </AnimatedTouchableOpacity>
+                            </View>
+                          </Animated.View>
+                        </View>
+                      ) : (
+                        <View />
+                      )}
                       {/* Derecha */}
                       <TouchableOpacity style={styles.arrowButton} onPress={controller.handleNextDay}>
                         <MaterialIcons name="chevron-right" size={30} color="#7288A2" />
@@ -258,8 +261,8 @@ export const AttendanceCheckScreen: React.FC = React.memo(() => {
 
                     </View>
 
-
                     {/* Tarjeta del reloj con animación */}
+                
                     <Animated.View 
                       entering={ZoomIn.delay(250).duration(400)}
                       style={[
@@ -267,15 +270,23 @@ export const AttendanceCheckScreen: React.FC = React.memo(() => {
                         { zIndex: 1 }
                       ]}
                     >
-                      <Clock 
-                        style={styles.timeContainer}
-                        hourStyle={styles.hour}
-                        dateStyle={styles.date}
-                      />
+                      {controller.showButtonAssist ? (
+                        <Clock 
+                          style={styles.timeContainer}
+                          hourStyle={styles.hour}
+                          dateStyle={styles.date}
+                        />
+                      ) : (
+                        <Typography variant="body" style={[styles.dateShift, styles.date, styles.datePrevious]}>
+                          {controller.dateSelectFormat}
+                        </Typography>
+                      )}
+
                       <Typography variant="body" style={styles.dateShift}>
                         {controller.shiftDate}
                       </Typography>
                     </Animated.View>
+                  
                     {/* Indicadores con animaciones staggered */}
                     <Animated.View 
                       entering={FadeIn.delay(400).duration(300)}

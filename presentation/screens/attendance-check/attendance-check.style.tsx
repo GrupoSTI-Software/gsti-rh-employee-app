@@ -204,6 +204,9 @@ const createAttendanceCheckStyle = (theme: IAppTheme) =>
       width: '100%',
       marginTop: hp(0.5)
     },
+    datePrevious: {
+      marginTop: hp(7.42)
+    },
     loadingContainer: {
       flex: 1,
       justifyContent: 'center',
