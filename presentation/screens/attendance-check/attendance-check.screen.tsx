@@ -55,7 +55,7 @@ export const AttendanceCheckScreen: React.FC = React.memo(() => {
 
   const buttonStyles = useMemo(() => [
     styles.checkInButton,
-    controller.isButtonDisabled && styles.checkInButtonLocked
+    (controller.isButtonDisabled) && styles.checkInButtonLocked
   ], [styles.checkInButton, styles.checkInButtonLocked, controller.isButtonDisabled])
 
   const buttonTextStyles = useMemo(() => [
@@ -192,15 +192,7 @@ export const AttendanceCheckScreen: React.FC = React.memo(() => {
                   <>
                     {/* Contenido normal cuando hay conexión */}
                     <View style={styles.containerCalendar}>
-                      <Text style={styles.calendarDateText}>
-                        {controller.localDate.toLocaleDateString('es-ES', {
-                          day: '2-digit',
-                          month: 'short',
-                          year: 'numeric'
-                        })
-                        }
-                      </Text>
-                      {/* Botón central con calendario */}
+                      {/* Botón  con calendario */}
                       <TouchableOpacity style={styles.calendarButton} onPress={() => controller.setShowPicker(true)}>
                         <Svg
                           width={20}
@@ -226,37 +218,45 @@ export const AttendanceCheckScreen: React.FC = React.memo(() => {
                       </TouchableOpacity>
 
                       {/* Centro (tu diseño intacto) */}
-                      {controller.showButtonAssist ? (
-                        <View style={styles.centerWrapper}>
-                          <Animated.View 
-                            entering={ZoomIn.delay(200).duration(400)}
-                            style={[styles.checkInContainer, { zIndex: 10 }]}
-                          >
-                            <View style={[buttonWrapperStyles, { zIndex: 10 }]}>
-                              <AnimatedTouchableOpacity
-                                style={[buttonStyles, { zIndex: 10 }]}
-                                onPress={controller.handleCheckIn}
-                                disabled={controller.isButtonDisabled}
-                                activeOpacity={0.8}
-                              >
-                                {controller.isLoadingLocation ? (
-                                  <ActivityIndicator size={48} color={styles.checkButtonIcon.color} />
-                                ) : (
-                                  <CheckInIcon size={48} color={buttonIconColor} />
-                                )}
+                      <View style={styles.centerWrapper}>
+                        <Animated.View 
+                          entering={ZoomIn.delay(200).duration(400)}
+                          style={[styles.checkInContainer, { zIndex: 10 }]}
+                        >
+                          <View style={[buttonWrapperStyles, { zIndex: 10 }]}>
+                            <AnimatedTouchableOpacity
+                              style={[buttonStyles, { zIndex: 10 }, 
+                                !controller.showButtonAssist && { backgroundColor: 'orange' }]}
+                              onPress={controller.handleCheckIn}
+                              disabled={controller.isButtonDisabled || !controller.showButtonAssist}
+                              activeOpacity={0.8}
+                            >
+                              {controller.isLoadingLocation ? (
+                                <ActivityIndicator size={48} color={styles.checkButtonIcon.color} />
+                              ) : (
+                                <CheckInIcon size={48} color={buttonIconColor} />
+                              )}
+                              {controller.showButtonAssist ? (
                                 <Typography variant="body" style={buttonTextStyles as any}>
                                   {controller.buttonText}
                                 </Typography>
-                              </AnimatedTouchableOpacity>
-                            </View>
-                          </Animated.View>
-                        </View>
-                      ) : (
-                        <View />
-                      )}
+                              ) : (
+                                <Typography variant="body" style={buttonTextStyles as any}>
+                                  {t('screens.attendanceCheck.button.locked')}
+                                </Typography>
+                              )} 
+                            </AnimatedTouchableOpacity>
+                          </View>
+                        </Animated.View>
+                      </View>
+                    
                       {/* Derecha */}
-                      <TouchableOpacity style={styles.arrowButton} onPress={controller.handleNextDay}>
-                        <MaterialIcons name="chevron-right" size={30} color="#7288A2" />
+                      <TouchableOpacity
+                        style={[styles.arrowButton]}
+                        onPress={controller.handleNextDay}
+                        disabled={controller.showButtonAssist}
+                      >
+                        <MaterialIcons name="chevron-right" size={30} color={controller.showButtonAssist ? 'rgba(114,136,162,0.4)' : '#7288A2'} />
                       </TouchableOpacity>
 
                     </View>
@@ -390,6 +390,7 @@ export const AttendanceCheckScreen: React.FC = React.memo(() => {
               mode="date"
               display={Platform.OS === 'android' ? 'calendar' : 'spinner'}// 👈 forzar calendario
               onChange={controller.handleDateChange}
+              maximumDate={new Date()}
             />
           )}
         </AuthenticatedLayout>

@@ -289,10 +289,10 @@ const createAttendanceCheckStyle = (theme: IAppTheme) =>
     containerCalendar: {
       width: '100%',
       flexDirection: 'row',
-      justifyContent: 'space-between',
+      justifyContent: 'flex-end',
       alignItems: 'center',
       paddingHorizontal: 0,
-      paddingVertical: 15  
+      paddingVertical: 15   
     },
     calendarButton: {
       alignSelf: 'flex-end',

@@ -36,6 +36,10 @@ interface IAttendanceData {
   checkOutStatus: string | null
   checkEatInStatus: string | null
   checkEatOutStatus: string | null
+  isRestDay: boolean
+  isWorkDisabilityDate: boolean
+  isVacationDate: boolean
+  isHoliday: boolean
 }
 
 /**
@@ -65,7 +69,11 @@ const AttendanceCheckScreenController = () => {
     checkInStatus: null,
     checkOutStatus: null,
     checkEatInStatus: null,
-    checkEatOutStatus: null
+    checkEatOutStatus: null,
+    isRestDay: false,
+    isWorkDisabilityDate: false,
+    isVacationDate: false,
+    isHoliday: false
   })
   const [shiftEndTime, setShiftEndTime] = useState<string | null>(null)
   const [hasConnectionError, setHasConnectionError] = useState<boolean>(false)
@@ -131,6 +139,21 @@ const AttendanceCheckScreenController = () => {
   // Definir setShiftDateData antes de usarlo en useEffect
   const setShiftDateData = useCallback(async (): Promise<string> => {
     try {
+      setAttendanceData({
+        checkInTime: null,
+        checkOutTime: null,
+        checkEatInTime: null,
+        checkEatOutTime: null,
+        checkInStatus: null,
+        checkOutStatus: null,
+        checkEatInStatus: null,
+        checkEatOutStatus: null,
+        isRestDay: false,
+        isWorkDisabilityDate: false,
+        isVacationDate: false,
+        isHoliday: false
+      })
+      setShiftEndTime(null)
       const date = dateSelect.toISOString().split('T')[0]
       const todayDate = new Date().toISOString().split('T')[0]
       setShowButtonAssist(date === todayDate)
@@ -166,9 +189,12 @@ const AttendanceCheckScreenController = () => {
         checkInStatus: attendanceProps.checkInStatus ?? '',
         checkOutStatus: attendanceProps.checkOutStatus ?? '',
         checkEatInStatus: attendanceProps.checkEatInStatus ?? '',
-        checkEatOutStatus: attendanceProps.checkEatOutStatus ?? ''
+        checkEatOutStatus: attendanceProps.checkEatOutStatus ?? '',
+        isRestDay: attendanceProps.isRestDay ?? false,
+        isWorkDisabilityDate: attendanceProps.isWorkDisabilityDate ?? false,
+        isVacationDate: attendanceProps.isVacationDate ?? false,
+        isHoliday: attendanceProps.isHoliday ?? false
       }
-
       setAttendanceData(newAttendanceData)
 
       return shiftInfo
@@ -214,7 +240,11 @@ const AttendanceCheckScreenController = () => {
         checkInStatus: null,
         checkOutStatus: null,
         checkEatInStatus: null,
-        checkEatOutStatus: null
+        checkEatOutStatus: null,
+        isRestDay: false,
+        isWorkDisabilityDate: false,
+        isVacationDate: false,
+        isHoliday: false
       })
       setShiftEndTime(null)
       

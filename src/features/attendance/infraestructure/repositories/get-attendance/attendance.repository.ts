@@ -53,17 +53,39 @@ export class AttendanceRepository implements Pick<AttendancePorts, 'getAttendanc
     }
     const responseData = response.data.data.employeeCalendar[0].assist
     const shiftInfo: string = responseData?.dateShift?.shiftName || '---'
+    const hasException =
+      responseData.isRestDay ||
+      responseData.isWorkDisabilityDate ||
+      responseData.isVacationDate ||
+      responseData.isHoliday
+
     const attendanceEntity = new AttendanceEntity({
       checkInTime: formatTime(responseData?.checkIn?.assistPunchTimeUtc as string | null),
       checkOutTime: formatTime(responseData?.checkOut?.assistPunchTimeUtc as string | null),
       checkEatInTime: formatTime(responseData?.checkEatIn?.assistPunchTimeUtc as string | null),
       checkEatOutTime: formatTime(responseData?.checkEatOut?.assistPunchTimeUtc as string | null),
-      checkInStatus: (responseData?.checkInStatus as string) || null,
-      checkOutStatus: (responseData?.checkOutStatus as string) || null,
+
+      checkInStatus:
+        responseData?.checkInStatus === 'fault' && hasException
+          ? ''
+          : (responseData?.checkInStatus as string) || null,
+
+      checkOutStatus:
+        responseData?.checkOutStatus === 'fault' && hasException
+          ? ''
+          : (responseData?.checkOutStatus as string) || null,
+
       checkEatInStatus: (responseData?.checkEatInStatus as string) || null,
       checkEatOutStatus: (responseData?.checkEatOutStatus as string) || null,
-      shiftInfo: shiftInfo
+
+      shiftInfo: shiftInfo,
+
+      isRestDay: responseData.isRestDay,
+      isWorkDisabilityDate: responseData.isWorkDisabilityDate,
+      isVacationDate: responseData.isVacationDate,
+      isHoliday: responseData.isHoliday
     })
+
     
     return attendanceEntity
   }
