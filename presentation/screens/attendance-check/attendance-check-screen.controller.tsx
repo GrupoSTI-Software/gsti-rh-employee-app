@@ -11,6 +11,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
 import { RootStackParamList } from '../../../navigation/types/types'
+import { IAssistance } from '../../../src/features/attendance/domain/types/assistance.interface'
 import { GetAttendanceController } from '../../../src/features/attendance/infraestructure/controllers/get-attendance/get-attendance.controller'
 import { StoreAssistanceController } from '../../../src/features/attendance/infraestructure/controllers/store-assistance/store-assistance.controller'
 import { AuthStateController } from '../../../src/features/authentication/infrastructure/controllers/auth-state.controller'
@@ -40,6 +41,7 @@ interface IAttendanceData {
   isWorkDisabilityDate: boolean
   isVacationDate: boolean
   isHoliday: boolean
+  assitFlatList: Array<IAssistance>
 }
 
 /**
@@ -73,7 +75,8 @@ const AttendanceCheckScreenController = () => {
     isRestDay: false,
     isWorkDisabilityDate: false,
     isVacationDate: false,
-    isHoliday: false
+    isHoliday: false,
+    assitFlatList: [] 
   })
   const [shiftEndTime, setShiftEndTime] = useState<string | null>(null)
   const [hasConnectionError, setHasConnectionError] = useState<boolean>(false)
@@ -103,6 +106,7 @@ const AttendanceCheckScreenController = () => {
   )
   const [showButtonAssist, setShowButtonAssist] = useState(false)
   const [dateSelectFormat, setDateSelectFormat] = useState('')
+  const [showHoursList, setShowHoursList] = useState(false)
   useEffect(() => {
     const checkPermission = async () => {
       if (!permission) return
@@ -151,12 +155,15 @@ const AttendanceCheckScreenController = () => {
         isRestDay: false,
         isWorkDisabilityDate: false,
         isVacationDate: false,
-        isHoliday: false
+        isHoliday: false,
+        assitFlatList: []
       })
       setShiftEndTime(null)
       const date = dateSelect.toISOString().split('T')[0]
       const todayDate = new Date().toISOString().split('T')[0]
       setShowButtonAssist(date === todayDate)
+      const dateFormat = DateTime.fromJSDate(dateSelect).setLocale(i18n.language).toFormat('DDDD')
+      setDateSelectFormat(dateFormat)
 
       const attendanceController = new GetAttendanceController()
       const attendance =  await attendanceController.getAttendance(date, date)
@@ -193,7 +200,8 @@ const AttendanceCheckScreenController = () => {
         isRestDay: attendanceProps.isRestDay ?? false,
         isWorkDisabilityDate: attendanceProps.isWorkDisabilityDate ?? false,
         isVacationDate: attendanceProps.isVacationDate ?? false,
-        isHoliday: attendanceProps.isHoliday ?? false
+        isHoliday: attendanceProps.isHoliday ?? false,
+        assitFlatList: attendanceProps.assitFlatList ?? []
       }
       setAttendanceData(newAttendanceData)
 
@@ -244,7 +252,8 @@ const AttendanceCheckScreenController = () => {
         isRestDay: false,
         isWorkDisabilityDate: false,
         isVacationDate: false,
-        isHoliday: false
+        isHoliday: false,
+        assitFlatList: []
       })
       setShiftEndTime(null)
       
@@ -588,18 +597,14 @@ const AttendanceCheckScreenController = () => {
     setShowPicker(false)
 
     if (!selectedDate) return
-    const dateFormat = DateTime.fromJSDate(selectedDate).setLocale(i18n.language).toFormat('DDDD')
-    setDateSelectFormat(dateFormat)
     setLocalDate(selectedDate)
     setDateSelect(selectedDate)
     await setShiftDateData()
   }, [i18n,dateSelect, dateSelectFormat, setShiftDateData, setDateSelect,setDateSelectFormat, setLocalDate])
 
-  const handlePreviousDay  = useCallback(async (): Promise<void> => {
+  const handlePreviousDay = useCallback(async (): Promise<void> => {
     const newDate = new Date(dateSelect)
     newDate.setDate(newDate.getDate() - 1)
-    const dateFormat = DateTime.fromJSDate(newDate).setLocale(i18n.language).toFormat('DDDD')
-    setDateSelectFormat(dateFormat)
     setDateSelect(newDate)
     setLocalDate(newDate)
     await setShiftDateData()
@@ -611,13 +616,15 @@ const AttendanceCheckScreenController = () => {
     newDate.setDate(newDate.getDate() + 1)
 
     if (newDate <= today) {
-      const dateFormat = DateTime.fromJSDate(newDate).setLocale(i18n.language).toFormat('DDDD')
-      setDateSelectFormat(dateFormat) 
       setDateSelect(newDate)
       setLocalDate(newDate)
       await setShiftDateData()
     }
   }, [i18n,dateSelect, dateSelectFormat, setShiftDateData, setDateSelect, setDateSelectFormat, setLocalDate])
+
+  const getHoursList = useCallback(async (): Promise<void> => {
+    setShowHoursList(true)
+  }, [i18n,dateSelect, setShowHoursList, attendanceData])
   // Memorizar el objeto de retorno completo para evitar recreaciones innecesarias
   const controllerValue = useMemo(() => ({
     themeType,
@@ -678,7 +685,10 @@ const AttendanceCheckScreenController = () => {
     handlePreviousDay,
     handleNextDay,
     showButtonAssist,
-    setShowButtonAssist
+    setShowButtonAssist,
+    showHoursList,
+    setShowHoursList,
+    getHoursList
   }), [
     themeType,
     shiftDate,
@@ -739,7 +749,10 @@ const AttendanceCheckScreenController = () => {
     handlePreviousDay,
     handleNextDay,
     showButtonAssist,
-    setShowButtonAssist
+    setShowButtonAssist,
+    showHoursList,
+    setShowHoursList,
+    getHoursList
   ])
 
   return controllerValue

@@ -21,4 +21,10 @@ export interface IAssistance {
    */
   readonly assistLongitude: number
 
+  /**
+   * Hora de asistencia
+   * @type {string}
+   */
+  readonly assistPunchTime: string
+
 }

@@ -1,3 +1,5 @@
+import { IAssistance } from './assistance.interface'
+
 /**
  * Interfaz que define asistencias
  * @interface IAttendance
@@ -59,26 +61,31 @@ export interface IAttendance {
   
   /**
    * Es día de descanso
-   * @type {string}
+   * @type {boolean}
    */
   readonly isRestDay: boolean
 
   /**
    * Es día con incapacidad
-   * @type {string}
+   * @type {boolean}
    */
   readonly isWorkDisabilityDate: boolean
 
   /**
    * Es día de vacaciones
-   * @type {string}
+   * @type {boolean}
    */
   readonly isVacationDate: boolean
 
   /**
    * Es día de vacaciones
-   * @type {string}
+   * @type {boolean}
    */
   readonly isHoliday: boolean
 
+  /**
+   * Lista de registros del día
+   * @type {Array<IAssistance>}
+   */
+  readonly assitFlatList: Array<IAssistance>
 }

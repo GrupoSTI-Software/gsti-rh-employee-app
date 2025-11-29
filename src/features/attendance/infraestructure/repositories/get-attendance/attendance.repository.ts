@@ -83,7 +83,8 @@ export class AttendanceRepository implements Pick<AttendancePorts, 'getAttendanc
       isRestDay: responseData.isRestDay,
       isWorkDisabilityDate: responseData.isWorkDisabilityDate,
       isVacationDate: responseData.isVacationDate,
-      isHoliday: responseData.isHoliday
+      isHoliday: responseData.isHoliday,
+      assitFlatList: responseData.assitFlatList
     })
 
     

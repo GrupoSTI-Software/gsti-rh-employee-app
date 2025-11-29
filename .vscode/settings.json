@@ -143,7 +143,8 @@
     "GSTIRHAPPEMP1764006310 UI Control de tiempo en checador",
     "GSTIRHAPPEMP1764006581 Mostrar checks del dia seleccionado",
     "GSTIRHAPPEMP1764006581 Mostrar checks del dia seleccionado",
-    "GSTIRHAPPEMP1764006581 Mostrar checks del dia seleccionado"
+    "GSTIRHAPPEMP1764006581 Mostrar checks del dia seleccionado",
+    "GSTIRHAPPEMP1764006690 Mostrar todos los checks del día"
   ],
   "search.exclude": {
     "**/node_modules": true,
