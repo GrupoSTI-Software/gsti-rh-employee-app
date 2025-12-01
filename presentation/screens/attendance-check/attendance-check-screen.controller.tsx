@@ -2,6 +2,7 @@ import BottomSheet, { BottomSheetBackdrop } from '@gorhom/bottom-sheet'
 import { useNavigation } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { AxiosError } from 'axios'
+import { CameraView, useCameraPermissions } from 'expo-camera'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
@@ -13,6 +14,7 @@ import { ClearSessionController } from '../../../src/features/authentication/inf
 import { BiometricsService } from '../../../src/features/authentication/infrastructure/services/biometrics.service'
 import { ILocationCoordinates, LocationService } from '../../../src/features/authentication/infrastructure/services/location.service'
 import { PasswordPromptService } from '../../../src/features/authentication/infrastructure/services/password-prompt.service'
+import { HttpService } from '../../../src/shared/infrastructure/services/http-service'
 import { useAppTheme } from '../../theme/theme-context'
 import { isCheckOutTimeReached } from './utils/is-checkout-time-reached.util'
 import { openLocationSettings } from './utils/open-location-settings'
@@ -42,6 +44,7 @@ const AttendanceCheckScreenController = () => {
   // const [checkInTime, setCheckInTime] = useState<string | null>(null)
   const [currentLocation, setCurrentLocation] = useState<ILocationCoordinates | null>(null)
   const [isLoadingLocation, setIsLoadingLocation] = useState(false)
+  const [showFaceScreen, setShowFaceScreen] = useState(false)
   const { themeType } = useAppTheme()
   const { t } = useTranslation()
   const [showPasswordDrawer, setShowPasswordDrawer] = useState(false)
@@ -73,6 +76,47 @@ const AttendanceCheckScreenController = () => {
   
   // Memorizar snapPoints para evitar recreaciones
   const snapPoints = useMemo(() => ['65%'], [])
+  // Camera
+  const [permission, requestPermission] = useCameraPermissions()
+  const [permissionDeniedMessage, setPermissionDeniedMessage] = useState(false)
+  const [permissionDenied, setPermissionDenied] = useState(false)
+  const cameraRef = useRef<CameraView | null>(null)
+  const [status, setStatus] = useState(`📷 ${t('screens.attendanceCheck.waitingPermission')}`)
+  const [isLoading, setIsLoading] = useState(false)
+  const [attendanceSuccess, setIsAttendanceSucess] = useState(false)
+
+  useEffect(() => {
+    const checkPermission = async () => {
+      if (!permission) return
+      // Primera vez no solicitado
+      if (permission.status === 'undetermined') {
+        await requestPermission()
+        return
+      }
+
+      // Usuario negó, pero se puede preguntar otra vez -> preguntar de nuevo
+      if (permission.status === 'denied' && permission.canAskAgain) {
+        await requestPermission()
+        return
+      }
+
+      // Usuario negó y NO se puede volver a pedir
+      if (permission.status === 'denied' && !permission.canAskAgain) {
+        setPermissionDenied(true)
+        setPermissionDeniedMessage(true)
+        return
+      }
+
+      // Permisos otorgados
+      if (permission.status === 'granted') {
+        setPermissionDenied(false)
+        setPermissionDeniedMessage(false)
+      }
+    }
+    void checkPermission()
+    
+  }, [permission])
+
 
   // Definir setShiftDateData antes de usarlo en useEffect
   const setShiftDateData = useCallback(async (): Promise<string> => {
@@ -245,68 +289,13 @@ const AttendanceCheckScreenController = () => {
 
   /**
    * Ejecuta el proceso de check-in después de validar la ubicación
-   * @param {ILocationCoordinates} location - Coordenadas validadas de ubicación
    * @returns {Promise<void>}
    */
-  const performCheckIn = useCallback(async (location: ILocationCoordinates) => {
+  const performCheckIn = useCallback(async () => {
     try {
-      // Verificar si la biometría está habilitada y disponible
-      const authState = await authStateController.getAuthState()
-      const biometricsEnabled = authState?.props.biometricsPreferences?.isEnabled ?? false
-      
-      const isBiometricAvailable = await biometricService.isBiometricAvailable()
-      
-      let isAuthenticated = false
-      
-      if (biometricsEnabled && isBiometricAvailable) {
-        // Intentar autenticación biométrica primero
-        try {
-          isAuthenticated = await biometricService.authenticate()
-        } catch (biometricError) {
-          console.error('Error en autenticación biométrica:', biometricError)
-          // Si la biometría falla, continuar con contraseña como fallback
-        }
-      }
-      
-      // Si la biometría no está disponible, no está habilitada, o falló, solicitar contraseña
-      if (!isAuthenticated) {
-        // En vez de pedir contraseña aquí, muestra el drawer y espera
-        setShowPasswordDrawer(true)
-        // Devuelve una promesa que se resuelve cuando la pantalla valide la contraseña
-        await new Promise<void>((resolve) => {
-          setOnPasswordSuccess(() => () => {
-            setShowPasswordDrawer(false)
-            setPasswordError(null)
-            resolve()
-          })
-        })
-        isAuthenticated = true
-      }
-      
-      // Si llegamos aquí, la autenticación fue exitosa
-      if (isAuthenticated) {
-        setIsButtonLocked(true)
-        
-        // Registrar asistencia en el servidor
-        const registrationSuccess = await registerAttendance(location.latitude, location.longitude)
-        
-        if (registrationSuccess) {
-          // Si el registro fue exitoso, actualizar los datos locales
-          // setCheckInTime(DateTime.now().setLocale('es').toFormat('HH:mm:ss'))
-          
-          // Recargar los datos de asistencia desde el servidor
-          try {
-            await setShiftDateData()
-          } catch (reloadError) {
-            console.error('Error recargando datos de asistencia:', reloadError)
-            // No mostramos error al usuario, ya que el registro fue exitoso
-          }
-        }
-
-        setTimeout(() => {
-          setIsButtonLocked(false)
-        }, (2 * 1000))
-      }
+      setStatus(`📷 ${t('screens.attendanceCheck.centerFaceAndMoveCloser')}`)
+      setIsLoading(false)
+      setShowFaceScreen(true)
     } catch (error) {
       console.error('Error en autenticación:', error)
       Alert.alert(
@@ -324,10 +313,15 @@ const AttendanceCheckScreenController = () => {
    */
   const handleCheckIn = useCallback(async () => {    
     if (isButtonLocked || isLoadingLocation) return
-
+    if (permissionDenied) {
+      setPermissionDeniedMessage(true)
+      return
+    }
+    setIsLoading(true)
     setIsLoadingLocation(true)
 
     try {
+     
       // Primero validar la ubicación antes de proceder con la autenticación
       const locationResult = await validateLocationInBackground()
       
@@ -335,9 +329,10 @@ const AttendanceCheckScreenController = () => {
       setCurrentLocation(locationResult)
       
       // Ejecutar el check-in con la ubicación validada
-      await performCheckIn(locationResult)
-
+      await performCheckIn()
+      setIsLoading(false)
     } catch (error) {
+      setIsLoading(false)
       // Verificar si es error de ubicación
       const errorMessage = error instanceof Error ? error.message : ''
       // Verificar si el error es de precisión o autorización
@@ -369,7 +364,7 @@ const AttendanceCheckScreenController = () => {
     } finally {
       setIsLoadingLocation(false)
     }
-  }, [isButtonLocked, isLoadingLocation, t, validateLocationInBackground, performCheckIn])
+  }, [isButtonLocked, isLoadingLocation, t, validateLocationInBackground, performCheckIn, permissionDenied,setPermissionDeniedMessage])
 
   /**
    * Formatea las coordenadas para mostrarlas en pantalla
@@ -420,7 +415,6 @@ const AttendanceCheckScreenController = () => {
   // Filtrar datos de salida basándose en la hora del turno
   const filteredAttendanceData = useMemo(() => {
     const shouldShowCheckOut = !shiftEndTime || isCheckOutTimeReached(shiftEndTime)
-    
 
     return {
       ...attendanceData,
@@ -482,6 +476,65 @@ const AttendanceCheckScreenController = () => {
     }
   }, [setShiftDateData, isRetrying])
 
+  // Camera
+  const captureAndSend = async () => {
+    if (!currentLocation) {
+      setStatus(`❌ ${t('screens.attendanceCheck.locationAccessFailed')}`)
+      return
+    }
+    if (!cameraRef.current) return
+    if (cameraRef.current) {
+     
+      try {
+        const photo = await cameraRef.current.takePictureAsync({
+          base64: true,
+          quality: 0.4
+        })
+        setIsLoading(true)
+        setStatus(`⏳ ${t('screens.attendanceCheck.verifying')}`)
+        const response = await HttpService.post('/verify-face', {
+          imageBase64: photo.base64
+        })
+             
+        const data = typeof response === 'string' ? JSON.parse(response).data : response.data
+        if (data.match) {
+          setIsButtonLocked(true)
+          // Registrar asistencia en el servidor
+          const registrationSuccess = await registerAttendance(currentLocation.latitude, currentLocation.longitude)
+        
+          if (registrationSuccess) {
+            // Si el registro fue exitoso, actualizar los datos locales
+            
+            // Recargar los datos de asistencia desde el servidor
+            try {
+              await setShiftDateData()
+              setShowFaceScreen(false)
+              setIsAttendanceSucess(true)
+             
+            } catch (reloadError) {
+              console.error('Error recargando datos de asistencia:', reloadError)
+              // No mostramos error al usuario, ya que el registro fue exitoso
+            }
+          }
+          setTimeout(() => {
+            setIsButtonLocked(false)
+          }, (2 * 1000))
+        } else {
+          setStatus(`❌ ${t('screens.attendanceCheck.identityNotVerified')}`)
+        }
+      } catch (err) {
+        console.error(err)
+        setStatus(`⚠️ ${t('screens.attendanceCheck.imageSendError')} ${err}`)
+      }
+    }
+    setIsLoading(false)
+  }
+  const goBack = () => {
+    setStatus(`${t('common.loading')}`)
+    setIsLoading(false)
+    setShowFaceScreen(false)
+    setPermissionDeniedMessage(false)
+  }
   // Memorizar el objeto de retorno completo para evitar recreaciones innecesarias
   const controllerValue = useMemo(() => ({
     themeType,
@@ -489,6 +542,18 @@ const AttendanceCheckScreenController = () => {
     getShiftDate,
     isButtonLocked,
     isLoadingLocation,
+    isLoading,
+    showFaceScreen,
+    permission,
+    requestPermission,
+    permissionDeniedMessage,
+    permissionDenied,
+    cameraRef,
+    status,
+    attendanceSuccess,
+    captureAndSend,
+    setIsAttendanceSucess,
+    goBack,
     handleCheckIn,
     // checkInTime,
     currentLocation,
@@ -525,6 +590,18 @@ const AttendanceCheckScreenController = () => {
     shiftDate,
     isButtonLocked,
     isLoadingLocation,
+    isLoading,
+    showFaceScreen,
+    permission,
+    permissionDeniedMessage,
+    permissionDenied,
+    requestPermission,
+    cameraRef,
+    status,
+    attendanceSuccess,
+    captureAndSend,
+    setIsAttendanceSucess,
+    goBack,
     handleCheckIn,
     // checkInTime,
     currentLocation,

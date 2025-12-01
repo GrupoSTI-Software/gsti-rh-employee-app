@@ -106,7 +106,17 @@
         "message": "Your session has expired. Please log in again."
       },
       "registrationError": "Error registering attendance",
-      "deviceSettingsError": "Could not open device settings"
+      "deviceSettingsError": "Could not open device settings",
+      "verifying": "Verifying...",
+      "centerFaceAndMoveCloser": "Center your face and move closer to the camera",
+      "locationAccessFailed": "Could not access location",
+      "waitingPermission": "Waiting for permission...",
+      "cameraReady": "Camera ready",
+      "identityNotVerified": "Your identity could not be verified. Please try again.",
+      "imageSendError": "Error sending image",
+      "requestingPermissions": "Requesting permissions...",
+      "permissions": "Permissions",
+      "permissionDeniedPermanent": "You did not grant permissions and the system does not allow requesting them again. Please enable them from Settings."
     },
     "profile": {
       "title": "My Profile",
