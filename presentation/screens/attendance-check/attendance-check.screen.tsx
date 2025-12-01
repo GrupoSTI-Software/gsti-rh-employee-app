@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons'
+import { Ionicons, MaterialIcons } from '@expo/vector-icons'
 // import BottomSheet from '@gorhom/bottom-sheet'
 import { CameraView } from 'expo-camera'
 import { StatusBar } from 'expo-status-bar'
@@ -28,6 +28,7 @@ import AuthenticatedLayout from '../../layouts/authenticated-layout/authenticate
 import { AttendanceCheckScreenController } from './attendance-check-screen.controller'
 import useAttendanceCheckStyle from './attendance-check.style'
 // import { PasswordBottomSheet } from './password-bottom-sheet.component'
+import Svg, { Circle, Path } from 'react-native-svg'
 import { getIconColor } from './utils/get-icon-color'
 import { getIndicatorStyles } from './utils/get-indicator-styles'
 import { getLabelStyles } from './utils/get-label-styles'
@@ -188,45 +189,64 @@ export const AttendanceCheckScreen: React.FC = React.memo(() => {
                 ) : (
                   <>
                     {/* Contenido normal cuando hay conexión */}
-
-                    {/* Botón principal con animación */}
-                    <Animated.View 
-                      entering={ZoomIn.delay(200).duration(400)}
-                      style={[
-                        styles.checkInContainer,
-                        { zIndex: 10 }
-                      ]}
-                    >
-                      <View style={[
-                        buttonWrapperStyles,
-                        { zIndex: 10 }
-                      ]}>
-                        <AnimatedTouchableOpacity
-                          style={[
-                            buttonStyles,
-                            { zIndex: 10 }
-                          ]}
-                          onPress={controller.handleCheckIn}
-                          disabled={controller.isButtonDisabled}
-                          activeOpacity={0.8}
+                    <View style={styles.containerCalendar}>
+                      {/* Botón central con calendario */}
+                      <TouchableOpacity style={styles.calendarButton}>
+                        <Svg
+                          width={20}
+                          height={20}
+                          viewBox="0 0 24 24"
+                          fill="none"
                         >
-                          {controller.isLoadingLocation ? (
-                            <ActivityIndicator 
-                              size={48} 
-                              color={styles.checkButtonIcon.color} 
-                            />
-                          ) : (
-                            <CheckInIcon
-                              size={48}
-                              color={buttonIconColor}
-                            />
-                          )}
-                          <Typography variant="body" style={buttonTextStyles as any}>
-                            {controller.buttonText}
-                          </Typography>
-                        </AnimatedTouchableOpacity>
+                          <Path
+                            d="M19,2H18V1a1,1,0,0,0-2,0V2H8V1A1,1,0,0,0,6,1V2H5A5.006,5.006,0,0,0,0,7V19a5.006,5.006,0,0,0,5,5H19a5.006,5.006,0,0,0,5-5V7A5.006,5.006,0,0,0,19,2ZM2,7A3,3,0,0,1,5,4H19a3,3,0,0,1,3,3V8H2ZM19,22H5a3,3,0,0,1-3-3V10H22v9A3,3,0,0,1,19,22Z"
+                            fill="#88a4bf"
+                          />
+                          <Circle cx="12" cy="15" r="1.5" fill="#88a4bf" />
+                          <Circle cx="7" cy="15" r="1.5" fill="#88a4bf" />
+                          <Circle cx="17" cy="15" r="1.5" fill="#88a4bf" />
+                        </Svg>
+                      </TouchableOpacity>
+                    </View>
+                    <View style={styles.containerButtons}>
+                      {/* Izquierda */}
+                      <TouchableOpacity style={styles.arrowButton}>
+                        <MaterialIcons name="chevron-left" size={30} color="#7288A2" />
+                      </TouchableOpacity>
+
+                      {/* Centro (tu diseño intacto) */}
+                      <View style={styles.centerWrapper}>
+                        <Animated.View 
+                          entering={ZoomIn.delay(200).duration(400)}
+                          style={[styles.checkInContainer, { zIndex: 10 }]}
+                        >
+                          <View style={[buttonWrapperStyles, { zIndex: 10 }]}>
+                            <AnimatedTouchableOpacity
+                              style={[buttonStyles, { zIndex: 10 }]}
+                              onPress={controller.handleCheckIn}
+                              disabled={controller.isButtonDisabled}
+                              activeOpacity={0.8}
+                            >
+                              {controller.isLoadingLocation ? (
+                                <ActivityIndicator size={48} color={styles.checkButtonIcon.color} />
+                              ) : (
+                                <CheckInIcon size={48} color={buttonIconColor} />
+                              )}
+                              <Typography variant="body" style={buttonTextStyles as any}>
+                                {controller.buttonText}
+                              </Typography>
+                            </AnimatedTouchableOpacity>
+                          </View>
+                        </Animated.View>
                       </View>
-                    </Animated.View>
+
+                      {/* Derecha */}
+                      <TouchableOpacity style={styles.arrowButton}>
+                        <MaterialIcons name="chevron-right" size={30} color="#7288A2" />
+                      </TouchableOpacity>
+
+                    </View>
+
 
                     {/* Tarjeta del reloj con animación */}
                     <Animated.View 
@@ -245,7 +265,6 @@ export const AttendanceCheckScreen: React.FC = React.memo(() => {
                         {controller.shiftDate}
                       </Typography>
                     </Animated.View>
-
                     {/* Indicadores con animaciones staggered */}
                     <Animated.View 
                       entering={FadeIn.delay(400).duration(300)}

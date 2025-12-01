@@ -283,7 +283,58 @@ const createAttendanceCheckStyle = (theme: IAppTheme) =>
       marginTop: 20,
       borderRadius: 8
     },
-    buttonText: { color: '#fff' }
+    containerCalendar: {
+      width: '100%'
+    },
+    buttonText: { color: '#fff' },
+    iconButton: {
+      padding: 10
+    },
+    calendarButton: {
+      alignSelf: 'flex-end',
+      width: 70,
+      height: 70,
+      borderRadius: 16,
+      backgroundColor: '#FFFFFF',
+      borderWidth: 1,
+      borderColor: 'rgba(150, 180, 220, 0.3)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      shadowColor: '#9BB0CC',
+      shadowOpacity: 0.15,
+      shadowRadius: 10,
+      shadowOffset: { width: 0, height: 4 },
+      elevation: 4
+    },
+    containerButtons: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 0,
+      width: '100%',
+      marginTop: -30
+    },
+    arrowButton: {
+      width: 60,
+      height: 60,
+      borderRadius: 12,
+      backgroundColor: '#FFFFFF',
+      borderWidth: 1,
+      borderColor: 'rgba(150, 180, 220, 0.3)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      shadowColor: '#9BB0CC',
+      shadowOpacity: 0.15,
+      shadowRadius: 8,
+      shadowOffset: { width: 0, height: 4 },
+      elevation: 4,
+      marginTop: 70
+    },
+    centerWrapper: {
+      flex: 1,
+      alignItems: 'center'
+    }
+
   })
 
 const useAttendanceCheckStyle = () => {
