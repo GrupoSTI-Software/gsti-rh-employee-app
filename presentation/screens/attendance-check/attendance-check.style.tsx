@@ -204,6 +204,9 @@ const createAttendanceCheckStyle = (theme: IAppTheme) =>
       width: '100%',
       marginTop: hp(0.5)
     },
+    datePrevious: {
+      marginTop: hp(7.42)
+    },
     loadingContainer: {
       flex: 1,
       justifyContent: 'center',
@@ -284,11 +287,12 @@ const createAttendanceCheckStyle = (theme: IAppTheme) =>
       borderRadius: 8
     },
     containerCalendar: {
-      width: '100%'
-    },
-    buttonText: { color: '#fff' },
-    iconButton: {
-      padding: 10
+      width: '100%',
+      flexDirection: 'row',
+      justifyContent: 'flex-end',
+      alignItems: 'center',
+      paddingHorizontal: 0,
+      paddingVertical: 15   
     },
     calendarButton: {
       alignSelf: 'flex-end',
@@ -305,6 +309,15 @@ const createAttendanceCheckStyle = (theme: IAppTheme) =>
       shadowRadius: 10,
       shadowOffset: { width: 0, height: 4 },
       elevation: 4
+    },
+    calendarDateText: {
+      fontSize: 18,
+      color: '#000000ff"',
+      fontWeight: '600'
+    },
+    buttonText: { color: '#fff' },
+    iconButton: {
+      padding: 10
     },
     containerButtons: {
       flexDirection: 'row',

@@ -1,8 +1,12 @@
 import BottomSheet, { BottomSheetBackdrop } from '@gorhom/bottom-sheet'
+import {
+  DateTimePickerEvent
+} from '@react-native-community/datetimepicker'
 import { useNavigation } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { AxiosError } from 'axios'
 import { CameraView, useCameraPermissions } from 'expo-camera'
+import { DateTime } from 'luxon'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
@@ -32,6 +36,10 @@ interface IAttendanceData {
   checkOutStatus: string | null
   checkEatInStatus: string | null
   checkEatOutStatus: string | null
+  isRestDay: boolean
+  isWorkDisabilityDate: boolean
+  isVacationDate: boolean
+  isHoliday: boolean
 }
 
 /**
@@ -46,7 +54,7 @@ const AttendanceCheckScreenController = () => {
   const [isLoadingLocation, setIsLoadingLocation] = useState(false)
   const [showFaceScreen, setShowFaceScreen] = useState(false)
   const { themeType } = useAppTheme()
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [showPasswordDrawer, setShowPasswordDrawer] = useState(false)
   const [onPasswordSuccess, setOnPasswordSuccess] = useState<(() => void) | null>(null)
   const [passwordError, setPasswordError] = useState<string | null>(null)
@@ -61,7 +69,11 @@ const AttendanceCheckScreenController = () => {
     checkInStatus: null,
     checkOutStatus: null,
     checkEatInStatus: null,
-    checkEatOutStatus: null
+    checkEatOutStatus: null,
+    isRestDay: false,
+    isWorkDisabilityDate: false,
+    isVacationDate: false,
+    isHoliday: false
   })
   const [shiftEndTime, setShiftEndTime] = useState<string | null>(null)
   const [hasConnectionError, setHasConnectionError] = useState<boolean>(false)
@@ -84,7 +96,13 @@ const AttendanceCheckScreenController = () => {
   const [status, setStatus] = useState(`📷 ${t('screens.attendanceCheck.waitingPermission')}`)
   const [isLoading, setIsLoading] = useState(false)
   const [attendanceSuccess, setIsAttendanceSucess] = useState(false)
-
+  const [dateSelect, setDateSelect] = useState(new Date())
+  const [showPicker, setShowPicker] = useState(false)
+  const [localDate, setLocalDate] = useState(
+    dateSelect || new Date()
+  )
+  const [showButtonAssist, setShowButtonAssist] = useState(false)
+  const [dateSelectFormat, setDateSelectFormat] = useState('')
   useEffect(() => {
     const checkPermission = async () => {
       if (!permission) return
@@ -120,10 +138,28 @@ const AttendanceCheckScreenController = () => {
 
   // Definir setShiftDateData antes de usarlo en useEffect
   const setShiftDateData = useCallback(async (): Promise<string> => {
-    
     try {
+      setAttendanceData({
+        checkInTime: null,
+        checkOutTime: null,
+        checkEatInTime: null,
+        checkEatOutTime: null,
+        checkInStatus: null,
+        checkOutStatus: null,
+        checkEatInStatus: null,
+        checkEatOutStatus: null,
+        isRestDay: false,
+        isWorkDisabilityDate: false,
+        isVacationDate: false,
+        isHoliday: false
+      })
+      setShiftEndTime(null)
+      const date = dateSelect.toISOString().split('T')[0]
+      const todayDate = new Date().toISOString().split('T')[0]
+      setShowButtonAssist(date === todayDate)
+
       const attendanceController = new GetAttendanceController()
-      const attendance =  await attendanceController.getAttendance()
+      const attendance =  await attendanceController.getAttendance(date, date)
       // Éxito: limpiar error de conexión
       setHasConnectionError(false)
       const shiftInfo = attendance?.props.shiftInfo ? attendance?.props.shiftInfo : ''
@@ -153,9 +189,12 @@ const AttendanceCheckScreenController = () => {
         checkInStatus: attendanceProps.checkInStatus ?? '',
         checkOutStatus: attendanceProps.checkOutStatus ?? '',
         checkEatInStatus: attendanceProps.checkEatInStatus ?? '',
-        checkEatOutStatus: attendanceProps.checkEatOutStatus ?? ''
+        checkEatOutStatus: attendanceProps.checkEatOutStatus ?? '',
+        isRestDay: attendanceProps.isRestDay ?? false,
+        isWorkDisabilityDate: attendanceProps.isWorkDisabilityDate ?? false,
+        isVacationDate: attendanceProps.isVacationDate ?? false,
+        isHoliday: attendanceProps.isHoliday ?? false
       }
-
       setAttendanceData(newAttendanceData)
 
       return shiftInfo
@@ -201,13 +240,17 @@ const AttendanceCheckScreenController = () => {
         checkInStatus: null,
         checkOutStatus: null,
         checkEatInStatus: null,
-        checkEatOutStatus: null
+        checkEatOutStatus: null,
+        isRestDay: false,
+        isWorkDisabilityDate: false,
+        isVacationDate: false,
+        isHoliday: false
       })
       setShiftEndTime(null)
       
       return fallbackDate
     }
-  }, [])
+  }, [dateSelect, setShowButtonAssist])
 
   // Abrir/cerrar drawer según controller
   useEffect(() => {
@@ -414,14 +457,16 @@ const AttendanceCheckScreenController = () => {
 
   // Filtrar datos de salida basándose en la hora del turno
   const filteredAttendanceData = useMemo(() => {
-    const shouldShowCheckOut = !shiftEndTime || isCheckOutTimeReached(shiftEndTime)
+    const date = dateSelect.toISOString().split('T')[0]
+    const todayDate = new Date().toISOString().split('T')[0]
 
+    const shouldShowCheckOut = date !== todayDate || !shiftEndTime || isCheckOutTimeReached(shiftEndTime)
     return {
       ...attendanceData,
       checkOutTime: shouldShowCheckOut ? attendanceData.checkOutTime : null,
       checkOutStatus: shouldShowCheckOut ? attendanceData.checkOutStatus : null
     }
-  }, [attendanceData, shiftEndTime])
+  }, [attendanceData, shiftEndTime, dateSelect])
 
   // Optimizaciones movidas desde el componente
   const isButtonDisabled = useMemo(() => 
@@ -529,12 +574,50 @@ const AttendanceCheckScreenController = () => {
     }
     setIsLoading(false)
   }
+
   const goBack = () => {
     setStatus(`${t('common.loading')}`)
     setIsLoading(false)
     setShowFaceScreen(false)
     setPermissionDeniedMessage(false)
   }
+
+  const handleDateChange = useCallback(async ( event: DateTimePickerEvent,
+    selectedDate?: Date): Promise<void> => {
+  
+    setShowPicker(false)
+
+    if (!selectedDate) return
+    const dateFormat = DateTime.fromJSDate(selectedDate).setLocale(i18n.language).toFormat('DDDD')
+    setDateSelectFormat(dateFormat)
+    setLocalDate(selectedDate)
+    setDateSelect(selectedDate)
+    await setShiftDateData()
+  }, [i18n,dateSelect, dateSelectFormat, setShiftDateData, setDateSelect,setDateSelectFormat, setLocalDate])
+
+  const handlePreviousDay  = useCallback(async (): Promise<void> => {
+    const newDate = new Date(dateSelect)
+    newDate.setDate(newDate.getDate() - 1)
+    const dateFormat = DateTime.fromJSDate(newDate).setLocale(i18n.language).toFormat('DDDD')
+    setDateSelectFormat(dateFormat)
+    setDateSelect(newDate)
+    setLocalDate(newDate)
+    await setShiftDateData()
+  }, [i18n, dateSelect,dateSelectFormat ,setShiftDateData, setDateSelect, setDateSelectFormat, setLocalDate])
+
+  const handleNextDay =  useCallback(async (): Promise<void> => {
+    const today = new Date()
+    const newDate = new Date(dateSelect)
+    newDate.setDate(newDate.getDate() + 1)
+
+    if (newDate <= today) {
+      const dateFormat = DateTime.fromJSDate(newDate).setLocale(i18n.language).toFormat('DDDD')
+      setDateSelectFormat(dateFormat) 
+      setDateSelect(newDate)
+      setLocalDate(newDate)
+      await setShiftDateData()
+    }
+  }, [i18n,dateSelect, dateSelectFormat, setShiftDateData, setDateSelect, setDateSelectFormat, setLocalDate])
   // Memorizar el objeto de retorno completo para evitar recreaciones innecesarias
   const controllerValue = useMemo(() => ({
     themeType,
@@ -584,7 +667,18 @@ const AttendanceCheckScreenController = () => {
     isCheckOutTimeReached,
     hasConnectionError,
     retryLoadData,
-    isRetrying
+    isRetrying,
+    handleDateChange,
+    dateSelect,
+    dateSelectFormat,
+    setDateSelectFormat,
+    localDate,
+    showPicker,
+    setShowPicker,
+    handlePreviousDay,
+    handleNextDay,
+    showButtonAssist,
+    setShowButtonAssist
   }), [
     themeType,
     shiftDate,
@@ -634,7 +728,18 @@ const AttendanceCheckScreenController = () => {
     hasConnectionError,
     clearSessionController,
     retryLoadData,
-    isRetrying
+    isRetrying,
+    handleDateChange,
+    dateSelect,
+    dateSelectFormat,
+    setDateSelectFormat,
+    localDate,
+    showPicker,
+    setShowPicker,
+    handlePreviousDay,
+    handleNextDay,
+    showButtonAssist,
+    setShowButtonAssist
   ])
 
   return controllerValue

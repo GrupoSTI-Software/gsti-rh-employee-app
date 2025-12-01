@@ -17,10 +17,12 @@ export class GetAttendanceUsecase {
 
   /**
    * Ejecuta el caso de uso para obtener las asistencias del usuario
+   * @param {string} dateStart - Fecha inicial
+   * @param {string} dateEnd - Fecha final
    * @returns {Promise<AttendanceEntity | null>} Promesa que resuelve a la entidad de asistencia o null si no existe
    */
-  async run(): Promise<AttendanceEntity | null> {
-    const attendance = await this.attendancePorts.getAttendance()
+  async run(dateStart: string, dateEnd: string): Promise<AttendanceEntity | null> {
+    const attendance = await this.attendancePorts.getAttendance(dateStart, dateEnd)
     return attendance
   }
 }

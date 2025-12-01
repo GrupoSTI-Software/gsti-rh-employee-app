@@ -56,5 +56,29 @@ export interface IAttendance {
    * @type {string}
    */
   readonly shiftInfo: string | null
+  
+  /**
+   * Es día de descanso
+   * @type {string}
+   */
+  readonly isRestDay: boolean
+
+  /**
+   * Es día con incapacidad
+   * @type {string}
+   */
+  readonly isWorkDisabilityDate: boolean
+
+  /**
+   * Es día de vacaciones
+   * @type {string}
+   */
+  readonly isVacationDate: boolean
+
+  /**
+   * Es día de vacaciones
+   * @type {string}
+   */
+  readonly isHoliday: boolean
 
 }

@@ -1,4 +1,5 @@
 import { Ionicons, MaterialIcons } from '@expo/vector-icons'
+import DateTimePicker from '@react-native-community/datetimepicker'
 // import BottomSheet from '@gorhom/bottom-sheet'
 import { CameraView } from 'expo-camera'
 import { StatusBar } from 'expo-status-bar'
@@ -6,6 +7,7 @@ import React, { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   ActivityIndicator,
+  Platform,
   SafeAreaView,
   ScrollView,
   Text,
@@ -53,7 +55,7 @@ export const AttendanceCheckScreen: React.FC = React.memo(() => {
 
   const buttonStyles = useMemo(() => [
     styles.checkInButton,
-    controller.isButtonDisabled && styles.checkInButtonLocked
+    (controller.isButtonDisabled) && styles.checkInButtonLocked
   ], [styles.checkInButton, styles.checkInButtonLocked, controller.isButtonDisabled])
 
   const buttonTextStyles = useMemo(() => [
@@ -190,8 +192,8 @@ export const AttendanceCheckScreen: React.FC = React.memo(() => {
                   <>
                     {/* Contenido normal cuando hay conexión */}
                     <View style={styles.containerCalendar}>
-                      {/* Botón central con calendario */}
-                      <TouchableOpacity style={styles.calendarButton}>
+                      {/* Botón  con calendario */}
+                      <TouchableOpacity style={styles.calendarButton} onPress={() => controller.setShowPicker(true)}>
                         <Svg
                           width={20}
                           height={20}
@@ -207,10 +209,11 @@ export const AttendanceCheckScreen: React.FC = React.memo(() => {
                           <Circle cx="17" cy="15" r="1.5" fill="#88a4bf" />
                         </Svg>
                       </TouchableOpacity>
+                      
                     </View>
                     <View style={styles.containerButtons}>
                       {/* Izquierda */}
-                      <TouchableOpacity style={styles.arrowButton}>
+                      <TouchableOpacity style={styles.arrowButton} onPress={controller.handlePreviousDay}>
                         <MaterialIcons name="chevron-left" size={30} color="#7288A2" />
                       </TouchableOpacity>
 
@@ -222,9 +225,10 @@ export const AttendanceCheckScreen: React.FC = React.memo(() => {
                         >
                           <View style={[buttonWrapperStyles, { zIndex: 10 }]}>
                             <AnimatedTouchableOpacity
-                              style={[buttonStyles, { zIndex: 10 }]}
+                              style={[buttonStyles, { zIndex: 10 }, 
+                                !controller.showButtonAssist && { backgroundColor: 'orange' }]}
                               onPress={controller.handleCheckIn}
-                              disabled={controller.isButtonDisabled}
+                              disabled={controller.isButtonDisabled || !controller.showButtonAssist}
                               activeOpacity={0.8}
                             >
                               {controller.isLoadingLocation ? (
@@ -232,23 +236,33 @@ export const AttendanceCheckScreen: React.FC = React.memo(() => {
                               ) : (
                                 <CheckInIcon size={48} color={buttonIconColor} />
                               )}
-                              <Typography variant="body" style={buttonTextStyles as any}>
-                                {controller.buttonText}
-                              </Typography>
+                              {controller.showButtonAssist ? (
+                                <Typography variant="body" style={buttonTextStyles as any}>
+                                  {controller.buttonText}
+                                </Typography>
+                              ) : (
+                                <Typography variant="body" style={buttonTextStyles as any}>
+                                  {t('screens.attendanceCheck.button.locked')}
+                                </Typography>
+                              )} 
                             </AnimatedTouchableOpacity>
                           </View>
                         </Animated.View>
                       </View>
-
+                    
                       {/* Derecha */}
-                      <TouchableOpacity style={styles.arrowButton}>
-                        <MaterialIcons name="chevron-right" size={30} color="#7288A2" />
+                      <TouchableOpacity
+                        style={[styles.arrowButton]}
+                        onPress={controller.handleNextDay}
+                        disabled={controller.showButtonAssist}
+                      >
+                        <MaterialIcons name="chevron-right" size={30} color={controller.showButtonAssist ? 'rgba(114,136,162,0.4)' : '#7288A2'} />
                       </TouchableOpacity>
 
                     </View>
 
-
                     {/* Tarjeta del reloj con animación */}
+                
                     <Animated.View 
                       entering={ZoomIn.delay(250).duration(400)}
                       style={[
@@ -256,15 +270,23 @@ export const AttendanceCheckScreen: React.FC = React.memo(() => {
                         { zIndex: 1 }
                       ]}
                     >
-                      <Clock 
-                        style={styles.timeContainer}
-                        hourStyle={styles.hour}
-                        dateStyle={styles.date}
-                      />
+                      {controller.showButtonAssist ? (
+                        <Clock 
+                          style={styles.timeContainer}
+                          hourStyle={styles.hour}
+                          dateStyle={styles.date}
+                        />
+                      ) : (
+                        <Typography variant="body" style={[styles.dateShift, styles.date, styles.datePrevious]}>
+                          {controller.dateSelectFormat}
+                        </Typography>
+                      )}
+
                       <Typography variant="body" style={styles.dateShift}>
                         {controller.shiftDate}
                       </Typography>
                     </Animated.View>
+                  
                     {/* Indicadores con animaciones staggered */}
                     <Animated.View 
                       entering={FadeIn.delay(400).duration(300)}
@@ -362,6 +384,15 @@ export const AttendanceCheckScreen: React.FC = React.memo(() => {
               error={controller.passwordError}
             />
           </BottomSheet> */}
+          {controller.showPicker && (
+            <DateTimePicker
+              value={controller.localDate}
+              mode="date"
+              display={Platform.OS === 'android' ? 'calendar' : 'spinner'}// 👈 forzar calendario
+              onChange={controller.handleDateChange}
+              maximumDate={new Date()}
+            />
+          )}
         </AuthenticatedLayout>
       </GestureHandlerRootView>
     )
