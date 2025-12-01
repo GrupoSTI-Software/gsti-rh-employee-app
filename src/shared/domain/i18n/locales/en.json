@@ -116,7 +116,8 @@
       "imageSendError": "Error sending image",
       "requestingPermissions": "Requesting permissions...",
       "permissions": "Permissions",
-      "permissionDeniedPermanent": "You did not grant permissions and the system does not allow requesting them again. Please enable them from Settings."
+      "permissionDeniedPermanent": "You did not grant permissions and the system does not allow requesting them again. Please enable them from Settings.",
+      "noRecords": "No attendance records"
     },
     "profile": {
       "title": "My Profile",

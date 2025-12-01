@@ -31,6 +31,7 @@ import { AttendanceCheckScreenController } from './attendance-check-screen.contr
 import useAttendanceCheckStyle from './attendance-check.style'
 // import { PasswordBottomSheet } from './password-bottom-sheet.component'
 import Svg, { Circle, Path } from 'react-native-svg'
+import HourList from '../../components/attendance-hours-list/attendance-hours-list'
 import { getIconColor } from './utils/get-icon-color'
 import { getIndicatorStyles } from './utils/get-indicator-styles'
 import { getLabelStyles } from './utils/get-label-styles'
@@ -192,6 +193,38 @@ export const AttendanceCheckScreen: React.FC = React.memo(() => {
                   <>
                     {/* Contenido normal cuando hay conexión */}
                     <View style={styles.containerCalendar}>
+                      {/* Botón  con calendario */}
+                      <TouchableOpacity style={styles.hoursButton} onPress={() => controller.getHoursList()}>
+                        <Svg
+                          width={22}
+                          height={22}
+                          viewBox="0 0 24 24"
+                          fill="none"
+                        >
+                          {/* Círculo del reloj */}
+                          <Path
+                            d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2ZM12 20a8 8 0 1 1 8-8 8 8 0 0 1-8 8Z"
+                            fill="#88a4bf"
+                          />
+
+                          {/* Manecilla del reloj */}
+                          <Path
+                            d="M12.75 7h-1.5v5l4 2.4.75-1.23-3.25-1.92V7Z"
+                            fill="#88a4bf"
+                          />
+
+                          {/* Líneas de "records" */}
+                          <Path
+                            d="M4 8.5h3M4 12h3M4 15.5h3"
+                            stroke="#88a4bf"
+                            strokeWidth="1.6"
+                            strokeLinecap="round"
+                          />
+                        </Svg>
+
+
+
+                      </TouchableOpacity>
                       {/* Botón  con calendario */}
                       <TouchableOpacity style={styles.calendarButton} onPress={() => controller.setShowPicker(true)}>
                         <Svg
@@ -388,9 +421,16 @@ export const AttendanceCheckScreen: React.FC = React.memo(() => {
             <DateTimePicker
               value={controller.localDate}
               mode="date"
-              display={Platform.OS === 'android' ? 'calendar' : 'spinner'}// 👈 forzar calendario
+              display={Platform.OS === 'android' ? 'calendar' : 'spinner'}
               onChange={controller.handleDateChange}
               maximumDate={new Date()}
+            />
+          )}
+          {controller.showHoursList && (
+            <HourList
+              hours={controller.attendanceData.assitFlatList}
+              onClose={() => controller.setShowHoursList(false)}
+              dateString={controller.dateSelectFormat} 
             />
           )}
         </AuthenticatedLayout>

@@ -294,6 +294,23 @@ const createAttendanceCheckStyle = (theme: IAppTheme) =>
       paddingHorizontal: 0,
       paddingVertical: 15   
     },
+    hoursButton: {
+      alignSelf: 'flex-start',
+      width: 70,
+      height: 70,
+      borderRadius: 16,
+      backgroundColor: '#FFFFFF',
+      borderWidth: 1,
+      borderColor: 'rgba(150, 180, 220, 0.3)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      shadowColor: '#9BB0CC',
+      shadowOpacity: 0.15,
+      shadowRadius: 10,
+      shadowOffset: { width: 0, height: 4 },
+      elevation: 4,
+      marginRight: 4
+    },
     calendarButton: {
       alignSelf: 'flex-end',
       width: 70,

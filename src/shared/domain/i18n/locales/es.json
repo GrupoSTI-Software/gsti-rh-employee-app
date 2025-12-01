@@ -117,7 +117,8 @@
       "requestingPermissions": "Solicitando permisos...",
       "attendanceRegisteredSuccessfully": "Asistencia registrada correctamente",
       "permissions": "Permisos",
-      "permissionDeniedPermanent": "No otorgaste permisos y el sistema no permite volver a pedir. Actívalos desde Configuración."
+      "permissionDeniedPermanent": "No otorgaste permisos y el sistema no permite volver a pedir. Actívalos desde Configuración.",
+      "noRecords": "No hay registros de asistencia"
     },
     "profile": {
       "title": "Mi Perfil",
