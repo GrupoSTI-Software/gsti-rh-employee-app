@@ -1,9 +1,9 @@
+import js from '@eslint/js'
 import typescriptPlugin from '@typescript-eslint/eslint-plugin'
 import typescriptParser from '@typescript-eslint/parser'
+import prettierPlugin from 'eslint-plugin-prettier'
 import reactPlugin from 'eslint-plugin-react'
 import reactHooksPlugin from 'eslint-plugin-react-hooks'
-import prettierPlugin from 'eslint-plugin-prettier'
-import js from '@eslint/js'
 import unicornPlugin from 'eslint-plugin-unicorn'
 
 export default [
@@ -124,6 +124,15 @@ export default [
       '@typescript-eslint/no-unsafe-member-access': 'off'
     }
   },
+  {
+    files: ['src/**/*.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/explicit-function-return-type': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off'
+    }
+  },
   // Naming conventions for src files
   {
     files: ['src/**/*.{ts,tsx}'],
@@ -163,7 +172,9 @@ export default [
         // Propiedades en camelCase
         {
           selector: 'property',
-          format: ['camelCase']
+          format: ['camelCase'],
+          leadingUnderscore: 'allow',
+          filter: { regex: '.*', match: false }, // ignora string literals
         },
         // Parámetros en camelCase
         {

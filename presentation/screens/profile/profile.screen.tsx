@@ -14,6 +14,8 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 
 import { Typography } from '../../components/typography/typography.component'
 import AuthenticatedLayout from '../../layouts/authenticated-layout/authenticated.layout'
+import { getSafeEmailValue } from '../../utils/get-safe-email-value'
+import { getSafeValue } from '../../utils/get-safe-value'
 import { ProfileScreenController } from './profile-screen.controller'
 import useProfileStyle from './profile.style'
 
@@ -90,7 +92,7 @@ export const ProfileScreen: React.FC = () => {
 
   const getFullName = (): string => {
     if (!person) return '---'
-    const fullName = `${controller.getSafeValue(person.firstname)} ${controller.getSafeValue(person.lastname)} ${controller.getSafeValue(person.secondLastname)}`.trim()
+    const fullName = `${getSafeValue(person.firstname)} ${getSafeValue(person.lastname)} ${getSafeValue(person.secondLastname)}`.trim()
     return fullName !== '' ? fullName : '---'
   }
 
@@ -148,7 +150,7 @@ export const ProfileScreen: React.FC = () => {
                     />
                   ) : (
                     <Typography variant="h1" style={style.avatarText}>
-                      {getFirstInitial(controller.getSafeValue(person?.firstname))}
+                      {getFirstInitial(getSafeValue(person?.firstname))}
                     </Typography>
                   )}
                 </View>
@@ -157,7 +159,7 @@ export const ProfileScreen: React.FC = () => {
                     {getFullName()}
                   </Typography>
                   <Typography variant="body2" style={style.profileRole}>
-                    {controller.getSafeValue(employee?.code) || 'Empleado'}
+                    {getSafeValue(employee?.code) || 'Empleado'}
                   </Typography>
                 </View>
               </View>
@@ -177,7 +179,7 @@ export const ProfileScreen: React.FC = () => {
                   {t('screens.profile.email')}
                 </Typography>
                 <Typography variant="body2" style={style.infoValue}>
-                  {controller.getSafeEmailValue(user.email)}
+                  {getSafeEmailValue(user.email)}
                 </Typography>
               </View>
 
@@ -186,7 +188,7 @@ export const ProfileScreen: React.FC = () => {
                   {t('screens.profile.phone')}
                 </Typography>
                 <Typography variant="body2" style={style.infoValue}>
-                  {controller.getSafeValue(person?.phone)}
+                  {getSafeValue(person?.phone)}
                 </Typography>
               </View>
 
@@ -195,7 +197,7 @@ export const ProfileScreen: React.FC = () => {
                   {t('screens.profile.gender')}
                 </Typography>
                 <Typography variant="body2" style={style.infoValue}>
-                  {controller.getSafeValue(person?.gender)}
+                  {getSafeValue(person?.gender)}
                 </Typography>
               </View>
 
@@ -213,7 +215,7 @@ export const ProfileScreen: React.FC = () => {
                   {t('screens.profile.maritalStatus')}
                 </Typography>
                 <Typography variant="body2" style={style.infoValue}>
-                  {controller.getSafeValue(person?.maritalStatus)}
+                  {getSafeValue(person?.maritalStatus)}
                 </Typography>
               </View>
 
@@ -243,7 +245,7 @@ export const ProfileScreen: React.FC = () => {
                   {t('screens.profile.employeeCode')}
                 </Typography>
                 <Typography variant="body2" style={style.infoValue}>
-                  {controller.getSafeValue(employee?.code)}
+                  {getSafeValue(employee?.code)}
                 </Typography>
               </View>
 
@@ -252,7 +254,7 @@ export const ProfileScreen: React.FC = () => {
                   {t('screens.profile.payrollNumber')}
                 </Typography>
                 <Typography variant="body2" style={style.infoValue}>
-                  {controller.getSafeValue(employee?.payrollNum)}
+                  {getSafeValue(employee?.payrollNum)}
                 </Typography>
               </View>
 
@@ -270,7 +272,7 @@ export const ProfileScreen: React.FC = () => {
                   {t('screens.profile.contractType')}
                 </Typography>
                 <Typography variant="body2" style={style.infoValue}>
-                  {controller.getSafeValue(employee?.typeOfContract)}
+                  {getSafeValue(employee?.typeOfContract)}
                 </Typography>
               </View>
 
@@ -279,7 +281,7 @@ export const ProfileScreen: React.FC = () => {
                   {t('screens.profile.workSchedule')}
                 </Typography>
                 <Typography variant="body2" style={style.infoValue}>
-                  {controller.getSafeValue(employee?.workSchedule)}
+                  {getSafeValue(employee?.workSchedule)}
                 </Typography>
               </View>
 
@@ -288,7 +290,7 @@ export const ProfileScreen: React.FC = () => {
                   {t('screens.profile.businessEmail')}
                 </Typography>
                 <Typography variant="body2" style={style.infoValue}>
-                  {controller.getSafeEmailValue(employee?.businessEmail)}
+                  {getSafeEmailValue(employee?.businessEmail)}
                 </Typography>
               </View>
             </AnimatedView>
@@ -307,7 +309,7 @@ export const ProfileScreen: React.FC = () => {
                   {t('screens.profile.curp')}
                 </Typography>
                 <Typography variant="body2" style={style.infoValue}>
-                  {controller.getSafeValue(person?.curp)}
+                  {getSafeValue(person?.curp)}
                 </Typography>
               </View>
 
@@ -316,7 +318,7 @@ export const ProfileScreen: React.FC = () => {
                   {t('screens.profile.rfc')}
                 </Typography>
                 <Typography variant="body2" style={style.infoValue}>
-                  {controller.getSafeValue(person?.rfc)}
+                  {getSafeValue(person?.rfc)}
                 </Typography>
               </View>
 
@@ -325,7 +327,7 @@ export const ProfileScreen: React.FC = () => {
                   {t('screens.profile.imssNss')}
                 </Typography>
                 <Typography variant="body2" style={style.infoValue}>
-                  {controller.getSafeValue(person?.imssNss)}
+                  {getSafeValue(person?.imssNss)}
                 </Typography>
               </View>
             </AnimatedView>

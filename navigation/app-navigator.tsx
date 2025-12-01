@@ -6,9 +6,9 @@ import useAppNavigatorStyle from './app-navigator.style'
 import { RootStackParamList } from './types/types'
 
 import { AttendanceCheckScreen } from '../presentation/screens/attendance-check/attendance-check.screen'
-import { AuthenticationScreen } from '../presentation/screens/authentication/authentication.screen'
+import AuthenticationScreen from '../presentation/screens/authentication/authentication.screen'
 import { BiometricsConfigScreen } from '../presentation/screens/biometrics/biometrics-config.screen'
-import { ProfileScreen } from '../presentation/screens/profile/profile.screen'
+import { ProfileScreen } from '../presentation/screens/profile'
 import { SettingsScreen } from '../presentation/screens/settings/settings.screen'
 
 const Stack = createNativeStackNavigator<RootStackParamList>()
