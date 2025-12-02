@@ -144,7 +144,8 @@
     "GSTIRHAPPEMP1764006581 Mostrar checks del dia seleccionado",
     "GSTIRHAPPEMP1764006581 Mostrar checks del dia seleccionado",
     "GSTIRHAPPEMP1764006581 Mostrar checks del dia seleccionado",
-    "GSTIRHAPPEMP1764006690 Mostrar todos los checks del día"
+    "GSTIRHAPPEMP1764006690 Mostrar todos los checks del día",
+    "RHAPPEMP1764603328117 Validar coordenadas en el check"
   ],
   "search.exclude": {
     "**/node_modules": true,
