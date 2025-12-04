@@ -20,9 +20,9 @@ export class GetZoneCoordinatesController {
 
   /**
    * Obtiene las zonas permitidas por medio de las coordenadas
-   * @returns {Promise<Array<Array<number>> | null>} Promesa que resuelve las zonas permitidas o null si no existe
+   * @returns {Promise<number[][][] | null>} Promesa que resuelve las zonas permitidas o null si no existe
    */
-  async getZoneCoordinates(): Promise<Array<Array<number>> | null> {
+  async getZoneCoordinates(): Promise<number[][][] | null> {
     return await this.usecase.run()
   }
 }

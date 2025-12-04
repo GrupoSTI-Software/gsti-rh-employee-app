@@ -16,9 +16,9 @@ export class ZoneCoordinatesRepository implements Pick<AttendancePorts, 'getAtte
   }
   /**
    * Obtiene las asistencias del usuario
-   * @returns {Promise<Array<Array<number>> | null>} Zonas con coordenadas o null si no existen
+   * @returns {Promise<number[][][] | null>} Zonas con coordenadas o null si no existen
    */
-  async getZoneCoordinates(): Promise<Array<Array<number>> | null> {
+  async getZoneCoordinates(): Promise<number[][][] | null> {
     const authStateController = new AuthStateController()
     // Obtener el token de autenticación
     const authState = await authStateController.getAuthState()

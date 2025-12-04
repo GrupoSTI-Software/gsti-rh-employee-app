@@ -16,9 +16,9 @@ export class GetZoneCoordinatesUsecase {
 
   /**
    * Ejecuta el caso de uso para obtener las zonas permitidas del usuario
-   * @returns {Promise<Array<Array<number>> | null>}} Promesa que resuelve a la entidad de asistencia o null si no existe
+   * @returns {Promise<number[][][] | null>}} Promesa que resuelve a la entidad de asistencia o null si no existe
    */
-  async run(): Promise<Array<Array<number>> | null> {
+  async run(): Promise<number[][][] | null> {
     const coordinates = await this.zoneCoordinatesPorts.getZoneCoordinates()
     return coordinates
   }

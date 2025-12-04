@@ -6,7 +6,7 @@
 export interface ZoneCoordinatesPorts {
   /**
    * Obtiene las zonas permitidas del usuario para registrar asistencia
-   * @returns {Promise<Array<Array<number>> | null>} Promesa que resuelve las zonas permitidas o null si no existe
+   * @returns {Promise<number[][][] | null>} Promesa que resuelve las zonas permitidas o null si no existe
    */
-  getZoneCoordinates(): Promise<Array<Array<number>> | null>
+  getZoneCoordinates(): Promise<number[][][] | null>
 }

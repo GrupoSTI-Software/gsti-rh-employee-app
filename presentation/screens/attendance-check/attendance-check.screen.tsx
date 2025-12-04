@@ -93,6 +93,20 @@ export const AttendanceCheckScreen: React.FC = React.memo(() => {
       </View>
     )
   }
+
+  if (controller.isOutsideZone) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center' }}>
+
+        <CustomAlert
+          visible={controller.isOutsideZone}
+          title={`📍 ${t('screens.attendanceCheck.outsideAllowedZone')}`}
+          message={`🚫 ${controller.status}`}
+          onClose={() => controller.goBack() }
+        />
+      </View>
+    )
+  }
  
   if (controller.isLoading) {
     return (
@@ -192,6 +206,7 @@ export const AttendanceCheckScreen: React.FC = React.memo(() => {
                 ) : (
                   <>
                     {/* Contenido normal cuando hay conexión */}
+                    
                     <View style={styles.containerCalendar}>
                       {/* Botón  con calendario */}
                       <TouchableOpacity style={styles.hoursButton} onPress={() => controller.getHoursList()}>
