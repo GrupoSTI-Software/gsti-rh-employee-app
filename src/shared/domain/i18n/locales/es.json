@@ -120,7 +120,17 @@
       "permissionDeniedPermanent": "No otorgaste permisos y el sistema no permite volver a pedir. Actívalos desde Configuración.",
       "noRecords": "No hay registros de asistencia",
       "outsideAllowedZone": "Está fuera de la zona permitida",
-      "distanceToAllowedZone": "Te encuentras a {{meters}} metros de distancia de la zona permitida"
+      "distanceToAllowedZone": "Te encuentras fuera de la zona permitida, acercate aproximadamente {{meters}} metros hacia el {{direction}} para entrar en la zona permitida.",
+      "directions": {
+        "north": "norte",
+        "northeast": "noreste",
+        "east": "este",
+        "southeast": "sureste",
+        "south": "sur",
+        "southwest": "suroeste",
+        "west": "oeste",
+        "northwest": "noroeste"
+      }
     },
     "profile": {
       "title": "Mi Perfil",

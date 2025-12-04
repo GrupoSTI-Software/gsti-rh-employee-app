@@ -119,7 +119,17 @@
       "permissionDeniedPermanent": "You did not grant permissions and the system does not allow requesting them again. Please enable them from Settings.",
       "noRecords": "No attendance records",
       "outsideAllowedZone": "You are outside the allowed zone",
-      "distanceToAllowedZone": "You are {{meters}} meters away from the allowed zone"
+      "distanceToAllowedZone": "You are outside the allowed zone. Please move approximately {{meters}} meters towards the {{direction}} to enter the permitted area.",
+        "directions": {
+        "north": "north",
+        "northeast": "northeast",
+        "east": "east",
+        "southeast": "southeast",
+        "south": "south",
+        "southwest": "southwest",
+        "west": "west",
+        "northwest": "northwest"
+       }
     },
     "profile": {
       "title": "My Profile",

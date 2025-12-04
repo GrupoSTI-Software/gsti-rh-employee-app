@@ -4,7 +4,6 @@ import {
 } from '@react-native-community/datetimepicker'
 import { useNavigation } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
-// import { booleanPointInPolygon, lineString, point, pointToLineDistance, polygon } from '@turf/turf'
 import { AxiosError } from 'axios'
 import { CameraView, useCameraPermissions } from 'expo-camera'
 import { DateTime } from 'luxon'
@@ -27,7 +26,7 @@ import { isCheckOutTimeReached } from './utils/is-checkout-time-reached.util'
 import { openLocationSettings } from './utils/open-location-settings'
 import { validateLocationInBackground } from './utils/validate-location-in-background'
 import { validatePassword } from './utils/validate-password.util'
-import { validateZones, ZonesArray } from './utils/validate-zones'
+import { validateZonesWithDirection, ZonesArray } from './utils/validate-zones'
 
 
 // Agregar interfaces para tipado
@@ -388,12 +387,12 @@ const AttendanceCheckScreenController = () => {
         const zonas: ZonesArray = zones.map(zona =>
           zona.map(coord => [coord[0], coord[1]] as [number, number])
         )
-        const result = validateZones(
+        const result = validateZonesWithDirection(
           locationResult.latitude,
           locationResult.longitude,
           zonas
         )
-        setStatus(t('screens.attendanceCheck.distanceToAllowedZone', { meters: result.distance.toFixed(2) }))
+        setStatus(t('screens.attendanceCheck.distanceToAllowedZone', { meters: result.distance.toFixed(2) , direction: t(`screens.attendanceCheck.directions.${result.direction}`)}))
         if (result.distance > 3) { // Le damos rango de 3 metros fuera de la zona por motivo de presición
           setIsOutSideZone(true)
           setIsLoading(false)
@@ -647,63 +646,6 @@ const AttendanceCheckScreenController = () => {
   const getHoursList = useCallback(async (): Promise<void> => {
     setShowHoursList(true)
   }, [i18n,dateSelect, setShowHoursList, attendanceData])
-
-  /*  const checkZoneAndDistance = (lat: number, lng: number, zones: number[][][]) => {
-  let zoneIndex = null;
-  let closestDistance = Infinity;
-
-  for (let i = 0; i < zones.length; i++) {
-    const zona = zones[i];
-
-    if (isInsideZone(lat, lng, zona)) {
-      return {
-        inside: true,
-        zoneIndex: i,
-        distance: 0   // Dentro de la zona
-      };
-    }
-
-    // Si no está dentro, medir distancia a esta zona
-    const dist = distanceToZone(lat, lng, zona);
-
-    if (dist < closestDistance) {
-      closestDistance = dist;
-      zoneIndex = i;
-    }
-  }
-
-  return {
-    inside: false,
-    zoneIndex,
-    distance: closestDistance  // metros al borde más cercano
-  };
-};
-
-// Verificar si está dentro
-const isInsideZone = (lat: number, lng: number, zones: number[][] ) => {
-  const userPoint = point([lng, lat]);
-  const poly = polygon([zones]);
-  return booleanPointInPolygon(userPoint, poly);
-};
-
-// Calcular distancia (en metros)
-const distanceToZone = (lat: number, lng: number, zones: number[][] ) => {
-  const userPoint = point([lng, lat]);
-
-  let minDistance = Infinity;
-
-  // Recorrer cada segmento del polígono
-  for (let i = 0; i < zones.length - 1; i++) {
-    const segment = lineString([zones[i], zones[i + 1]]);
-    const dist = pointToLineDistance(userPoint, segment, { units: "meters" });
-
-    if (dist < minDistance) {
-      minDistance = dist
-    }
-  }
-
-  return minDistance; // en metros
-}; */
 
   // Memorizar el objeto de retorno completo para evitar recreaciones innecesarias
   const controllerValue = useMemo(() => ({
