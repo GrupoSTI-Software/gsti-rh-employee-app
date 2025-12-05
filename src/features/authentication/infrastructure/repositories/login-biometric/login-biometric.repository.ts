@@ -1,5 +1,7 @@
 import { AxiosError } from 'axios'
+import * as Device from 'expo-device'
 import i18next from 'i18next'
+import { getOrCreateDeviceToken } from '../../../../../../presentation/utils/token-manager'
 import { InvalidFieldFormatException } from '../../../../../shared/domain/exceptions/invalid-field-format.exception'
 import { RequiredAllFieldsException } from '../../../../../shared/domain/exceptions/required-all-fields.exception'
 import { RequiredFieldException } from '../../../../../shared/domain/exceptions/required-field.exception'
@@ -105,10 +107,17 @@ export class LoginBiometricRepository implements Pick<AuthenticationPorts, 'logi
         throw new RequiredAllFieldsException()
       }
 
+      const deviceToken = await getOrCreateDeviceToken()
+
       this.validateCredentials(credentials.email, credentials.password)
       const response: LoginResponse = await HttpService.post('/auth/login', {
         userEmail: credentials.email,
-        userPassword: credentials.password
+        userPassword: credentials.password,
+        deviceToken,
+        deviceModel: Device.modelName,
+        deviceBrand: Device.brand,
+        deviceType: Device.deviceName,
+        deviceOs: `${Device.osName} ${Device.osVersion}`
       })
 
       if (response.status !== 200) {
