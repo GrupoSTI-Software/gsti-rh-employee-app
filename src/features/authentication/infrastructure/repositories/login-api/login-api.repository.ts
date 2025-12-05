@@ -1,5 +1,7 @@
 import { AxiosError } from 'axios'
+import * as Device from 'expo-device'
 import i18next from 'i18next'
+import { getOrCreateDeviceToken } from '../../../../../../presentation/utils/token-manager'
 import { InvalidFieldFormatException } from '../../../../../shared/domain/exceptions/invalid-field-format.exception'
 import { RequiredAllFieldsException } from '../../../../../shared/domain/exceptions/required-all-fields.exception'
 import { RequiredFieldException } from '../../../../../shared/domain/exceptions/required-field.exception'
@@ -72,9 +74,16 @@ export class LoginAPIRepository implements Pick<AuthenticationPorts, 'login'> {
         authentication.props.loginCredentials.email,
         authentication.props.loginCredentials.password
       )
+      const deviceToken = await getOrCreateDeviceToken()
+    
       const response: LoginResponse = await HttpService.post('/auth/login', {
         userEmail: authentication.props.loginCredentials.email,
-        userPassword: authentication.props.loginCredentials.password
+        userPassword: authentication.props.loginCredentials.password,
+        deviceToken,
+        deviceModel: Device.modelName,
+        deviceBrand: Device.brand,
+        deviceType: Device.deviceName,
+        deviceOs: `${Device.osName} ${Device.osVersion}`
       })
 
       if (response.status !== 200) {
