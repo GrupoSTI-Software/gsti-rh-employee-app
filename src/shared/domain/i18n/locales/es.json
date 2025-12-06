@@ -155,6 +155,17 @@
       "curp": "CURP",
       "rfc": "RFC",
       "imssNss": "NSS (IMSS)"
+    },
+     "apiConfig": {
+      "title": "Configuración del API",
+      "save": "Guardar",
+      "url": "Url del servidor",
+      "placeholder": "https://app.com",
+      "success": "Éxito",
+      "urlSavedSuccessfully": "La URL se guardó correctamente",
+      "couldNotBeSaved": "No se pudo guardar",
+      "urlCannotBeEmpty": "La URL no puede estar vacía",
+      "validation": "Validación"
     }
   },
   "components": {

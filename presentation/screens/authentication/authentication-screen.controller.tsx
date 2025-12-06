@@ -11,6 +11,7 @@ import { AuthStateController } from '../../../src/features/authentication/infras
 import { LoginController } from '../../../src/features/authentication/infrastructure/controllers/login.controller'
 import { BiometricsService } from '../../../src/features/authentication/infrastructure/services/biometrics.service'
 import { ILocationCoordinates, LocationService } from '../../../src/features/authentication/infrastructure/services/location.service'
+import { ApiConfigScreenController } from '../api-config/api-config.screen.controller'
 
 // import Constants from 'expo-constants'
 
@@ -35,13 +36,29 @@ const AuthenticationScreenController = () => {
   const [settedAPIUrl, setSettedAPIUrl] = useState<string>('')
 
   const { t } = useTranslation()
+  const apiConfigController = ApiConfigScreenController()
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>()
 
   useEffect(() => {
     initializeApp().catch(console.error)
   })
+  useEffect(() => {
+    const validateApi = async () => {
+      try {
+      
+        const api = await apiConfigController.loadApi()
 
+        if (!api) {
+          navigation.replace('apiConfig')
+        }
+      } catch (error) {
+        navigation.replace('apiConfig')
+      }
+    }
+
+    void validateApi()
+  }, [])
   /**
    * Inicializa la aplicación
    * - Inicializa la biometría y los datos de usuario en caso de que existan

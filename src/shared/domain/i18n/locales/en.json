@@ -115,6 +115,7 @@
       "identityNotVerified": "Your identity could not be verified. Please try again.",
       "imageSendError": "Error sending image",
       "requestingPermissions": "Requesting permissions...",
+      "attendanceRegisteredSuccessfully": "Correctly registered attendance",
       "permissions": "Permissions",
       "permissionDeniedPermanent": "You did not grant permissions and the system does not allow requesting them again. Please enable them from Settings.",
       "noRecords": "No attendance records",
@@ -154,6 +155,17 @@
       "curp": "CURP",
       "rfc": "RFC",
       "imssNss": "IMSS NSS"
+    },
+     "apiConfig": {
+        "title": "Config API",
+        "save": "Save",
+        "url": "Server url",
+        "placeholder": "https://app.com",
+        "success": "Success",
+        "urlSavedSuccessfully": "The URL was saved successfully",
+        "couldNotBeSaved": "Could not be saved",
+        "urlCannotBeEmpty": "The URL cannot be empty",
+        "validation": "Validation"
     }
   },
   "components": {

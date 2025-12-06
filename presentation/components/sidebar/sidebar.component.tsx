@@ -198,6 +198,29 @@ const SidebarLayout: React.FC<ISidebarProps> = ({ isOpen, onClose }) => {
               />
             )}
 
+            {/* Configuración API */}
+            {isOpen && (
+              <Animated.View 
+                entering={SlideInLeft.delay(140).duration(200)}
+                style={styles.menuGroup}
+              >
+                <SidebarItem
+                  icon={<CogIcon color={styles.sidebarIcon.color} />}
+                  label={`${t('sidebar.menuLinks.settings')} API`}
+                  textColor={styles.sidebarIconText.color}
+                  onPress={() => { controller.navigateTo('apiConfig') }}
+                  delay={300}
+                />
+              </Animated.View>
+            )}
+
+            {isOpen && (
+              <Animated.View 
+                entering={FadeIn.delay(180).duration(150)}
+                style={styles.separator} 
+              />
+            )}
+
             {/* Logout */}
             {isOpen && (
               <Animated.View 

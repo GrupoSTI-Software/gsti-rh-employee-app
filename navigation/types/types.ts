@@ -5,4 +5,5 @@ export type RootStackParamList = {
   biometricsConfigScreen: undefined
   settingsScreen: undefined
   faceAuthenticationScreen: undefined
+  apiConfig: undefined
 }
