@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useNavigation } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import axios from 'axios'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
@@ -57,7 +56,6 @@ const AuthenticationScreenController = () => {
         navigation.replace('apiConfig')
       }
     }
-
     void validateApi()
   }, [])
   /**
@@ -129,13 +127,16 @@ const AuthenticationScreenController = () => {
       } else {
         navigation.replace('attendanceCheck')
       }
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        Alert.alert(
-          t('common.error'),
-          error instanceof Error ? error.message : t('errors.unknownError')
-        )
+    } catch (error: any) {
+      let title = 'common.error'
+      if (error.status === 400) {
+        title = 'common.information'
       }
+
+      const message =
+        (error.message ? error.message : t('errors.unknownError')) as string
+
+      Alert.alert(t(title), message)
     } finally {
       setTimeout(() => {
         setLoginButtonLoading(false)

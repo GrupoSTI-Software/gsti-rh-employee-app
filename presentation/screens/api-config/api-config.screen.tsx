@@ -76,7 +76,7 @@ export const ApiConfigScreen: React.FC = () => {
         <TextInput
           label={`${t('screens.apiConfig.url')}`}
           value={apiUrl}
-          onChangeText={setApiUrl}
+          onChangeText={(text) => setApiUrl(text.toLowerCase())}
           leftIcon='link'
         />
         <Button title={`${t('screens.apiConfig.save')}`} onPress={handleSave} />
