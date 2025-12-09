@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { environment } from '../../../../../../config/environment'
+import { getApi } from '../../../../../../presentation/utils/get-api-url'
 import { AuthStateController } from '../../../../authentication/infrastructure/controllers/auth-state.controller'
 import { AttendanceEntity } from '../../../domain/entities/attendance-entity'
 import { AttendancePorts } from '../../../domain/ports/attendance.ports.js'
@@ -19,6 +19,7 @@ export class ZoneCoordinatesRepository implements Pick<AttendancePorts, 'getAtte
    * @returns {Promise<number[][][] | null>} Zonas con coordenadas o null si no existen
    */
   async getZoneCoordinates(): Promise<number[][][] | null> {
+    const apiUrl = await getApi()
     const authStateController = new AuthStateController()
     // Obtener el token de autenticación
     const authState = await authStateController.getAuthState()
@@ -33,7 +34,7 @@ export class ZoneCoordinatesRepository implements Pick<AttendancePorts, 'getAtte
     }
 
     const employeeId = authState?.props.authState?.user?.props.person?.props.employee?.props?.id?.value || null
-    const response = await axios.get(`${environment.API_URL}/get-coordinates/&employeeId=${employeeId}`, {
+    const response = await axios.get(`${apiUrl}/get-coordinates/&employeeId=${employeeId}`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -42,7 +43,6 @@ export class ZoneCoordinatesRepository implements Pick<AttendancePorts, 'getAtte
     if (response.status !== 200) {
       throw new Error('Error fetching zone coordinates')
     }
-    // console.log(response.data.data.coordinates)
     const responseData = response.data.data.coordinates as []
     
     

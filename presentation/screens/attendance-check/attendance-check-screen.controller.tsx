@@ -566,7 +566,7 @@ const AttendanceCheckScreenController = () => {
         })
         setIsLoading(true)
         setStatus(`⏳ ${t('screens.attendanceCheck.verifying')}`)
-        const response = await HttpService.post('/verify-face', {
+        const response = await (await HttpService).post('/verify-face', {
           imageBase64: photo.base64
         })
              

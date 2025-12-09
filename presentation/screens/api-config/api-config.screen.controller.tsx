@@ -12,7 +12,7 @@ import { ClearSessionController } from '../../../src/features/authentication/inf
  */
 export const ApiConfigScreenController = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const STORAGE_KEY = 'API_URLz'
+  const STORAGE_KEY = 'API_URL'
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>()
 
@@ -54,10 +54,27 @@ export const ApiConfigScreenController = () => {
     }
   }
 
+  const isValidUrl = (url: string) => {
+    try {
+      new URL(url)
+      return true
+    } catch (error) {
+      console.error('url no valida', error)
+      return false
+    }
+  }
+
   const handleLogout = async () => {
     const clearSessionController = new ClearSessionController()
     await clearSessionController.clearSession()
     navigation.replace('authenticationScreen')
+  }
+
+  
+  const goBack = () => {
+    setTimeout(() => {
+      navigation.navigate('authenticationScreen')
+    }, 300)
   }
 
   return {
@@ -65,6 +82,8 @@ export const ApiConfigScreenController = () => {
     // Funciones
     saveApiUrl,
     loadApi,
+    isValidUrl,
+    goBack,
     handleLogout
   }
 }

@@ -439,6 +439,7 @@ export const AttendanceCheckScreen: React.FC = React.memo(() => {
               display={Platform.OS === 'android' ? 'calendar' : 'spinner'}
               onChange={controller.handleDateChange}
               maximumDate={new Date()}
+              textColor={styles.calendarDateText.color}
             />
           )}
           {controller.showHoursList && (

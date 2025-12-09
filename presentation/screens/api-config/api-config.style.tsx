@@ -38,23 +38,35 @@ const createApiConfigStyle = (theme: IAppTheme, themeType: EThemeType) =>
       fontWeight: 'bold',
       color: theme.colors.text,
       marginBottom: hp(1),
-      textAlign: 'left'
+      textAlign: 'left',
+      marginTop: 55
     },
     subtitle: {
-      color: theme.colors.textSecondary
+      color: theme.colors.textSecondary,
+      marginBottom: 5
     },
     label: {
       fontSize: 16,
       marginBottom: 6
     },
     input: {
-      borderWidth: 1,
-      borderColor: '#ccc',
       color: themeType === EThemeType.LIGHT ? '#000000ff' : '#FFFFFF',
       padding: 10,
       borderRadius: 6,
       marginBottom: 20,
       marginTop: 5
+    },
+    backButton: {
+      position: 'absolute',
+      left: 20,
+      backgroundColor: themeType === EThemeType.LIGHT ? '#FFFFFF' : theme.colors.background,
+      padding: 10,
+      borderRadius: 50,
+      borderColor: theme.colors.iconColor,
+      borderWidth: 1
+    },
+    iconBack: {
+      color: theme.colors.iconColor
     }
   })
 

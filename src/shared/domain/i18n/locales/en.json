@@ -2,6 +2,7 @@
   "common": {
     "loading": "Loading...",
     "error": "Error",
+    "information": "Information",
     "warning": "Warning",
     "success": "Success",
     "cancel": "Cancel",
@@ -165,7 +166,8 @@
         "urlSavedSuccessfully": "The URL was saved successfully",
         "couldNotBeSaved": "Could not be saved",
         "urlCannotBeEmpty": "The URL cannot be empty",
-        "validation": "Validation"
+        "validation": "Validation",
+        "invalidUrl": "The entered URL is not valid. Please check the format."
     }
   },
   "components": {

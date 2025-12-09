@@ -2,6 +2,7 @@
   "common": {
     "loading": "Cargando...",
     "error": "Error",
+    "information": "Información",
     "warning": "Advertencia",
     "success": "Éxito",
     "cancel": "Cancelar",
@@ -165,7 +166,8 @@
       "urlSavedSuccessfully": "La URL se guardó correctamente",
       "couldNotBeSaved": "No se pudo guardar",
       "urlCannotBeEmpty": "La URL no puede estar vacía",
-      "validation": "Validación"
+      "validation": "Validación",
+      "invalidUrl": "La URL ingresada no es válida. Por favor, verifica el formato."
     }
   },
   "components": {

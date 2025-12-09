@@ -1,7 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
-import { environment } from '../../../../config/environment'
-
-const API_URL = environment.API_URL
+import { getApi } from '../../../../presentation/utils/get-api-url'
 
 /**
  * Servicio HTTP para realizar solicitudes a la API
@@ -11,15 +9,13 @@ const API_URL = environment.API_URL
 class HttpServiceClass {
   private readonly apiClient: AxiosInstance
   private static instance: HttpServiceClass
-  public readonly apiUrl: string
 
   /**
    * Constructor de la clase HttpServiceClass
    */
-  private constructor() {
-    this.apiUrl = API_URL
+  private constructor(apiUrl: string) {
     this.apiClient = axios.create({
-      baseURL: `${API_URL}`,
+      baseURL: `${apiUrl}`,
       headers: {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         'Content-Type': 'application/json',
@@ -33,9 +29,10 @@ class HttpServiceClass {
    * Obtiene la instancia única de HttpServiceClass (Singleton)
    * @returns {HttpServiceClass} La instancia única de HttpServiceClass
    */
-  public static getInstance(): HttpServiceClass {
+  public static async getInstance(): Promise<HttpServiceClass> {
     if (!HttpServiceClass.instance) {
-      HttpServiceClass.instance = new HttpServiceClass()
+      const apiUrl = await getApi()
+      HttpServiceClass.instance = new HttpServiceClass(apiUrl ? apiUrl : '')
     }
     return HttpServiceClass.instance
   }

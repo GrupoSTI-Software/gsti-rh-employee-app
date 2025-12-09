@@ -1,16 +1,17 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useNavigation } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
+import axios from 'axios'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
-import { environment } from '../../../config/environment'
 import { RootStackParamList } from '../../../navigation/types/types'
 import { ELoginTypes } from '../../../src/features/authentication/application/types/login-types.enum'
 import { AuthStateController } from '../../../src/features/authentication/infrastructure/controllers/auth-state.controller'
 import { LoginController } from '../../../src/features/authentication/infrastructure/controllers/login.controller'
 import { BiometricsService } from '../../../src/features/authentication/infrastructure/services/biometrics.service'
 import { ILocationCoordinates, LocationService } from '../../../src/features/authentication/infrastructure/services/location.service'
+import { getApi } from '../../utils/get-api-url'
 import { ApiConfigScreenController } from '../api-config/api-config.screen.controller'
 
 // import Constants from 'expo-constants'
@@ -77,7 +78,8 @@ const AuthenticationScreenController = () => {
    * @returns {Promise<void>}
    */
   const initUserData = async () => {
-    setSettedAPIUrl(environment.API_URL || 'NOT ASSIGNED')
+    const apiUrl = await getApi()
+    setSettedAPIUrl(apiUrl || 'NOT ASSIGNED')
     await Promise.all([initBiometricAvailability(), setAuthStateData()])
   }
 
@@ -128,10 +130,12 @@ const AuthenticationScreenController = () => {
         navigation.replace('attendanceCheck')
       }
     } catch (error) {
-      Alert.alert(
-        t('common.error'),
-        error instanceof Error ? error.message : t('errors.unknownError')
-      )
+      if (axios.isAxiosError(error)) {
+        Alert.alert(
+          t('common.error'),
+          error instanceof Error ? error.message : t('errors.unknownError')
+        )
+      }
     } finally {
       setTimeout(() => {
         setLoginButtonLoading(false)

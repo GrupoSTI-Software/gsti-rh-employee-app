@@ -75,8 +75,7 @@ export class LoginAPIRepository implements Pick<AuthenticationPorts, 'login'> {
         authentication.props.loginCredentials.password
       )
       const deviceToken = await getOrCreateDeviceToken()
-    
-      const response: LoginResponse = await HttpService.post('/auth/login', {
+      const response: LoginResponse = await (await HttpService).post('/auth/login', {
         userEmail: authentication.props.loginCredentials.email,
         userPassword: authentication.props.loginCredentials.password,
         deviceToken,
@@ -85,7 +84,6 @@ export class LoginAPIRepository implements Pick<AuthenticationPorts, 'login'> {
         deviceType: Device.deviceName,
         deviceOs: `${Device.osName} ${Device.osVersion}`
       })
-
       if (response.status !== 200) {
         throw new Error(response.data.message)
       }
@@ -96,7 +94,7 @@ export class LoginAPIRepository implements Pick<AuthenticationPorts, 'login'> {
         throw new Error(i18next.t('errors.loginFailedNoTokenProvided'))
       }
 
-      HttpService.setBearerToken(responseData.token)
+      (await HttpService).setBearerToken(responseData.token)
 
       const sessionUser = await this.getSessionUser()
 
@@ -152,7 +150,7 @@ export class LoginAPIRepository implements Pick<AuthenticationPorts, 'login'> {
    * @private
    */
   private async getSessionUser(): Promise<UserEntity> {
-    const responseUser: SessionResponse = await HttpService.get('/auth/session')
+    const responseUser: SessionResponse = await (await HttpService).get('/auth/session')
 
     if (responseUser.status !== 200) {
       throw new Error(i18next.t('errors.loginFailedNoAuthenticationStatus'))
