@@ -230,7 +230,7 @@ const createAttendanceCheckStyle = (theme: IAppTheme, themeType: EThemeType) =>
       borderRadius: 200,
       backgroundColor: 'transparent',
       alignSelf: 'center',
-      marginTop: 30
+      marginTop: 10
     },
     captureButton: {
       width: 110,
@@ -239,7 +239,7 @@ const createAttendanceCheckStyle = (theme: IAppTheme, themeType: EThemeType) =>
       backgroundColor: '#fff',
       alignItems: 'center',
       justifyContent: 'center',
-      marginBottom: 0,
+      marginBottom: -10,
       borderColor: '#000',
       borderWidth: 1
     },
@@ -263,7 +263,7 @@ const createAttendanceCheckStyle = (theme: IAppTheme, themeType: EThemeType) =>
     textStatus: {
       position: 'absolute',
       backgroundColor: '#00000095',
-      top: 663,
+      top: 643,
       color: '#fff',
       fontSize: 18,
       fontWeight: '600',
@@ -330,6 +330,10 @@ const createAttendanceCheckStyle = (theme: IAppTheme, themeType: EThemeType) =>
       fontSize: 18,
       color: themeType === EThemeType.LIGHT ? '#000000ff' : '#FFFFFF',
       fontWeight: '600'
+    },
+    calendar: { 
+      alignItems: 'center', 
+      justifyContent: 'center' 
     },
     buttonText: { color: '#fff' },
     iconButton: {

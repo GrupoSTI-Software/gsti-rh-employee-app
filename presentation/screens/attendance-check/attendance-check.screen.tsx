@@ -433,14 +433,16 @@ export const AttendanceCheckScreen: React.FC = React.memo(() => {
             />
           </BottomSheet> */}
           {controller.showPicker && (
-            <DateTimePicker
-              value={controller.localDate}
-              mode="date"
-              display={Platform.OS === 'android' ? 'calendar' : 'spinner'}
-              onChange={controller.handleDateChange}
-              maximumDate={new Date()}
-              textColor={styles.calendarDateText.color}
-            />
+            <View style={ styles.calendar }>
+              <DateTimePicker
+                value={controller.localDate}
+                mode="date"
+                display={Platform.OS === 'android' ? 'calendar' : 'spinner'}
+                onChange={controller.handleDateChange}
+                maximumDate={new Date()}
+              />
+            </View>
+            
           )}
           {controller.showHoursList && (
             <HourList
