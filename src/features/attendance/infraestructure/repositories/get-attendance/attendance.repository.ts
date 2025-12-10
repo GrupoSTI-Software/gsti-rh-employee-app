@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { DateTime } from 'luxon'
-import { environment } from '../../../../../../config/environment'
+import { getApi } from '../../../../../../presentation/utils/get-api-url'
 import { AuthStateController } from '../../../../authentication/infrastructure/controllers/auth-state.controller'
 import { AttendanceEntity } from '../../../domain/entities/attendance-entity'
 import { AttendancePorts } from '../../../domain/ports/attendance.ports.js'
@@ -19,6 +19,7 @@ export class AttendanceRepository implements Pick<AttendancePorts, 'getAttendanc
    * @returns {Promise<AttendanceEntity | null>} Asistencias del usuario o null si no existe
    */
   async getAttendance(dateStart: string, dateEnd: string): Promise<AttendanceEntity | null> {
+    const apiUrl = await getApi()
     const authStateController = new AuthStateController()
     // Obtener el token de autenticación
     const authState = await authStateController.getAuthState()
@@ -33,7 +34,7 @@ export class AttendanceRepository implements Pick<AttendancePorts, 'getAttendanc
     }
 
     const employeeId = authState?.props.authState?.user?.props.person?.props.employee?.props?.id?.value || null
-    const response = await axios.get(`${environment.API_URL}/v1/assists?date=${dateStart}&date-end=${dateEnd}&employeeId=${employeeId}`, {
+    const response = await axios.get(`${apiUrl}/v1/assists?date=${dateStart}&date-end=${dateEnd}&employeeId=${employeeId}`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }

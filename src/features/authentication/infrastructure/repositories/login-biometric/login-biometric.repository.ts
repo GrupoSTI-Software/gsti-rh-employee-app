@@ -1,5 +1,7 @@
 import { AxiosError } from 'axios'
+import * as Device from 'expo-device'
 import i18next from 'i18next'
+import { getOrCreateDeviceToken } from '../../../../../../presentation/utils/token-manager'
 import { InvalidFieldFormatException } from '../../../../../shared/domain/exceptions/invalid-field-format.exception'
 import { RequiredAllFieldsException } from '../../../../../shared/domain/exceptions/required-all-fields.exception'
 import { RequiredFieldException } from '../../../../../shared/domain/exceptions/required-field.exception'
@@ -105,12 +107,18 @@ export class LoginBiometricRepository implements Pick<AuthenticationPorts, 'logi
         throw new RequiredAllFieldsException()
       }
 
-      this.validateCredentials(credentials.email, credentials.password)
-      const response: LoginResponse = await HttpService.post('/auth/login', {
-        userEmail: credentials.email,
-        userPassword: credentials.password
-      })
+      const deviceToken = await getOrCreateDeviceToken()
 
+      this.validateCredentials(credentials.email, credentials.password)
+      const response: LoginResponse = await (await HttpService).post('/auth/login', {
+        userEmail: credentials.email,
+        userPassword: credentials.password,
+        deviceToken,
+        deviceModel: Device.modelName,
+        deviceBrand: Device.brand,
+        deviceType: Device.deviceName,
+        deviceOs: `${Device.osName} ${Device.osVersion}`
+      })
       if (response.status !== 200) {
         throw new Error(response.data.message)
       }
@@ -121,7 +129,7 @@ export class LoginBiometricRepository implements Pick<AuthenticationPorts, 'logi
         throw new Error(i18next.t('errors.loginFailedNoTokenProvided'))
       }
 
-      HttpService.setBearerToken(responseData.token)
+      (await HttpService).setBearerToken(responseData.token)
 
       const sessionUser = await this.getSessionUser()
       const authenticationLocalStorageService = new AuthenticationLocalStorageService()
@@ -149,8 +157,11 @@ export class LoginBiometricRepository implements Pick<AuthenticationPorts, 'logi
       if (error instanceof AxiosError && error.response) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         const errorMessage = (error?.response?.data?.message ||
-          i18next.t('errors.loginFailed')) as string
-        throw new Error(errorMessage)
+        i18next.t('errors.loginFailed')) as string
+        throw {
+          message: errorMessage,
+          status: error.status
+        }
       }
 
       throw new Error(
@@ -174,7 +185,7 @@ export class LoginBiometricRepository implements Pick<AuthenticationPorts, 'logi
    * @private
    */
   private async getSessionUser(): Promise<UserEntity> {
-    const responseUser: SessionResponse = await HttpService.get('/auth/session')
+    const responseUser: SessionResponse = await (await HttpService).get('/auth/session')
 
     if (responseUser.status !== 200) {
       throw new Error(i18next.t('errors.loginFailedNoAuthenticationStatus'))

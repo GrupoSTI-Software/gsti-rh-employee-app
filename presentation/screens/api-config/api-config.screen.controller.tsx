@@ -1,0 +1,89 @@
+import { useNavigation } from '@react-navigation/native'
+import { NativeStackNavigationProp } from '@react-navigation/native-stack'
+import * as SecureStore from 'expo-secure-store'
+import { useEffect, useState } from 'react'
+import { RootStackParamList } from '../../../navigation/types/types'
+import { AuthStateController } from '../../../src/features/authentication/infrastructure/controllers/auth-state.controller'
+import { ClearSessionController } from '../../../src/features/authentication/infrastructure/controllers/clear-seassion.controller'
+/**
+ * Controlador de la pantalla de configuración del api
+ * @description Gestiona la lógica de negocio para configurar la dirección del API
+ * @returns {Object} Objeto con los datos y funciones accesibles desde la pantalla
+ */
+export const ApiConfigScreenController = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const STORAGE_KEY = 'API_URL'
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>()
+
+  useEffect(() => {
+    checkAuthState().catch(console.error)
+  }, [])
+
+  const checkAuthState = async () => {
+    try {
+      const authStateController = new AuthStateController()
+      const authState = await authStateController.getAuthState()
+
+      if (authState?.props.authState?.isAuthenticated) {
+        setIsAuthenticated(true)
+      }
+    } catch (error) {
+      console.error('Error checking auth state:', error)
+    }
+  }
+  
+  // Obtener URL guardada
+  const  loadApi = async (): Promise<string | null> => {
+    try {
+      return await SecureStore.getItemAsync(STORAGE_KEY)
+    } catch (error) {
+      console.error('Error cargando API URL:', error)
+      return null
+    }
+  }
+
+  // Guardar URL
+  const  saveApiUrl = async (url: string): Promise<boolean> => {
+    try {
+      await SecureStore.setItemAsync(STORAGE_KEY, url)
+      return true
+    } catch (error) {
+      console.error('Error guardando API URL:', error)
+      return false
+    }
+  }
+
+  const isValidUrl = (url: string) => {
+    try {
+      new URL(url)
+      return true
+    } catch (error) {
+      console.error('url no valida', error)
+      return false
+    }
+  }
+
+  const handleLogout = async () => {
+    const clearSessionController = new ClearSessionController()
+    await clearSessionController.clearSession()
+    navigation.replace('authenticationScreen')
+  }
+
+  
+  const goBack = () => {
+    setTimeout(() => {
+      navigation.navigate('authenticationScreen')
+    }, 300)
+  }
+
+  return {
+    isAuthenticated,
+    // Funciones
+    saveApiUrl,
+    loadApi,
+    isValidUrl,
+    goBack,
+    handleLogout
+  }
+}

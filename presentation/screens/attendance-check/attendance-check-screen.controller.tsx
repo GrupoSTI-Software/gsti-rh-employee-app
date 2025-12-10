@@ -13,6 +13,7 @@ import { Alert } from 'react-native'
 import { RootStackParamList } from '../../../navigation/types/types'
 import { IAssistance } from '../../../src/features/attendance/domain/types/assistance.interface'
 import { GetAttendanceController } from '../../../src/features/attendance/infraestructure/controllers/get-attendance/get-attendance.controller'
+import { GetZoneCoordinatesController } from '../../../src/features/attendance/infraestructure/controllers/get-zone-coordinates/get-zone-coordinates.controller'
 import { StoreAssistanceController } from '../../../src/features/attendance/infraestructure/controllers/store-assistance/store-assistance.controller'
 import { AuthStateController } from '../../../src/features/authentication/infrastructure/controllers/auth-state.controller'
 import { ClearSessionController } from '../../../src/features/authentication/infrastructure/controllers/clear-seassion.controller'
@@ -25,6 +26,7 @@ import { isCheckOutTimeReached } from './utils/is-checkout-time-reached.util'
 import { openLocationSettings } from './utils/open-location-settings'
 import { validateLocationInBackground } from './utils/validate-location-in-background'
 import { validatePassword } from './utils/validate-password.util'
+import { validateZonesWithDirection, ZonesArray } from './utils/validate-zones'
 
 
 // Agregar interfaces para tipado
@@ -107,6 +109,7 @@ const AttendanceCheckScreenController = () => {
   const [showButtonAssist, setShowButtonAssist] = useState(false)
   const [dateSelectFormat, setDateSelectFormat] = useState('')
   const [showHoursList, setShowHoursList] = useState(false)
+  const [isOutsideZone, setIsOutSideZone] = useState(false)
   useEffect(() => {
     const checkPermission = async () => {
       if (!permission) return
@@ -355,7 +358,7 @@ const AttendanceCheckScreenController = () => {
         error instanceof Error ? error.message : t('errors.unknownError')
       )
     }
-  }, [authStateController, biometricService, registerAttendance, setShiftDateData, t])
+  }, [currentLocation, authStateController, biometricService, registerAttendance, setShiftDateData, t])
 
   /**
    * Maneja el evento de registro de asistencia
@@ -376,10 +379,27 @@ const AttendanceCheckScreenController = () => {
      
       // Primero validar la ubicación antes de proceder con la autenticación
       const locationResult = await validateLocationInBackground()
-      
       // Ubicación validada correctamente, proceder con autenticación
       setCurrentLocation(locationResult)
-      
+      const zoneCoordinatesController = new GetZoneCoordinatesController()
+      const zones =  await zoneCoordinatesController.getZoneCoordinates()
+      if (zones) {
+        const zonas: ZonesArray = zones.map(zona =>
+          zona.map(coord => [coord[0], coord[1]] as [number, number])
+        )
+        const result = validateZonesWithDirection(
+          locationResult.latitude,
+          locationResult.longitude,
+          zonas
+        )
+        setStatus(t('screens.attendanceCheck.distanceToAllowedZone', { meters: result.distance.toFixed(2) , direction: t(`screens.attendanceCheck.directions.${result.direction}`)}))
+        if (result.distance > 3) { // Le damos rango de 3 metros fuera de la zona por motivo de presición
+          setIsOutSideZone(true)
+          setIsLoading(false)
+          setIsLoadingLocation(false)
+          return
+        }
+      }
       // Ejecutar el check-in con la ubicación validada
       await performCheckIn()
       setIsLoading(false)
@@ -416,7 +436,7 @@ const AttendanceCheckScreenController = () => {
     } finally {
       setIsLoadingLocation(false)
     }
-  }, [isButtonLocked, isLoadingLocation, t, validateLocationInBackground, performCheckIn, permissionDenied,setPermissionDeniedMessage])
+  }, [currentLocation,setCurrentLocation,isButtonLocked, isLoadingLocation, t, validateLocationInBackground, performCheckIn, permissionDenied,setPermissionDeniedMessage])
 
   /**
    * Formatea las coordenadas para mostrarlas en pantalla
@@ -546,7 +566,7 @@ const AttendanceCheckScreenController = () => {
         })
         setIsLoading(true)
         setStatus(`⏳ ${t('screens.attendanceCheck.verifying')}`)
-        const response = await HttpService.post('/verify-face', {
+        const response = await (await HttpService).post('/verify-face', {
           imageBase64: photo.base64
         })
              
@@ -589,6 +609,7 @@ const AttendanceCheckScreenController = () => {
     setIsLoading(false)
     setShowFaceScreen(false)
     setPermissionDeniedMessage(false)
+    setIsOutSideZone(false)
   }
 
   const handleDateChange = useCallback(async ( event: DateTimePickerEvent,
@@ -625,6 +646,7 @@ const AttendanceCheckScreenController = () => {
   const getHoursList = useCallback(async (): Promise<void> => {
     setShowHoursList(true)
   }, [i18n,dateSelect, setShowHoursList, attendanceData])
+
   // Memorizar el objeto de retorno completo para evitar recreaciones innecesarias
   const controllerValue = useMemo(() => ({
     themeType,
@@ -688,7 +710,9 @@ const AttendanceCheckScreenController = () => {
     setShowButtonAssist,
     showHoursList,
     setShowHoursList,
-    getHoursList
+    getHoursList,
+    isOutsideZone,
+    setIsOutSideZone
   }), [
     themeType,
     shiftDate,
@@ -752,7 +776,9 @@ const AttendanceCheckScreenController = () => {
     setShowButtonAssist,
     showHoursList,
     setShowHoursList,
-    getHoursList
+    getHoursList,
+    isOutsideZone,
+    setIsOutSideZone
   ])
 
   return controllerValue

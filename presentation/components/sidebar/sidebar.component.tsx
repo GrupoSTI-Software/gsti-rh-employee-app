@@ -198,6 +198,13 @@ const SidebarLayout: React.FC<ISidebarProps> = ({ isOpen, onClose }) => {
               />
             )}
 
+            {isOpen && (
+              <Animated.View 
+                entering={FadeIn.delay(180).duration(150)}
+                style={styles.separator} 
+              />
+            )}
+
             {/* Logout */}
             {isOpen && (
               <Animated.View 

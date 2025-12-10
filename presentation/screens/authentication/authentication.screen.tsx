@@ -68,7 +68,6 @@ export const AuthenticationScreen: React.FC = () => {
   return (
     <View style={[style.container]}>
       <StatusBar style={themeType === 'light' ? 'light' : 'light'} translucent={true} />
-
       <Animated.Image
         entering={FadeInUp.delay(100).duration(400)}
         source={headBannerPath}
@@ -91,6 +90,7 @@ export const AuthenticationScreen: React.FC = () => {
               entering={FadeInDown.delay(200).duration(300)}
               style={style.formContainer}
             >
+              
               <Animated.View
                 entering={FadeIn.delay(300).duration(250)}
               >
@@ -98,6 +98,9 @@ export const AuthenticationScreen: React.FC = () => {
                   {controller.getWelcomeTitle()}
                 </Typography>
               </Animated.View>
+
+
+              
 
               <Animated.View
                 entering={SlideInLeft.delay(400).duration(250)}
@@ -146,7 +149,7 @@ export const AuthenticationScreen: React.FC = () => {
                   loading={Boolean(controller.loginButtonLoading)}
                 />
               </Animated.View>
-
+               
               {controller.shouldShowBiometrics() && (
                 <Animated.View 
                   entering={FadeInUp.delay(800).duration(300)}
@@ -172,6 +175,7 @@ export const AuthenticationScreen: React.FC = () => {
                       disabled={Boolean(controller.loginButtonLoading)}
                     />
                   </Animated.View>
+                  
                 </Animated.View>
               )}
             </Animated.View>

@@ -2,6 +2,7 @@
   "common": {
     "loading": "Cargando...",
     "error": "Error",
+    "information": "Información",
     "warning": "Advertencia",
     "success": "Éxito",
     "cancel": "Cancelar",
@@ -118,7 +119,19 @@
       "attendanceRegisteredSuccessfully": "Asistencia registrada correctamente",
       "permissions": "Permisos",
       "permissionDeniedPermanent": "No otorgaste permisos y el sistema no permite volver a pedir. Actívalos desde Configuración.",
-      "noRecords": "No hay registros de asistencia"
+      "noRecords": "No hay registros de asistencia",
+      "outsideAllowedZone": "Está fuera de la zona permitida",
+      "distanceToAllowedZone": "Te encuentras fuera de la zona permitida, acercate aproximadamente {{meters}} metros hacia el {{direction}} para entrar en la zona permitida.",
+      "directions": {
+        "north": "norte",
+        "northeast": "noreste",
+        "east": "este",
+        "southeast": "sureste",
+        "south": "sur",
+        "southwest": "suroeste",
+        "west": "oeste",
+        "northwest": "noroeste"
+      }
     },
     "profile": {
       "title": "Mi Perfil",
@@ -143,6 +156,18 @@
       "curp": "CURP",
       "rfc": "RFC",
       "imssNss": "NSS (IMSS)"
+    },
+     "apiConfig": {
+      "title": "Configuración del API",
+      "save": "Guardar",
+      "url": "Url del servidor",
+      "placeholder": "https://app.com",
+      "success": "Éxito",
+      "urlSavedSuccessfully": "La URL se guardó correctamente",
+      "couldNotBeSaved": "No se pudo guardar",
+      "urlCannotBeEmpty": "La URL no puede estar vacía",
+      "validation": "Validación",
+      "invalidUrl": "La URL ingresada no es válida. Por favor, verifica el formato."
     }
   },
   "components": {
