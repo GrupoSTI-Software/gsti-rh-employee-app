@@ -1,6 +1,7 @@
 import { Dimensions, StyleSheet } from 'react-native'
 import { IAppTheme } from '../../theme/app-theme.interface'
 import { useAppTheme } from '../../theme/theme-context'
+import { EThemeType } from '../../theme/types/theme-type.enum'
 
 // Get screen dimensions
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window')
@@ -10,7 +11,7 @@ const wp = (percentage: number) => (screenWidth * percentage) / 100
 const hp = (percentage: number) => (screenHeight * percentage) / 100
 const sp = (size: number) => (screenWidth / 375) * size // Scale based on iPhone X width as reference
 
-const createAttendanceCheckStyle = (theme: IAppTheme) =>
+const createAttendanceCheckStyle = (theme: IAppTheme, themeType: EThemeType) =>
   StyleSheet.create({
     backgroundWrapper: {
       flex: 1,
@@ -299,12 +300,11 @@ const createAttendanceCheckStyle = (theme: IAppTheme) =>
       width: 70,
       height: 70,
       borderRadius: 16,
-      backgroundColor: '#FFFFFF',
+      backgroundColor: themeType === EThemeType.LIGHT ? '#FFFFFF' : theme.colors.background,
       borderWidth: 1,
       borderColor: 'rgba(150, 180, 220, 0.3)',
       justifyContent: 'center',
       alignItems: 'center',
-      shadowColor: '#9BB0CC',
       shadowOpacity: 0.15,
       shadowRadius: 10,
       shadowOffset: { width: 0, height: 4 },
@@ -316,12 +316,11 @@ const createAttendanceCheckStyle = (theme: IAppTheme) =>
       width: 70,
       height: 70,
       borderRadius: 16,
-      backgroundColor: '#FFFFFF',
+      backgroundColor: themeType === EThemeType.LIGHT ? '#FFFFFF' : theme.colors.background,
       borderWidth: 1,
       borderColor: 'rgba(150, 180, 220, 0.3)',
       justifyContent: 'center',
       alignItems: 'center',
-      shadowColor: '#9BB0CC',
       shadowOpacity: 0.15,
       shadowRadius: 10,
       shadowOffset: { width: 0, height: 4 },
@@ -329,7 +328,7 @@ const createAttendanceCheckStyle = (theme: IAppTheme) =>
     },
     calendarDateText: {
       fontSize: 18,
-      color: '#000000ff"',
+      color: themeType === EThemeType.LIGHT ? '#000000ff' : '#FFFFFF',
       fontWeight: '600'
     },
     calendar: { 
@@ -352,12 +351,11 @@ const createAttendanceCheckStyle = (theme: IAppTheme) =>
       width: 60,
       height: 60,
       borderRadius: 12,
-      backgroundColor: '#FFFFFF',
+      backgroundColor: themeType === EThemeType.LIGHT ? '#FFFFFF' : theme.colors.background,
       borderWidth: 1,
       borderColor: 'rgba(150, 180, 220, 0.3)',
       justifyContent: 'center',
       alignItems: 'center',
-      shadowColor: '#9BB0CC',
       shadowOpacity: 0.15,
       shadowRadius: 8,
       shadowOffset: { width: 0, height: 4 },
@@ -372,8 +370,8 @@ const createAttendanceCheckStyle = (theme: IAppTheme) =>
   })
 
 const useAttendanceCheckStyle = () => {
-  const { theme } = useAppTheme()
-  return createAttendanceCheckStyle(theme)
+  const { theme, themeType } = useAppTheme()
+  return createAttendanceCheckStyle(theme, themeType)
 }
 
 export default useAttendanceCheckStyle

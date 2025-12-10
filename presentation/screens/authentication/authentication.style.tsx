@@ -1,6 +1,6 @@
-import { StyleSheet, Dimensions } from 'react-native'
-import { useAppTheme } from '../../theme/theme-context'
+import { Dimensions, StyleSheet } from 'react-native'
 import { IAppTheme } from '../../theme/app-theme.interface'
+import { useAppTheme } from '../../theme/theme-context'
 import { EThemeType } from '../../theme/types/theme-type.enum'
 
 const { height, width } = Dimensions.get('window')

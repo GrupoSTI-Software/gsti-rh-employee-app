@@ -1,5 +1,7 @@
 import { AxiosError } from 'axios'
+import * as Device from 'expo-device'
 import i18next from 'i18next'
+import { getOrCreateDeviceToken } from '../../../../../../presentation/utils/token-manager'
 import { InvalidFieldFormatException } from '../../../../../shared/domain/exceptions/invalid-field-format.exception'
 import { RequiredAllFieldsException } from '../../../../../shared/domain/exceptions/required-all-fields.exception'
 import { RequiredFieldException } from '../../../../../shared/domain/exceptions/required-field.exception'
@@ -72,11 +74,16 @@ export class LoginAPIRepository implements Pick<AuthenticationPorts, 'login'> {
         authentication.props.loginCredentials.email,
         authentication.props.loginCredentials.password
       )
-      const response: LoginResponse = await HttpService.post('/auth/login', {
+      const deviceToken = await getOrCreateDeviceToken()
+      const response: LoginResponse = await (await HttpService).post('/auth/login', {
         userEmail: authentication.props.loginCredentials.email,
-        userPassword: authentication.props.loginCredentials.password
+        userPassword: authentication.props.loginCredentials.password,
+        deviceToken,
+        deviceModel: Device.modelName,
+        deviceBrand: Device.brand,
+        deviceType: Device.deviceName,
+        deviceOs: `${Device.osName} ${Device.osVersion}`
       })
-
       if (response.status !== 200) {
         throw new Error(response.data.message)
       }
@@ -87,7 +94,7 @@ export class LoginAPIRepository implements Pick<AuthenticationPorts, 'login'> {
         throw new Error(i18next.t('errors.loginFailedNoTokenProvided'))
       }
 
-      HttpService.setBearerToken(responseData.token)
+      (await HttpService).setBearerToken(responseData.token)
 
       const sessionUser = await this.getSessionUser()
 
@@ -119,7 +126,11 @@ export class LoginAPIRepository implements Pick<AuthenticationPorts, 'login'> {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         const errorMessage = (error?.response?.data?.message ||
           i18next.t('errors.loginFailed')) as string
-        throw new Error(errorMessage)
+        throw {
+          message: errorMessage,
+          status: error.status
+        }
+        
       }
 
       throw new Error(
@@ -143,7 +154,7 @@ export class LoginAPIRepository implements Pick<AuthenticationPorts, 'login'> {
    * @private
    */
   private async getSessionUser(): Promise<UserEntity> {
-    const responseUser: SessionResponse = await HttpService.get('/auth/session')
+    const responseUser: SessionResponse = await (await HttpService).get('/auth/session')
 
     if (responseUser.status !== 200) {
       throw new Error(i18next.t('errors.loginFailedNoAuthenticationStatus'))

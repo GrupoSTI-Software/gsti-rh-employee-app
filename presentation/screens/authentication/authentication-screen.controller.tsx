@@ -4,13 +4,14 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
-import { environment } from '../../../config/environment'
 import { RootStackParamList } from '../../../navigation/types/types'
 import { ELoginTypes } from '../../../src/features/authentication/application/types/login-types.enum'
 import { AuthStateController } from '../../../src/features/authentication/infrastructure/controllers/auth-state.controller'
 import { LoginController } from '../../../src/features/authentication/infrastructure/controllers/login.controller'
 import { BiometricsService } from '../../../src/features/authentication/infrastructure/services/biometrics.service'
 import { ILocationCoordinates, LocationService } from '../../../src/features/authentication/infrastructure/services/location.service'
+import { getApi } from '../../utils/get-api-url'
+import { ApiConfigScreenController } from '../api-config/api-config.screen.controller'
 
 // import Constants from 'expo-constants'
 
@@ -35,13 +36,28 @@ const AuthenticationScreenController = () => {
   const [settedAPIUrl, setSettedAPIUrl] = useState<string>('')
 
   const { t } = useTranslation()
+  const apiConfigController = ApiConfigScreenController()
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>()
 
   useEffect(() => {
     initializeApp().catch(console.error)
   })
+  useEffect(() => {
+    const validateApi = async () => {
+      try {
+      
+        const api = await apiConfigController.loadApi()
 
+        if (!api) {
+          navigation.replace('apiConfig')
+        }
+      } catch (error) {
+        navigation.replace('apiConfig')
+      }
+    }
+    void validateApi()
+  }, [])
   /**
    * Inicializa la aplicación
    * - Inicializa la biometría y los datos de usuario en caso de que existan
@@ -60,7 +76,8 @@ const AuthenticationScreenController = () => {
    * @returns {Promise<void>}
    */
   const initUserData = async () => {
-    setSettedAPIUrl(environment.API_URL || 'NOT ASSIGNED')
+    const apiUrl = await getApi()
+    setSettedAPIUrl(apiUrl || 'NOT ASSIGNED')
     await Promise.all([initBiometricAvailability(), setAuthStateData()])
   }
 
@@ -110,11 +127,16 @@ const AuthenticationScreenController = () => {
       } else {
         navigation.replace('attendanceCheck')
       }
-    } catch (error) {
-      Alert.alert(
-        t('common.error'),
-        error instanceof Error ? error.message : t('errors.unknownError')
-      )
+    } catch (error: any) {
+      let title = 'common.error'
+      if (error.status === 400) {
+        title = 'common.information'
+      }
+
+      const message =
+        (error.message ? error.message : t('errors.unknownError')) as string
+
+      Alert.alert(t(title), message)
     } finally {
       setTimeout(() => {
         setLoginButtonLoading(false)

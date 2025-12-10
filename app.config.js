@@ -99,6 +99,9 @@ export default ({ config }) => {
         fallbackToCacheTimeout: 0,
         checkAutomatically: "ON_LOAD"
       }
-    }
+    },
+    plugins: [
+      "expo-secure-store",
+    ],
   }
 }

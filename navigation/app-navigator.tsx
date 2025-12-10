@@ -5,6 +5,7 @@ import AppNavigatorController from './app-navigator.controller'
 import useAppNavigatorStyle from './app-navigator.style'
 import { RootStackParamList } from './types/types'
 
+import ApiConfigScreen from '../presentation/screens/api-config/api-config.screen'
 import { AttendanceCheckScreen } from '../presentation/screens/attendance-check/attendance-check.screen'
 import AuthenticationScreen from '../presentation/screens/authentication/authentication.screen'
 import { BiometricsConfigScreen } from '../presentation/screens/biometrics/biometrics-config.screen'
@@ -50,6 +51,10 @@ export const AppNavigator: React.FC = () => {
         <Stack.Screen
           name="profile"
           component={ProfileScreen}
+        />
+        <Stack.Screen
+          name="apiConfig"
+          component={ApiConfigScreen}
         />
       </Stack.Navigator>
     </NavigationContainer>
