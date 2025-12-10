@@ -72,7 +72,7 @@ export const ApiConfigScreen: React.FC = () => {
           <Ionicons name="arrow-back" size={32} style={styles.iconBack}/>
         </TouchableOpacity>
         <Text style={styles.title}>{ t('screens.apiConfig.title') }</Text>
-         
+          <Text style={styles.title}>{ t('screens.apiConfig.title') }</Text>
         <TextInput
           label={`${t('screens.apiConfig.url')}`}
           value={apiUrl}
