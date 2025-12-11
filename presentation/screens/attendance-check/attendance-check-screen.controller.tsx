@@ -4,7 +4,7 @@ import {
 } from '@react-native-community/datetimepicker'
 import { useNavigation } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import { AxiosError } from 'axios'
+import axios, { AxiosError } from 'axios'
 import { CameraView, useCameraPermissions } from 'expo-camera'
 import { DateTime } from 'luxon'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -20,14 +20,13 @@ import { ClearSessionController } from '../../../src/features/authentication/inf
 import { BiometricsService } from '../../../src/features/authentication/infrastructure/services/biometrics.service'
 import { ILocationCoordinates, LocationService } from '../../../src/features/authentication/infrastructure/services/location.service'
 import { PasswordPromptService } from '../../../src/features/authentication/infrastructure/services/password-prompt.service'
-import { HttpService } from '../../../src/shared/infrastructure/services/http-service'
 import { useAppTheme } from '../../theme/theme-context'
+import { getApi } from '../../utils/get-api-url'
 import { isCheckOutTimeReached } from './utils/is-checkout-time-reached.util'
 import { openLocationSettings } from './utils/open-location-settings'
 import { validateLocationInBackground } from './utils/validate-location-in-background'
 import { validatePassword } from './utils/validate-password.util'
 import { validateZonesWithDirection, ZonesArray } from './utils/validate-zones'
-
 
 // Agregar interfaces para tipado
 interface IAttendanceData {
@@ -565,11 +564,46 @@ const AttendanceCheckScreenController = () => {
           quality: 0.4
         })
         setIsLoading(true)
+        const authState = await authStateController.getAuthState()
+        const token = authState?.props.authState?.token
+    
+        if (!token) {
+          throw new Error('Token de autenticación no encontrado')
+        }
+        const employeeId = authState?.props.authState?.user?.props.person?.props.employee?.props?.id?.value || null
         setStatus(`⏳ ${t('screens.attendanceCheck.verifying')}`)
-        const response = await (await HttpService).post('/verify-face', {
-          imageBase64: photo.base64
+        // const response = await (await HttpService).post('/verify-face', {
+        //   imageBase64: photo.base64,
+        //   employeeId: employeeId
+        // })
+        const payload = {
+          imageBase64: photo.base64,
+          employeeId: employeeId
+        }
+        const apiUrl = await getApi()
+        const response = await axios.post(`${apiUrl}/verify-face`, payload, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          // Configurar axios para que no lance excepciones en ningún código de estado
+          validateStatus: () => true // Acepta cualquier código de estado sin lanzar excepción
         })
-             
+        // Verificar el código de estado HTTP
+        if (response.status >= 400) {
+          // Manejar errores HTTP 4xx y 5xx
+          const errorMessage = response.data?.message || response.data?.error || 'Error desconocido'
+          
+          if (response.status === 400) {
+            setStatus(`⚠️ Datos inválidos: ${errorMessage}`)
+          } else if (response.status === 500) {
+            setStatus(`⚠️ Error del servidor: ${errorMessage}`)
+          } else {
+            setStatus(`⚠️ Error (${response.status}): ${errorMessage}`)
+          }
+          setIsLoading(false)
+          return // Salir de la función sin continuar
+        }
         const data = typeof response === 'string' ? JSON.parse(response).data : response.data
         if (data.match) {
           setIsButtonLocked(true)

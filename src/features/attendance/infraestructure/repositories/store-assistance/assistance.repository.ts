@@ -17,7 +17,7 @@ export class AssistanceRepository implements Pick<AttendancePorts, 'storeAssist'
    * @returns {Promise<Boolean>} Promesa que resuelve el registro de asistencia o falso si hay error
    */
   async storeAssist(latitude: number, longitude: number): Promise<Boolean> {
-    const API_URL = await getApi()
+    const apiUrl = await getApi()
     const authStateController = new AuthStateController()
       
     // Obtener el token de autenticación y employeeId
@@ -39,7 +39,7 @@ export class AssistanceRepository implements Pick<AttendancePorts, 'storeAssist'
       assistLongitude: longitude
     }
 
-    const response = await axios.post(`${API_URL}/v1/assists`, payload, {
+    const response = await axios.post(`${apiUrl}/v1/assists`, payload, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
