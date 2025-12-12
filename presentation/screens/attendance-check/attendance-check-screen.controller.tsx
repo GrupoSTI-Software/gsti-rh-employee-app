@@ -479,7 +479,7 @@ const AttendanceCheckScreenController = () => {
       onPasswordSuccess?.()
     } else {
       setPasswordError(error)
-      throw new Error(error) // Throw para que el componente maneje el error
+      throw new Error(error)
     }
   }, [onPasswordSuccess, validatePassword])
 
@@ -549,94 +549,215 @@ const AttendanceCheckScreenController = () => {
     }
   }, [setShiftDateData, isRetrying])
 
-  // Camera
-  const captureAndSend = async () => {
+  /**
+   * Captura una fotografía desde la cámara con configuración optimizada
+   * @returns {Promise<{uri: string, base64: string | undefined}>} Objeto con la URI y base64 de la foto capturada
+   * @throws {Error} Si la cámara no está disponible o falla la captura
+   */
+  const capturePhoto = useCallback(async () => {
+    if (!cameraRef.current) {
+      throw new Error(t('screens.attendanceCheck.cameraNotAvailable'))
+    }
+
+    const photo = await cameraRef.current.takePictureAsync({
+      base64: true,
+      quality: 0.4
+    })
+
+    return photo
+  }, [cameraRef])
+
+  /**
+   * Obtiene y valida el token de autenticación del usuario actual
+   * @returns {Promise<{token: string, employeeId: number | null}>} Token y ID del empleado
+   * @throws {Error} Si no se encuentra el token de autenticación
+   */
+  const getAuthenticationData = useCallback(async () => {
+    const authState = await authStateController.getAuthState()
+    const token = authState?.props.authState?.token
+    if (!token) {
+      throw new Error(t('errors.authTokenNotFound'))
+    }
+
+    const employeeId = authState?.props.authState?.user?.props.person?.props.employee?.props?.id?.value || null
+
+    return { token, employeeId }
+  }, [authStateController])
+
+  /**
+   * Envía la imagen capturada al servidor para verificar la identidad facial
+   * @param {string} imageBase64 - Imagen en formato base64
+   * @param {number | null} employeeId - ID del empleado
+   * @param {string} token - Token de autenticación
+   * @returns {Promise<{match: boolean, confidence?: number}>} Resultado de la verificación facial
+   */
+  const verifyFaceWithServer = useCallback(async (
+    imageBase64: string,
+    employeeId: number | null,
+    token: string
+  ) => {
+    const payload = {
+      imageBase64,
+      employeeId
+    }
+
+    const apiUrl = await getApi()
+    const response = await axios.post(`${apiUrl}/verify-face`, payload, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      validateStatus: () => true // Acepta cualquier código de estado sin lanzar excepción
+    })
+
+    return response
+  }, [])
+
+  /**
+   * Maneja la respuesta HTTP del servidor y extrae los datos
+   * @param {any} response - Respuesta del servidor
+   * @returns {{success: boolean, data?: any, errorMessage?: string}} Resultado procesado
+   */
+  const handleServerResponse = useCallback((response: any) => {
+    // Verificar errores HTTP 4xx y 5xx
+    if (response.status >= 400) {
+      const errorMessage = response.data?.message || response.data?.error || 'Error desconocido'
+      
+      let statusMessage = ''
+      if (response.status === 400) {
+        statusMessage = `⚠️ ${t('common.information')}: ${errorMessage}`
+      } else if (response.status === 500) {
+        statusMessage = `⛔️ Error: ${errorMessage}`
+      } else {
+        statusMessage = `⚠️ Error (${response.status}): ${errorMessage}`
+      }
+
+      return {
+        success: false,
+        errorMessage: statusMessage
+      }
+    }
+
+    // Extraer datos de la respuesta
+    const data = typeof response === 'string' ? JSON.parse(response).data : response.data
+    
+    return {
+      success: true,
+      data
+    }
+  }, [])
+
+  /**
+   * Procesa una verificación facial exitosa y registra la asistencia
+   * @param {ILocationCoordinates} location - Ubicación actual del usuario
+   * @returns {Promise<void>}
+   */
+  const handleSuccessfulVerification = useCallback(async (location: ILocationCoordinates) => {
+    setIsButtonLocked(true)
+    
+    // Registrar asistencia en el servidor
+    const registrationSuccess = await registerAttendance(location.latitude, location.longitude)
+    
+    if (registrationSuccess) {
+      try {
+        // Recargar los datos de asistencia desde el servidor
+        await setShiftDateData()
+        setShowFaceScreen(false)
+        setIsAttendanceSucess(true)
+      } catch (reloadError) {
+        console.error('Error recargando datos de asistencia:', reloadError)
+        // No mostramos error al usuario, ya que el registro fue exitoso
+      }
+    }
+
+    // Desbloquear el botón después de 2 segundos
+    setTimeout(() => {
+      setIsButtonLocked(false)
+    }, 2000)
+  }, [registerAttendance, setShiftDateData])
+
+  /**
+   * Maneja errores durante el proceso de captura y verificación
+   * @param {Error | unknown} error - Error capturado
+   */
+  const handleVerificationError = useCallback((error: Error | unknown) => {
+    console.error(t('screens.attendanceCheck.faceVerificationError'), error)
+    setStatus(`⚠️ ${t('screens.attendanceCheck.imageSendError')} ${error}`)
+    setIsLoading(false)
+  }, [t])
+
+  /**
+   * Orquesta el proceso completo de captura y verificación facial
+   * - Valida ubicación actual
+   * - Captura fotografía
+   * - Obtiene datos de autenticación
+   * - Verifica identidad con el servidor
+   * - Registra asistencia si la verificación es exitosa
+   * @returns {Promise<void>}
+   */
+  const captureAndSend = useCallback(async () => {
+    // Validar ubicación actual
     if (!currentLocation) {
       setStatus(`❌ ${t('screens.attendanceCheck.locationAccessFailed')}`)
       return
     }
-    if (!cameraRef.current) return
-    if (cameraRef.current) {
-     
-      try {
-        const photo = await cameraRef.current.takePictureAsync({
-          base64: true,
-          quality: 0.4
-        })
-        setIsLoading(true)
-        const authState = await authStateController.getAuthState()
-        const token = authState?.props.authState?.token
-    
-        if (!token) {
-          throw new Error('Token de autenticación no encontrado')
-        }
-        const employeeId = authState?.props.authState?.user?.props.person?.props.employee?.props?.id?.value || null
-        setStatus(`⏳ ${t('screens.attendanceCheck.verifying')}`)
-        // const response = await (await HttpService).post('/verify-face', {
-        //   imageBase64: photo.base64,
-        //   employeeId: employeeId
-        // })
-        const payload = {
-          imageBase64: photo.base64,
-          employeeId: employeeId
-        }
-        const apiUrl = await getApi()
-        const response = await axios.post(`${apiUrl}/verify-face`, payload, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          // Configurar axios para que no lance excepciones en ningún código de estado
-          validateStatus: () => true // Acepta cualquier código de estado sin lanzar excepción
-        })
-        // Verificar el código de estado HTTP
-        if (response.status >= 400) {
-          // Manejar errores HTTP 4xx y 5xx
-          const errorMessage = response.data?.message || response.data?.error || 'Error desconocido'
-          
-          if (response.status === 400) {
-            setStatus(`⚠️ Datos inválidos: ${errorMessage}`)
-          } else if (response.status === 500) {
-            setStatus(`⚠️ Error del servidor: ${errorMessage}`)
-          } else {
-            setStatus(`⚠️ Error (${response.status}): ${errorMessage}`)
-          }
-          setIsLoading(false)
-          return // Salir de la función sin continuar
-        }
-        const data = typeof response === 'string' ? JSON.parse(response).data : response.data
-        if (data.match) {
-          setIsButtonLocked(true)
-          // Registrar asistencia en el servidor
-          const registrationSuccess = await registerAttendance(currentLocation.latitude, currentLocation.longitude)
-        
-          if (registrationSuccess) {
-            // Si el registro fue exitoso, actualizar los datos locales
-            
-            // Recargar los datos de asistencia desde el servidor
-            try {
-              await setShiftDateData()
-              setShowFaceScreen(false)
-              setIsAttendanceSucess(true)
-             
-            } catch (reloadError) {
-              console.error('Error recargando datos de asistencia:', reloadError)
-              // No mostramos error al usuario, ya que el registro fue exitoso
-            }
-          }
-          setTimeout(() => {
-            setIsButtonLocked(false)
-          }, (2 * 1000))
-        } else {
-          setStatus(`❌ ${t('screens.attendanceCheck.identityNotVerified')}`)
-        }
-      } catch (err) {
-        console.error(err)
-        setStatus(`⚠️ ${t('screens.attendanceCheck.imageSendError')} ${err}`)
-      }
+
+    // Validar disponibilidad de la cámara
+    if (!cameraRef.current) {
+      return
     }
-    setIsLoading(false)
-  }
+
+    try {
+      // 1. Capturar fotografía
+      const photo = await capturePhoto()
+      if (!photo.base64) {
+        setStatus(`❌ ${t('screens.attendanceCheck.photoCaptureError')}`)
+        return
+      }
+      setIsLoading(true)
+
+      // 2. Obtener datos de autenticación
+      const { token, employeeId } = await getAuthenticationData()
+
+      // 3. Actualizar estado de verificación
+      setStatus(`⏳ ${t('screens.attendanceCheck.verifying')}`)
+
+      // 4. Verificar identidad con el servidor
+      const response = await verifyFaceWithServer(photo.base64, employeeId, token)
+
+      // 5. Procesar respuesta del servidor
+      const result = handleServerResponse(response)
+
+      if (!result.success) {
+        if (result.errorMessage) {
+          setStatus(result.errorMessage)
+        }
+        setIsLoading(false)
+        return
+      }
+
+      // 6. Verificar si hay coincidencia facial
+      if (result.data?.match) {
+        await handleSuccessfulVerification(currentLocation)
+      } else {
+        setStatus(`❌ ${t('screens.attendanceCheck.identityNotVerified')}`)
+      }
+    } catch (error) {
+      handleVerificationError(error)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [
+    currentLocation,
+    cameraRef,
+    capturePhoto,
+    getAuthenticationData,
+    verifyFaceWithServer,
+    handleServerResponse,
+    handleSuccessfulVerification,
+    handleVerificationError,
+    t
+  ])
 
   const goBack = () => {
     setStatus(`${t('common.loading')}`)

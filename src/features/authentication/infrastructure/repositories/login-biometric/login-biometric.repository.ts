@@ -110,7 +110,7 @@ export class LoginBiometricRepository implements Pick<AuthenticationPorts, 'logi
       const deviceToken = await getOrCreateDeviceToken()
 
       this.validateCredentials(credentials.email, credentials.password)
-      const response: LoginResponse = await (await HttpService).post('/auth/login', {
+      const response: LoginResponse = await (await HttpService.getInstance()).post('/auth/login', {
         userEmail: credentials.email,
         userPassword: credentials.password,
         deviceToken,
@@ -129,7 +129,7 @@ export class LoginBiometricRepository implements Pick<AuthenticationPorts, 'logi
         throw new Error(i18next.t('errors.loginFailedNoTokenProvided'))
       }
 
-      (await HttpService).setBearerToken(responseData.token)
+      (await HttpService.getInstance()).setBearerToken(responseData.token)
 
       const sessionUser = await this.getSessionUser()
       const authenticationLocalStorageService = new AuthenticationLocalStorageService()
@@ -185,7 +185,7 @@ export class LoginBiometricRepository implements Pick<AuthenticationPorts, 'logi
    * @private
    */
   private async getSessionUser(): Promise<UserEntity> {
-    const responseUser: SessionResponse = await (await HttpService).get('/auth/session')
+    const responseUser: SessionResponse = await (await HttpService.getInstance()).get('/auth/session')
 
     if (responseUser.status !== 200) {
       throw new Error(i18next.t('errors.loginFailedNoAuthenticationStatus'))

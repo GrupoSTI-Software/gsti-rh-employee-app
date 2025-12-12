@@ -10,6 +10,7 @@ import { AuthStateController } from '../../../src/features/authentication/infras
 import { LoginController } from '../../../src/features/authentication/infrastructure/controllers/login.controller'
 import { BiometricsService } from '../../../src/features/authentication/infrastructure/services/biometrics.service'
 import { ILocationCoordinates, LocationService } from '../../../src/features/authentication/infrastructure/services/location.service'
+import { HttpService } from '../../../src/shared/infrastructure/services/http-service'
 import { getApi } from '../../utils/get-api-url'
 import { ApiConfigScreenController } from '../api-config/api-config.screen.controller'
 
@@ -118,6 +119,10 @@ const AuthenticationScreenController = () => {
       })
 
       await setAuthStateData()
+
+      // Inicializar o reutilizar la instancia de HttpService
+      // Si ya existe, la retorna; si no existe, la crea con la URL configurada
+      const httpServiceInstance = await HttpService.getInstance()
 
       const biometricService = new BiometricsService()
       const isBiometricAvailable = await biometricService.isBiometricAvailable()

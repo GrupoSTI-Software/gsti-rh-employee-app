@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { t } from 'i18next'
 import { getApi } from '../../../../../../presentation/utils/get-api-url'
 import { AuthStateController } from '../../../../authentication/infrastructure/controllers/auth-state.controller'
 import { AttendancePorts } from '../../../domain/ports/attendance.ports.js'
@@ -25,12 +26,12 @@ export class AssistanceRepository implements Pick<AttendancePorts, 'storeAssist'
     const token = authState?.props.authState?.token
     
     if (!token) {
-      throw new Error('Token de autenticación no encontrado')
+      throw new Error(t('errors.authTokenNotFound'))
     }
 
     const employeeId = authState?.props.authState?.user?.props.person?.props.employee?.props?.id?.value || null
     if (!employeeId) {
-      throw new Error('Employee ID no encontrado')
+      throw new Error(t('errors.employeeIdNotFound'))
     }
 
     const payload = {

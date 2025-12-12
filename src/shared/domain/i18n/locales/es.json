@@ -83,6 +83,8 @@
       "password": "Ingresa tu contraseña",
       "confirmButton": "Confirmar",
       "cancelButton": "Cancelar",
+      "cameraNotAvailable": "Cámara no disponible",
+      "faceVerificationError": "Error al verificar la cara:",
       "connectionError": {
         "title": "Sin conexión",
         "message": "No se pudo cargar la información de asistencia",
@@ -131,7 +133,11 @@
         "southwest": "suroeste",
         "west": "oeste",
         "northwest": "noroeste"
-      }
+      },
+      "errorFetchingShiftData": "Error al obtener los datos del turno",
+      "methodNotImplemented": "Método no implementado",
+      "errorFetchingZoneCoordinates": "Error al obtener las coordenadas de la zona",
+      "photoCaptureError": "Error al capturar la foto"
     },
     "profile": {
       "title": "Mi Perfil",
@@ -201,6 +207,9 @@
     "invalidPassword": "La contraseña ingresada es incorrecta",
     "noStoredCredentials": "No se encontraron credenciales almacenadas",
     "locationValidationWarning": "El check-in se completó exitosamente, pero hubo un problema con la validación de ubicación:",
-    "goToSettingsMessage": "Para resolver este problema, ve a la configuración de tu dispositivo y habilita los permisos de ubicación con alta precisión."
+    "goToSettingsMessage": "Para resolver este problema, ve a la configuración de tu dispositivo y habilita los permisos de ubicación con alta precisión.",
+    "authTokenNotFound": "Token de autenticación no encontrado",
+    "employeeIdNotFound": "ID de empleado no encontrado",
+    "httpServiceUrlNotConfigured": "No se pudo crear HttpService: URL de API no configurada"
   }
 }

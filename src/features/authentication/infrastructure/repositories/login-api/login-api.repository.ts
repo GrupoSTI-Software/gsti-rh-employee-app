@@ -75,7 +75,7 @@ export class LoginAPIRepository implements Pick<AuthenticationPorts, 'login'> {
         authentication.props.loginCredentials.password
       )
       const deviceToken = await getOrCreateDeviceToken()
-      const response: LoginResponse = await (await HttpService).post('/auth/login', {
+      const response: LoginResponse = await (await HttpService.getInstance()).post('/auth/login', {
         userEmail: authentication.props.loginCredentials.email,
         userPassword: authentication.props.loginCredentials.password,
         deviceToken,
@@ -87,20 +87,15 @@ export class LoginAPIRepository implements Pick<AuthenticationPorts, 'login'> {
       if (response.status !== 200) {
         throw new Error(response.data.message)
       }
-
       const responseData = response.data.data
 
       if (!responseData.token) {
         throw new Error(i18next.t('errors.loginFailedNoTokenProvided'))
       }
-
-      (await HttpService).setBearerToken(responseData.token)
-
+      (await HttpService.getInstance()).setBearerToken(responseData.token)
       const sessionUser = await this.getSessionUser()
-
       const authenticationLocalStorageService = new AuthenticationLocalStorageService()
       const localAuthState = await authenticationLocalStorageService.localGetAuthenticationState()
-
       const newAuthentication = new AuthenticationEntity({
         authState: {
           user: sessionUser,
@@ -154,8 +149,7 @@ export class LoginAPIRepository implements Pick<AuthenticationPorts, 'login'> {
    * @private
    */
   private async getSessionUser(): Promise<UserEntity> {
-    const responseUser: SessionResponse = await (await HttpService).get('/auth/session')
-
+    const responseUser: SessionResponse = await (await HttpService.getInstance()).get('/auth/session')
     if (responseUser.status !== 200) {
       throw new Error(i18next.t('errors.loginFailedNoAuthenticationStatus'))
     }
