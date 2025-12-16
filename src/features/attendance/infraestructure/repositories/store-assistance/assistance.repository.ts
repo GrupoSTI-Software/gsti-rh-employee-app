@@ -14,10 +14,11 @@ export class AssistanceRepository implements Pick<AttendancePorts, 'storeAssist'
   /**
    * Registra la asistencia del usuario
    * @param {number} latitude - Latitud de la ubicación
-   * @param {number} longitude - Longitud de la ubicación  
+   * @param {number} longitude - Longitud de la ubicación 
+   * @param {number} precision - Precisión de la ubicación
    * @returns {Promise<Boolean>} Promesa que resuelve el registro de asistencia o falso si hay error
    */
-  async storeAssist(latitude: number, longitude: number): Promise<Boolean> {
+  async storeAssist(latitude: number, longitude: number, precision: number): Promise<Boolean> {
     const apiUrl = await getApi()
     const authStateController = new AuthStateController()
       
@@ -37,7 +38,8 @@ export class AssistanceRepository implements Pick<AttendancePorts, 'storeAssist'
     const payload = {
       employeeId,
       assistLatitude: latitude,
-      assistLongitude: longitude
+      assistLongitude: longitude,
+      assistPrecision: precision
     }
 
     const response = await axios.post(`${apiUrl}/v1/assists`, payload, {

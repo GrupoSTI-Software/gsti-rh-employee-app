@@ -17,7 +17,8 @@ export interface AttendancePorts {
    * Registra la asistencia del usuario
    * @param {number} latitude - Latitud del usuario
    * @param {number} longitude - Longitud del usuario
+   * @param {number} precision - Precisión de la ubicación
    * @returns {Promise<Boolean>} Promesa que resuelve el registro de asistencia o falso si hay error
    */
-  storeAssist(latitude: number, longitude: number): Promise<Boolean>
+  storeAssist(latitude: number, longitude: number, precision: number): Promise<Boolean>
 }

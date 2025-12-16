@@ -138,7 +138,8 @@
       "methodNotImplemented": "Método no implementado",
       "errorFetchingZoneCoordinates": "Error al obtener las coordenadas de la zona",
       "photoCaptureError": "Error al capturar la foto",
-      "noZonesAssigned": "No se encontraron zonas asignadas para el empleado"
+      "noZonesAssigned": "No se encontraron zonas asignadas para el empleado",
+      "errorFetchingAuthorizeAnyZone": "Error al obtener el permiso para registrar asistencia en cualquier zona"
     },
     "profile": {
       "title": "Mi Perfil",

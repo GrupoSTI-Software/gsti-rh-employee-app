@@ -46,7 +46,7 @@ export function validateZonesWithDirection(
     const zoneLine = lineString(zona)
 
     // 3. Encontrar el punto más cercano en el borde
-    const nearest = nearestPointOnLine(zoneLine, userPoint)
+    const nearest = nearestPointOnLine(zoneLine, userPoint, { units: 'meters' })
 
     const dist = nearest.properties.dist // metros
     if (dist < closestDistance) {
