@@ -137,7 +137,8 @@
       "errorFetchingShiftData": "Error al obtener los datos del turno",
       "methodNotImplemented": "Método no implementado",
       "errorFetchingZoneCoordinates": "Error al obtener las coordenadas de la zona",
-      "photoCaptureError": "Error al capturar la foto"
+      "photoCaptureError": "Error al capturar la foto",
+      "noZonesAssigned": "No se encontraron zonas asignadas para el empleado"
     },
     "profile": {
       "title": "Mi Perfil",

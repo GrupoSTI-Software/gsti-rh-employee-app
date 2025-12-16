@@ -29,14 +29,14 @@ export class ZoneCoordinatesRepository implements Pick<AttendancePorts, 'getAtte
     if (!token) {
       throw new Error(t('errors.authTokenNotFound'))
     }
-
+   
     const employeeId = authState?.props.authState?.user?.props.person?.props.employee?.props?.id?.value || null
-    const response = await axios.get(`${apiUrl}/get-coordinates/&employeeId=${employeeId}`, {
+     
+    const response = await axios.get(`${apiUrl}/employees/${employeeId}/zones`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
     })
-
     if (response.status !== 200) {
       throw new Error(t('screens.attendanceCheck.errorFetchingZoneCoordinates'))
     }
@@ -44,5 +44,6 @@ export class ZoneCoordinatesRepository implements Pick<AttendancePorts, 'getAtte
     
     
     return responseData
+   
   }
 }

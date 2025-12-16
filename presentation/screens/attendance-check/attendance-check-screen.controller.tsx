@@ -373,35 +373,51 @@ const AttendanceCheckScreenController = () => {
     }
     setIsLoading(true)
     setIsLoadingLocation(true)
-
+    const authState = await authStateController.getAuthState()
     try {
-     
+      const employeeAuthorizeAnyZones = authState?.props.authState?.user?.props.person?.props.employee?.props.employeeAuthorizeAnyZones
       // Primero validar la ubicación antes de proceder con la autenticación
       const locationResult = await validateLocationInBackground()
       // Ubicación validada correctamente, proceder con autenticación
       setCurrentLocation(locationResult)
-      const zoneCoordinatesController = new GetZoneCoordinatesController()
-      const zones =  await zoneCoordinatesController.getZoneCoordinates()
-      if (zones) {
-        const zonas: ZonesArray = zones.map(zona =>
-          zona.map(coord => [coord[0], coord[1]] as [number, number])
-        )
-        const result = validateZonesWithDirection(
-          locationResult.latitude,
-          locationResult.longitude,
-          zonas
-        )
-        setStatus(t('screens.attendanceCheck.distanceToAllowedZone', { meters: result.distance.toFixed(2) , direction: t(`screens.attendanceCheck.directions.${result.direction}`)}))
-        if (result.distance > 3) { // Le damos rango de 3 metros fuera de la zona por motivo de presición
-          setIsOutSideZone(true)
+      if (employeeAuthorizeAnyZones === 1) {// Si el empleado tiene permiso para checar cualquier zona, se ejecuta el check-in sin validar la ubicación
+        // Ejecutar el check-in con la ubicación validada
+        await performCheckIn()
+        setIsLoading(false)
+        setIsLoadingLocation(false)
+        return
+      } else {    
+        const zoneCoordinatesController = new GetZoneCoordinatesController()
+        const zones =  await zoneCoordinatesController.getZoneCoordinates()
+        if (zones && zones.length > 0) {
+          const zonas: ZonesArray = zones.map(zona =>
+            zona.map(coord => [coord[0], coord[1]] as [number, number])
+          )
+          const result = validateZonesWithDirection(
+            locationResult.latitude,
+            locationResult.longitude,
+            zonas
+          )
+          setStatus(t('screens.attendanceCheck.distanceToAllowedZone', { meters: result.distance.toFixed(2) , direction: t(`screens.attendanceCheck.directions.${result.direction}`)}))
+          if (result.distance > 3) { // Le damos rango de 3 metros fuera de la zona por motivo de presición
+            setIsOutSideZone(true)
+            setIsLoading(false)
+            setIsLoadingLocation(false)
+            return
+          }
+          // Ejecutar el check-in con la ubicación validada
+          await performCheckIn()
+          setIsLoading(false)
+        } else {
+          Alert.alert(
+            t('common.information'),
+            t('screens.attendanceCheck.noZonesAssigned')
+          )
           setIsLoading(false)
           setIsLoadingLocation(false)
           return
         }
       }
-      // Ejecutar el check-in con la ubicación validada
-      await performCheckIn()
-      setIsLoading(false)
     } catch (error) {
       setIsLoading(false)
       // Verificar si es error de ubicación

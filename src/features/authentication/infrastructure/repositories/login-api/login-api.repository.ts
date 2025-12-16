@@ -187,6 +187,7 @@ export class LoginAPIRepository implements Pick<AuthenticationPorts, 'login'> {
       typeId: responseUser.data.person.employee.employeeTypeId ? new IntegerIdVO(parseInt(`${responseUser.data.person.employee.employeeTypeId}`)) : null,
       businessEmail: responseUser.data.person.employee.employeeBusinessEmail ? new EmailVO(responseUser.data.person.employee.employeeBusinessEmail) : null,
       ignoreConsecutiveAbsences: responseUser.data.person.employee.employeeIgnoreConsecutiveAbsences,
+      employeeAuthorizeAnyZones: responseUser.data.person.employee.employeeAuthorizeAnyZones,
       createdAt: responseUser.data.person.employee.employeeCreatedAt ? new Date(responseUser.data.person.employee.employeeCreatedAt) : null,
       updatedAt: responseUser.data.person.employee.employeeUpdatedAt ? new Date(responseUser.data.person.employee.employeeUpdatedAt) : null,
       deletedAt: responseUser.data.person.employee.employeeDeletedAt ? new Date(responseUser.data.person.employee.employeeDeletedAt) : null,
