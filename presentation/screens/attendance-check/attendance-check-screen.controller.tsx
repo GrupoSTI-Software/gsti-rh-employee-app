@@ -818,15 +818,12 @@ const AttendanceCheckScreenController = () => {
   }, [i18n, dateSelect,dateSelectFormat ,setShiftDateData, setDateSelect, setDateSelectFormat, setLocalDate])
 
   const handleNextDay =  useCallback(async (): Promise<void> => {
-    const today = new Date()
     const newDate = new Date(dateSelect)
     newDate.setDate(newDate.getDate() + 1)
-
-    if (newDate <= today) {
-      setDateSelect(newDate)
-      setLocalDate(newDate)
-      await setShiftDateData()
-    }
+    setDateSelect(newDate)
+    setLocalDate(newDate)
+    await setShiftDateData()
+   
   }, [i18n,dateSelect, dateSelectFormat, setShiftDateData, setDateSelect, setDateSelectFormat, setLocalDate])
 
   const getHoursList = useCallback(async (): Promise<void> => {
