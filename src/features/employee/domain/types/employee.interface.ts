@@ -59,7 +59,8 @@ export interface IEmployee {
   readonly terminatedDate: Date | null
   readonly typeId: IntegerIdVO | null
   readonly businessEmail: EmailVO | null
-  readonly ignoreConsecutiveAbsences: number
+  readonly ignoreConsecutiveAbsences: number,
+  readonly employeeAuthorizeAnyZones: number
   readonly createdAt: Date | null
   readonly updatedAt: Date | null
   readonly deletedAt: Date | null

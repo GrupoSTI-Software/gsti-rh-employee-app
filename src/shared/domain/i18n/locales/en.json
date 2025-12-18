@@ -137,7 +137,9 @@
        "errorFetchingShiftData": "Error fetching shift data",
        "methodNotImplemented": "Method not implemented",
        "errorFetchingZoneCoordinates": "Error fetching zone coordinates",
-       "photoCaptureError": "Error capturing photo"
+       "photoCaptureError": "Error capturing photo",
+       "noZonesAssigned": "No zones assigned for the employee",
+       "errorFetchingAuthorizeAnyZone": "Error fetching authorize any zone"
     },
     "profile": {
       "title": "My Profile",

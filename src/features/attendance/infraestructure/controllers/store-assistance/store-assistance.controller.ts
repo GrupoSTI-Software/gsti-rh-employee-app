@@ -21,10 +21,11 @@ export class StoreAssistanceController {
   /**
    * Registra la asistencia del usuario
    * @param {number} latitude - Latitud de la ubicación
-   * @param {number} longitude - Longitud de la ubicación  
+   * @param {number} longitude - Longitud de la ubicación
+   * @param {number} precision - Precisión de la ubicación
    * @returns {Promise<Boolean>} Promesa que resuelve el registro y devuelve true o false si hay error
    */
-  async storeAssist(latitude: number, longitude: number): Promise<Boolean> {
-    return await this.usecase.run(latitude, longitude)
+  async storeAssist(latitude: number, longitude: number, precision: number): Promise<Boolean> {
+    return await this.usecase.run(latitude, longitude, precision)
   }
 }

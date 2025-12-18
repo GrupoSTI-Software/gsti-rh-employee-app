@@ -18,10 +18,11 @@ export class StoreAssistanceUsecase {
    * Ejecuta el caso de uso para registrar la asistencia del usuario
    * @param {number} latitude - Latitud del usuario
    * @param {number} longitude - Longitud del usuario
+   * @param {number} precision - Precisión de la ubicación
    * @returns {Promise<Boolean>} Promesa que resuelve el registro de asistencia o false si hay error
    */
-  async run(latitude: number, longitude: number): Promise<Boolean> {
-    const attendance = await this.attendancePorts.storeAssist(latitude, longitude)
+  async run(latitude: number, longitude: number, precision: number): Promise<Boolean> {
+    const attendance = await this.attendancePorts.storeAssist(latitude, longitude, precision)
     return attendance
   }
 }

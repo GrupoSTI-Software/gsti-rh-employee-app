@@ -155,7 +155,9 @@
     "RHAPPEMP1764784515787 Token para identificar empleado en app",
     "RHAPPEMP1764784515787 Token para identificar empleado en app",
     "RHBO1765380382682 Ajustes en FaceVerification",
-    "RHBO1765380382682 Ajustes en FaceVerification"
+    "RHBO1765380382682 Ajustes en FaceVerification",
+    "RHBO1765495092404 Asignar zonas autorizadas a empleado",
+    "RHBO1765495092404 Asignar zonas autorizadas a empleado"
   ],
   "search.exclude": {
     "**/node_modules": true,

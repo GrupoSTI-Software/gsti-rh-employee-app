@@ -152,7 +152,7 @@ export class LocationService {
    * @returns {Promise<ILocationCoordinates>} Promesa que resuelve a las coordenadas validadas
    * @throws {Error} Si no se puede obtener una ubicación precisa
    */
-  async getValidatedLocation(requiredAccuracy: number = 30): Promise<ILocationCoordinates> {
+  async getValidatedLocation(requiredAccuracy: number = 200): Promise<ILocationCoordinates> {
     const coordinates = await this.getCurrentLocation()
     
     if (!this.validateLocationAccuracy(coordinates, requiredAccuracy)) {

@@ -13,6 +13,7 @@ import { Alert } from 'react-native'
 import { RootStackParamList } from '../../../navigation/types/types'
 import { IAssistance } from '../../../src/features/attendance/domain/types/assistance.interface'
 import { GetAttendanceController } from '../../../src/features/attendance/infraestructure/controllers/get-attendance/get-attendance.controller'
+import { GetAuthorizeAnyZoneController } from '../../../src/features/attendance/infraestructure/controllers/get-authorize-any-zone/get-authorize-any-zone.controller'
 import { GetZoneCoordinatesController } from '../../../src/features/attendance/infraestructure/controllers/get-zone-coordinates/get-zone-coordinates.controller'
 import { StoreAssistanceController } from '../../../src/features/attendance/infraestructure/controllers/store-assistance/store-assistance.controller'
 import { AuthStateController } from '../../../src/features/authentication/infrastructure/controllers/auth-state.controller'
@@ -300,12 +301,13 @@ const AttendanceCheckScreenController = () => {
    * Registra la asistencia mediante petición POST al API
    * @param {number} latitude - Latitud de la ubicación
    * @param {number} longitude - Longitud de la ubicación  
+   * @param {number} precision - Precisión de la ubicación
    * @returns {Promise<boolean>} True si la petición fue exitosa
    */
-  const registerAttendance = useCallback(async (latitude: number, longitude: number): Promise<Boolean> => {
+  const registerAttendance = useCallback(async (latitude: number, longitude: number, precision: number): Promise<Boolean> => {
     try {
       const assistanceController = new StoreAssistanceController()
-      const storeAssistance =  await assistanceController.storeAssist(latitude, longitude)
+      const storeAssistance =  await assistanceController.storeAssist(latitude, longitude, precision)
       return storeAssistance
     } catch (error) {
       console.error('Error registrando asistencia:', error)
@@ -371,37 +373,66 @@ const AttendanceCheckScreenController = () => {
       setPermissionDeniedMessage(true)
       return
     }
-    setIsLoading(true)
-    setIsLoadingLocation(true)
-
+    
+    const authState = await authStateController.getAuthState()
+   
     try {
-     
+      const employeeId = authState?.props.authState?.user?.props.person?.props.employee?.props?.id?.value
+      if (!employeeId) {
+        Alert.alert(
+          t('common.error'),
+          t('errors.employeeIdNotFound')
+        )
+        return   
+      }
+      const authorizeAnyZoneController = new GetAuthorizeAnyZoneController()
+
+      const employeeAuthorizeAnyZones = await authorizeAnyZoneController.getAuthorizeAnyZone()
+      setIsLoading(true)
+      setIsLoadingLocation(true)
+      
       // Primero validar la ubicación antes de proceder con la autenticación
       const locationResult = await validateLocationInBackground()
       // Ubicación validada correctamente, proceder con autenticación
       setCurrentLocation(locationResult)
-      const zoneCoordinatesController = new GetZoneCoordinatesController()
-      const zones =  await zoneCoordinatesController.getZoneCoordinates()
-      if (zones) {
-        const zonas: ZonesArray = zones.map(zona =>
-          zona.map(coord => [coord[0], coord[1]] as [number, number])
-        )
-        const result = validateZonesWithDirection(
-          locationResult.latitude,
-          locationResult.longitude,
-          zonas
-        )
-        setStatus(t('screens.attendanceCheck.distanceToAllowedZone', { meters: result.distance.toFixed(2) , direction: t(`screens.attendanceCheck.directions.${result.direction}`)}))
-        if (result.distance > 3) { // Le damos rango de 3 metros fuera de la zona por motivo de presición
-          setIsOutSideZone(true)
+      if (employeeAuthorizeAnyZones === 1) {// Si el empleado tiene permiso para checar cualquier zona, se ejecuta el check-in sin validar la ubicación
+        // Ejecutar el check-in con la ubicación validada
+        await performCheckIn()
+        setIsLoading(false)
+        setIsLoadingLocation(false)
+        return
+      } else {    
+        const zoneCoordinatesController = new GetZoneCoordinatesController()
+        const zones =  await zoneCoordinatesController.getZoneCoordinates()
+        if (zones && zones.length > 0) {
+          const zonas: ZonesArray = zones.map(zona =>
+            zona.map(coord => [coord[0], coord[1]] as [number, number])
+          )
+          const result = validateZonesWithDirection(
+            locationResult.latitude,
+            locationResult.longitude,
+            zonas
+          )
+          setStatus(t('screens.attendanceCheck.distanceToAllowedZone', { meters: result.distance.toFixed(2) , direction: t(`screens.attendanceCheck.directions.${result.direction}`)}))
+          if (result.distance > 3) { // Le damos rango de 3 metros fuera de la zona por motivo de presición
+            setIsOutSideZone(true)
+            setIsLoading(false)
+            setIsLoadingLocation(false)
+            return
+          }
+          // Ejecutar el check-in con la ubicación validada
+          await performCheckIn()
+          setIsLoading(false)
+        } else {
+          Alert.alert(
+            t('common.information'),
+            t('screens.attendanceCheck.noZonesAssigned')
+          )
           setIsLoading(false)
           setIsLoadingLocation(false)
           return
         }
       }
-      // Ejecutar el check-in con la ubicación validada
-      await performCheckIn()
-      setIsLoading(false)
     } catch (error) {
       setIsLoading(false)
       // Verificar si es error de ubicación
@@ -656,7 +687,7 @@ const AttendanceCheckScreenController = () => {
     setIsButtonLocked(true)
     
     // Registrar asistencia en el servidor
-    const registrationSuccess = await registerAttendance(location.latitude, location.longitude)
+    const registrationSuccess = await registerAttendance(location.latitude, location.longitude, location.accuracy)
     
     if (registrationSuccess) {
       try {
