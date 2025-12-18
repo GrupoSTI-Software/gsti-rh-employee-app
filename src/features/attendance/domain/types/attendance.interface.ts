@@ -1,4 +1,5 @@
 import { IAssistance } from './assistance.interface'
+import { IException } from './exception.interface'
 
 /**
  * Interfaz que define asistencias
@@ -88,4 +89,10 @@ export interface IAttendance {
    * @type {Array<IAssistance>}
    */
   readonly assitFlatList: Array<IAssistance>
+
+  /**
+   * Lista de excepciones del día
+   * @type {Array<IException>}
+   */
+  readonly exceptions: Array<IException>
 }

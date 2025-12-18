@@ -5,6 +5,7 @@ import { getApi } from '../../../../../../presentation/utils/get-api-url'
 import { AuthStateController } from '../../../../authentication/infrastructure/controllers/auth-state.controller'
 import { AttendanceEntity } from '../../../domain/entities/attendance-entity'
 import { AttendancePorts } from '../../../domain/ports/attendance.ports.js'
+import { IException } from '../../../domain/types/exception.interface'
 
 
 /**
@@ -49,6 +50,33 @@ export class AttendanceRepository implements Pick<AttendancePorts, 'getAttendanc
       }
     }
     const responseData = response.data.data.employeeCalendar[0].assist
+    const exceptions: Array<IException> = []
+    for (const itemException of responseData.exceptions) {
+      const exception: IException = {
+        shiftExceptionId: itemException.shiftExceptionId,
+        shiftExceptionsDescription: itemException.shiftExceptionsDescription,
+        shiftExceptionCheckInTime: itemException.shiftExceptionCheckInTime,
+        shiftExceptionCheckOutTime: itemException.shiftExceptionCheckOutTime,
+        type: itemException.exceptionType?.exceptionTypeTypeName,
+        evidences: []
+      }
+     
+      const responseEvidence = await axios.get(`${apiUrl}/shift-exception/${itemException.shiftExceptionId}/evidences`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      if (responseEvidence.status === 200) {
+        for(const evidence of responseEvidence.data.data.data) {
+          exception.evidences.push({
+            file: evidence.shiftExceptionEvidenceFile
+          })
+        }
+      }
+      exceptions.push(exception)
+      
+    }
+    //
     const shiftInfo: string = responseData?.dateShift?.shiftName || '---'
     const hasException =
       responseData.isRestDay ||
@@ -81,7 +109,8 @@ export class AttendanceRepository implements Pick<AttendancePorts, 'getAttendanc
       isWorkDisabilityDate: responseData.isWorkDisabilityDate,
       isVacationDate: responseData.isVacationDate,
       isHoliday: responseData.isHoliday,
-      assitFlatList: responseData.assitFlatList
+      assitFlatList: responseData.assitFlatList,
+      exceptions: exceptions
     })
 
     

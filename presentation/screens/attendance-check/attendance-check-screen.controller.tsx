@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
 import { RootStackParamList } from '../../../navigation/types/types'
 import { IAssistance } from '../../../src/features/attendance/domain/types/assistance.interface'
+import { IException } from '../../../src/features/attendance/domain/types/exception.interface'
 import { GetAttendanceController } from '../../../src/features/attendance/infraestructure/controllers/get-attendance/get-attendance.controller'
 import { GetAuthorizeAnyZoneController } from '../../../src/features/attendance/infraestructure/controllers/get-authorize-any-zone/get-authorize-any-zone.controller'
 import { GetZoneCoordinatesController } from '../../../src/features/attendance/infraestructure/controllers/get-zone-coordinates/get-zone-coordinates.controller'
@@ -43,7 +44,8 @@ interface IAttendanceData {
   isWorkDisabilityDate: boolean
   isVacationDate: boolean
   isHoliday: boolean
-  assitFlatList: Array<IAssistance>
+  assitFlatList: Array<IAssistance>,
+  exceptions: Array<IException>
 }
 
 /**
@@ -78,7 +80,8 @@ const AttendanceCheckScreenController = () => {
     isWorkDisabilityDate: false,
     isVacationDate: false,
     isHoliday: false,
-    assitFlatList: [] 
+    assitFlatList: [],
+    exceptions: []
   })
   const [shiftEndTime, setShiftEndTime] = useState<string | null>(null)
   const [hasConnectionError, setHasConnectionError] = useState<boolean>(false)
@@ -110,6 +113,7 @@ const AttendanceCheckScreenController = () => {
   const [dateSelectFormat, setDateSelectFormat] = useState('')
   const [showHoursList, setShowHoursList] = useState(false)
   const [isOutsideZone, setIsOutSideZone] = useState(false)
+  const [showExceptionsList, setShowExceptionsList] = useState(false)
   useEffect(() => {
     const checkPermission = async () => {
       if (!permission) return
@@ -159,7 +163,8 @@ const AttendanceCheckScreenController = () => {
         isWorkDisabilityDate: false,
         isVacationDate: false,
         isHoliday: false,
-        assitFlatList: []
+        assitFlatList: [],
+        exceptions: []
       })
       setShiftEndTime(null)
       const date = dateSelect.toISOString().split('T')[0]
@@ -204,7 +209,8 @@ const AttendanceCheckScreenController = () => {
         isWorkDisabilityDate: attendanceProps.isWorkDisabilityDate ?? false,
         isVacationDate: attendanceProps.isVacationDate ?? false,
         isHoliday: attendanceProps.isHoliday ?? false,
-        assitFlatList: attendanceProps.assitFlatList ?? []
+        assitFlatList: attendanceProps.assitFlatList ?? [],
+        exceptions: attendanceProps.exceptions ?? []
       }
       setAttendanceData(newAttendanceData)
 
@@ -256,7 +262,8 @@ const AttendanceCheckScreenController = () => {
         isWorkDisabilityDate: false,
         isVacationDate: false,
         isHoliday: false,
-        assitFlatList: []
+        assitFlatList: [],
+        exceptions: []
       })
       setShiftEndTime(null)
       
@@ -830,6 +837,10 @@ const AttendanceCheckScreenController = () => {
     setShowHoursList(true)
   }, [i18n,dateSelect, setShowHoursList, attendanceData])
 
+  const getExceptionsList = useCallback(async (): Promise<void> => {
+    setShowExceptionsList(true)
+  }, [i18n,dateSelect, setShowExceptionsList, attendanceData])
+
   // Memorizar el objeto de retorno completo para evitar recreaciones innecesarias
   const controllerValue = useMemo(() => ({
     themeType,
@@ -894,8 +905,11 @@ const AttendanceCheckScreenController = () => {
     showHoursList,
     setShowHoursList,
     getHoursList,
+    getExceptionsList,
     isOutsideZone,
-    setIsOutSideZone
+    setIsOutSideZone,
+    showExceptionsList,
+    setShowExceptionsList
   }), [
     themeType,
     shiftDate,
@@ -960,8 +974,11 @@ const AttendanceCheckScreenController = () => {
     showHoursList,
     setShowHoursList,
     getHoursList,
+    getExceptionsList,
     isOutsideZone,
-    setIsOutSideZone
+    setIsOutSideZone,
+    showExceptionsList,
+    setShowExceptionsList
   ])
 
   return controllerValue
