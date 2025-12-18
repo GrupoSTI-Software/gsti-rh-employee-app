@@ -83,6 +83,8 @@
       "password": "Enter your password",
       "confirmButton": "Confirm",
       "cancelButton": "Cancel",
+      "cameraNotAvailable": "Camera not available",
+      "faceVerificationError": "Face verification error:",
       "connectionError": {
         "title": "No connection",
         "message": "Could not load attendance information",
@@ -131,7 +133,13 @@
         "southwest": "southwest",
         "west": "west",
         "northwest": "northwest"
-       }
+       },
+       "errorFetchingShiftData": "Error fetching shift data",
+       "methodNotImplemented": "Method not implemented",
+       "errorFetchingZoneCoordinates": "Error fetching zone coordinates",
+       "photoCaptureError": "Error capturing photo",
+       "noZonesAssigned": "No zones assigned for the employee",
+       "errorFetchingAuthorizeAnyZone": "Error fetching authorize any zone"
     },
     "profile": {
       "title": "My Profile",
@@ -201,6 +209,9 @@
     "invalidPassword": "The entered password is incorrect",
     "noStoredCredentials": "No stored credentials found",
     "locationValidationWarning": "Check-in completed successfully, but there was an issue with location validation:",
-    "goToSettingsMessage": "To resolve this issue, go to your device settings and enable location permissions with high precision."
+    "goToSettingsMessage": "To resolve this issue, go to your device settings and enable location permissions with high precision.",
+    "authTokenNotFound": "Authentication token not found",
+    "employeeIdNotFound": "Employee ID not found",
+    "httpServiceUrlNotConfigured": "Could not create HttpService: API URL not configured"
   }
 }

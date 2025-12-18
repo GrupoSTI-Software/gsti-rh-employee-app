@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
+import { t } from 'i18next'
 import { getApi } from '../../../../presentation/utils/get-api-url'
 
 /**
@@ -27,14 +28,44 @@ class HttpServiceClass {
 
   /**
    * Obtiene la instancia única de HttpServiceClass (Singleton)
-   * @returns {HttpServiceClass} La instancia única de HttpServiceClass
+   * Si ya existe una instancia, la retorna directamente sin crear una nueva.
+   * Si no existe, intenta crear una nueva con la URL de la API configurada.
+   * @returns {Promise<HttpServiceClass>} La instancia única de HttpServiceClass
+   * @throws {Error} Si no existe instancia y no hay URL de API configurada
    */
   public static async getInstance(): Promise<HttpServiceClass> {
-    if (!HttpServiceClass.instance) {
-      const apiUrl = await getApi()
-      HttpServiceClass.instance = new HttpServiceClass(apiUrl ? apiUrl : '')
+    // Si ya existe la instancia, retornarla directamente
+    if (HttpServiceClass.instance) {
+      return HttpServiceClass.instance
     }
+
+    // No existe instancia, intentar crear una nueva
+    const apiUrl = await getApi()
+    
+    if (!apiUrl || apiUrl.trim() === '') {
+      throw new Error(t('errors.httpServiceUrlNotConfigured'))
+    }
+
+    HttpServiceClass.instance = new HttpServiceClass(apiUrl)
+    
     return HttpServiceClass.instance
+  }
+
+  /**
+   * Verifica si ya existe una instancia creada del servicio HTTP
+   * @returns {boolean} true si existe una instancia, false en caso contrario
+   */
+  public static hasInstance(): boolean {
+    return HttpServiceClass.instance !== undefined && HttpServiceClass.instance !== null
+  }
+
+  /**
+   * Reinicia la instancia del servicio HTTP
+   * Útil cuando se necesita cambiar la URL de la API o para testing
+   * @returns {void}
+   */
+  public static resetInstance(): void {
+    HttpServiceClass.instance = null as any
   }
 
   /**
@@ -170,5 +201,48 @@ class HttpServiceClass {
   }
 }
 
- 
-export const HttpService = HttpServiceClass.getInstance()
+/**
+ * Servicio HTTP Singleton exportado
+ * 
+ * @description
+ * Este servicio utiliza el patrón Singleton para garantizar una única instancia
+ * de la configuración HTTP en toda la aplicación.
+ * 
+ * @example
+ * // Verificar si existe una instancia antes de usarla
+ * if (HttpService.hasInstance()) {
+ *   console.log('Instancia ya existe')
+ * }
+ * 
+ * @example
+ * // Obtener o crear instancia en un componente/controlador
+ * const handleLogin = async () => {
+ *   try {
+ *     // Si ya existe instancia, la reutiliza; si no, la crea
+ *     const httpService = await HttpService.getInstance()
+ *     
+ *     // Configurar token de autenticación
+ *     httpService.setBearerToken('mi-token-jwt')
+ *     
+ *     // Hacer peticiones
+ *     const response = await httpService.get('/user/profile')
+ *     return response.data
+ *   } catch (error) {
+ *     console.error('Error:', error)
+ *   }
+ * }
+ * 
+ * @example
+ * // Uso después del login (instancia ya existe)
+ * const fetchUserData = async () => {
+ *   const httpService = await HttpService.getInstance() // Reutiliza la instancia existente
+ *   const response = await httpService.get('/users')
+ *   return response.data
+ * }
+ * 
+ * @example
+ * // Reiniciar instancia (útil para cambiar de URL o testing)
+ * HttpService.resetInstance()
+ * const newHttpService = await HttpService.getInstance() // Crea nueva instancia
+ */
+export const HttpService = HttpServiceClass

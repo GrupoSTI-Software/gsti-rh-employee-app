@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { t } from 'i18next'
 import { getApi } from '../../../../../../presentation/utils/get-api-url'
 import { AuthStateController } from '../../../../authentication/infrastructure/controllers/auth-state.controller'
 import { AttendancePorts } from '../../../domain/ports/attendance.ports.js'
@@ -13,11 +14,12 @@ export class AssistanceRepository implements Pick<AttendancePorts, 'storeAssist'
   /**
    * Registra la asistencia del usuario
    * @param {number} latitude - Latitud de la ubicación
-   * @param {number} longitude - Longitud de la ubicación  
+   * @param {number} longitude - Longitud de la ubicación 
+   * @param {number} precision - Precisión de la ubicación
    * @returns {Promise<Boolean>} Promesa que resuelve el registro de asistencia o falso si hay error
    */
-  async storeAssist(latitude: number, longitude: number): Promise<Boolean> {
-    const API_URL = await getApi()
+  async storeAssist(latitude: number, longitude: number, precision: number): Promise<Boolean> {
+    const apiUrl = await getApi()
     const authStateController = new AuthStateController()
       
     // Obtener el token de autenticación y employeeId
@@ -25,21 +27,22 @@ export class AssistanceRepository implements Pick<AttendancePorts, 'storeAssist'
     const token = authState?.props.authState?.token
     
     if (!token) {
-      throw new Error('Token de autenticación no encontrado')
+      throw new Error(t('errors.authTokenNotFound'))
     }
 
     const employeeId = authState?.props.authState?.user?.props.person?.props.employee?.props?.id?.value || null
     if (!employeeId) {
-      throw new Error('Employee ID no encontrado')
+      throw new Error(t('errors.employeeIdNotFound'))
     }
 
     const payload = {
       employeeId,
       assistLatitude: latitude,
-      assistLongitude: longitude
+      assistLongitude: longitude,
+      assistPrecision: precision
     }
 
-    const response = await axios.post(`${API_URL}/v1/assists`, payload, {
+    const response = await axios.post(`${apiUrl}/v1/assists`, payload, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'

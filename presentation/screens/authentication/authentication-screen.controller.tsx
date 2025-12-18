@@ -10,6 +10,7 @@ import { AuthStateController } from '../../../src/features/authentication/infras
 import { LoginController } from '../../../src/features/authentication/infrastructure/controllers/login.controller'
 import { BiometricsService } from '../../../src/features/authentication/infrastructure/services/biometrics.service'
 import { ILocationCoordinates, LocationService } from '../../../src/features/authentication/infrastructure/services/location.service'
+import { HttpService } from '../../../src/shared/infrastructure/services/http-service'
 import { getApi } from '../../utils/get-api-url'
 import { ApiConfigScreenController } from '../api-config/api-config.screen.controller'
 
@@ -97,7 +98,7 @@ const AuthenticationScreenController = () => {
       const locationService = new LocationService()
       
       try {
-        const coordinates = await locationService.getValidatedLocation(30) // Precisión de 30 metros - recomendado para asistencia laboral
+        const coordinates = await locationService.getValidatedLocation(200) // Precisión de 30 metros - recomendado para asistencia laboral
         setCurrentLocation(coordinates)
       } catch (locationError) {
         Alert.alert(
@@ -118,6 +119,10 @@ const AuthenticationScreenController = () => {
       })
 
       await setAuthStateData()
+
+      // Inicializar o reutilizar la instancia de HttpService
+      // Si ya existe, la retorna; si no existe, la crea con la URL configurada
+      const httpServiceInstance = await HttpService.getInstance()
 
       const biometricService = new BiometricsService()
       const isBiometricAvailable = await biometricService.isBiometricAvailable()
@@ -243,7 +248,7 @@ const AuthenticationScreenController = () => {
   const getCurrentLocationCoordinates = async (): Promise<ILocationCoordinates | null> => {
     try {
       const locationService = new LocationService()
-      const coordinates = await locationService.getValidatedLocation(30) // Precisión de 30 metros - recomendado para asistencia laboral
+      const coordinates = await locationService.getValidatedLocation(200) // Precisión de 30 metros - recomendado para asistencia laboral
       setCurrentLocation(coordinates)
       return coordinates
     } catch (error) {

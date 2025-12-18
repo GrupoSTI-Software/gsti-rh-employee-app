@@ -1,8 +1,8 @@
-import { LoginAuthenticationUsecase } from '../../application/login-authentication/login-authentication.usecase'
+import i18next from 'i18next'
 import { ILoginAuthenticationDTO } from '../../application/login-authentication/login-authentication.dto'
+import { LoginAuthenticationUsecase } from '../../application/login-authentication/login-authentication.usecase'
 import { AuthenticationEntity } from '../../domain/entities/authentication-entity'
 import { IBiometricsPreferences } from '../../domain/types/authentication.interface'
-import i18next from 'i18next'
 import { LoginRepositoryFactory } from '../factories/login-repository.factory'
 import { AuthenticationLocalStorageService } from '../services/authentication-local-storage.service'
 

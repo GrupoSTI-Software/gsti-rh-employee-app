@@ -7,5 +7,7 @@ import { ILocationCoordinates, LocationService } from '../../../../src/features/
 export const validateLocationInBackground = async (): Promise<ILocationCoordinates> => {
   // Usar configuración más rápida para no bloquear la UX
   const locationService = new LocationService()
-  return await locationService.getValidatedLocation(50) // Precisión menos estricta: 50m vs 30m
+  
+  const precision = (await locationService.getCurrentLocation()).accuracy
+  return await locationService.getValidatedLocation(precision) // Precisión menos estricta: 50m vs 30m
 }

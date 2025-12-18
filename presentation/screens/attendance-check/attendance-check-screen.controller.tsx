@@ -4,7 +4,7 @@ import {
 } from '@react-native-community/datetimepicker'
 import { useNavigation } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import { AxiosError } from 'axios'
+import axios, { AxiosError } from 'axios'
 import { CameraView, useCameraPermissions } from 'expo-camera'
 import { DateTime } from 'luxon'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -13,6 +13,7 @@ import { Alert } from 'react-native'
 import { RootStackParamList } from '../../../navigation/types/types'
 import { IAssistance } from '../../../src/features/attendance/domain/types/assistance.interface'
 import { GetAttendanceController } from '../../../src/features/attendance/infraestructure/controllers/get-attendance/get-attendance.controller'
+import { GetAuthorizeAnyZoneController } from '../../../src/features/attendance/infraestructure/controllers/get-authorize-any-zone/get-authorize-any-zone.controller'
 import { GetZoneCoordinatesController } from '../../../src/features/attendance/infraestructure/controllers/get-zone-coordinates/get-zone-coordinates.controller'
 import { StoreAssistanceController } from '../../../src/features/attendance/infraestructure/controllers/store-assistance/store-assistance.controller'
 import { AuthStateController } from '../../../src/features/authentication/infrastructure/controllers/auth-state.controller'
@@ -20,14 +21,13 @@ import { ClearSessionController } from '../../../src/features/authentication/inf
 import { BiometricsService } from '../../../src/features/authentication/infrastructure/services/biometrics.service'
 import { ILocationCoordinates, LocationService } from '../../../src/features/authentication/infrastructure/services/location.service'
 import { PasswordPromptService } from '../../../src/features/authentication/infrastructure/services/password-prompt.service'
-import { HttpService } from '../../../src/shared/infrastructure/services/http-service'
 import { useAppTheme } from '../../theme/theme-context'
+import { getApi } from '../../utils/get-api-url'
 import { isCheckOutTimeReached } from './utils/is-checkout-time-reached.util'
 import { openLocationSettings } from './utils/open-location-settings'
 import { validateLocationInBackground } from './utils/validate-location-in-background'
 import { validatePassword } from './utils/validate-password.util'
 import { validateZonesWithDirection, ZonesArray } from './utils/validate-zones'
-
 
 // Agregar interfaces para tipado
 interface IAttendanceData {
@@ -301,12 +301,13 @@ const AttendanceCheckScreenController = () => {
    * Registra la asistencia mediante petición POST al API
    * @param {number} latitude - Latitud de la ubicación
    * @param {number} longitude - Longitud de la ubicación  
+   * @param {number} precision - Precisión de la ubicación
    * @returns {Promise<boolean>} True si la petición fue exitosa
    */
-  const registerAttendance = useCallback(async (latitude: number, longitude: number): Promise<Boolean> => {
+  const registerAttendance = useCallback(async (latitude: number, longitude: number, precision: number): Promise<Boolean> => {
     try {
       const assistanceController = new StoreAssistanceController()
-      const storeAssistance =  await assistanceController.storeAssist(latitude, longitude)
+      const storeAssistance =  await assistanceController.storeAssist(latitude, longitude, precision)
       return storeAssistance
     } catch (error) {
       console.error('Error registrando asistencia:', error)
@@ -372,37 +373,66 @@ const AttendanceCheckScreenController = () => {
       setPermissionDeniedMessage(true)
       return
     }
-    setIsLoading(true)
-    setIsLoadingLocation(true)
-
+    
+    const authState = await authStateController.getAuthState()
+   
     try {
-     
+      const employeeId = authState?.props.authState?.user?.props.person?.props.employee?.props?.id?.value
+      if (!employeeId) {
+        Alert.alert(
+          t('common.error'),
+          t('errors.employeeIdNotFound')
+        )
+        return   
+      }
+      const authorizeAnyZoneController = new GetAuthorizeAnyZoneController()
+
+      const employeeAuthorizeAnyZones = await authorizeAnyZoneController.getAuthorizeAnyZone()
+      setIsLoading(true)
+      setIsLoadingLocation(true)
+      
       // Primero validar la ubicación antes de proceder con la autenticación
       const locationResult = await validateLocationInBackground()
       // Ubicación validada correctamente, proceder con autenticación
       setCurrentLocation(locationResult)
-      const zoneCoordinatesController = new GetZoneCoordinatesController()
-      const zones =  await zoneCoordinatesController.getZoneCoordinates()
-      if (zones) {
-        const zonas: ZonesArray = zones.map(zona =>
-          zona.map(coord => [coord[0], coord[1]] as [number, number])
-        )
-        const result = validateZonesWithDirection(
-          locationResult.latitude,
-          locationResult.longitude,
-          zonas
-        )
-        setStatus(t('screens.attendanceCheck.distanceToAllowedZone', { meters: result.distance.toFixed(2) , direction: t(`screens.attendanceCheck.directions.${result.direction}`)}))
-        if (result.distance > 3) { // Le damos rango de 3 metros fuera de la zona por motivo de presición
-          setIsOutSideZone(true)
+      if (employeeAuthorizeAnyZones === 1) {// Si el empleado tiene permiso para checar cualquier zona, se ejecuta el check-in sin validar la ubicación
+        // Ejecutar el check-in con la ubicación validada
+        await performCheckIn()
+        setIsLoading(false)
+        setIsLoadingLocation(false)
+        return
+      } else {    
+        const zoneCoordinatesController = new GetZoneCoordinatesController()
+        const zones =  await zoneCoordinatesController.getZoneCoordinates()
+        if (zones && zones.length > 0) {
+          const zonas: ZonesArray = zones.map(zona =>
+            zona.map(coord => [coord[0], coord[1]] as [number, number])
+          )
+          const result = validateZonesWithDirection(
+            locationResult.latitude,
+            locationResult.longitude,
+            zonas
+          )
+          setStatus(t('screens.attendanceCheck.distanceToAllowedZone', { meters: result.distance.toFixed(2) , direction: t(`screens.attendanceCheck.directions.${result.direction}`)}))
+          if (result.distance > 3) { // Le damos rango de 3 metros fuera de la zona por motivo de presición
+            setIsOutSideZone(true)
+            setIsLoading(false)
+            setIsLoadingLocation(false)
+            return
+          }
+          // Ejecutar el check-in con la ubicación validada
+          await performCheckIn()
+          setIsLoading(false)
+        } else {
+          Alert.alert(
+            t('common.information'),
+            t('screens.attendanceCheck.noZonesAssigned')
+          )
           setIsLoading(false)
           setIsLoadingLocation(false)
           return
         }
       }
-      // Ejecutar el check-in con la ubicación validada
-      await performCheckIn()
-      setIsLoading(false)
     } catch (error) {
       setIsLoading(false)
       // Verificar si es error de ubicación
@@ -480,7 +510,7 @@ const AttendanceCheckScreenController = () => {
       onPasswordSuccess?.()
     } else {
       setPasswordError(error)
-      throw new Error(error) // Throw para que el componente maneje el error
+      throw new Error(error)
     }
   }, [onPasswordSuccess, validatePassword])
 
@@ -550,59 +580,215 @@ const AttendanceCheckScreenController = () => {
     }
   }, [setShiftDateData, isRetrying])
 
-  // Camera
-  const captureAndSend = async () => {
+  /**
+   * Captura una fotografía desde la cámara con configuración optimizada
+   * @returns {Promise<{uri: string, base64: string | undefined}>} Objeto con la URI y base64 de la foto capturada
+   * @throws {Error} Si la cámara no está disponible o falla la captura
+   */
+  const capturePhoto = useCallback(async () => {
+    if (!cameraRef.current) {
+      throw new Error(t('screens.attendanceCheck.cameraNotAvailable'))
+    }
+
+    const photo = await cameraRef.current.takePictureAsync({
+      base64: true,
+      quality: 0.4
+    })
+
+    return photo
+  }, [cameraRef])
+
+  /**
+   * Obtiene y valida el token de autenticación del usuario actual
+   * @returns {Promise<{token: string, employeeId: number | null}>} Token y ID del empleado
+   * @throws {Error} Si no se encuentra el token de autenticación
+   */
+  const getAuthenticationData = useCallback(async () => {
+    const authState = await authStateController.getAuthState()
+    const token = authState?.props.authState?.token
+    if (!token) {
+      throw new Error(t('errors.authTokenNotFound'))
+    }
+
+    const employeeId = authState?.props.authState?.user?.props.person?.props.employee?.props?.id?.value || null
+
+    return { token, employeeId }
+  }, [authStateController])
+
+  /**
+   * Envía la imagen capturada al servidor para verificar la identidad facial
+   * @param {string} imageBase64 - Imagen en formato base64
+   * @param {number | null} employeeId - ID del empleado
+   * @param {string} token - Token de autenticación
+   * @returns {Promise<{match: boolean, confidence?: number}>} Resultado de la verificación facial
+   */
+  const verifyFaceWithServer = useCallback(async (
+    imageBase64: string,
+    employeeId: number | null,
+    token: string
+  ) => {
+    const payload = {
+      imageBase64,
+      employeeId
+    }
+
+    const apiUrl = await getApi()
+    const response = await axios.post(`${apiUrl}/verify-face`, payload, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      validateStatus: () => true // Acepta cualquier código de estado sin lanzar excepción
+    })
+
+    return response
+  }, [])
+
+  /**
+   * Maneja la respuesta HTTP del servidor y extrae los datos
+   * @param {any} response - Respuesta del servidor
+   * @returns {{success: boolean, data?: any, errorMessage?: string}} Resultado procesado
+   */
+  const handleServerResponse = useCallback((response: any) => {
+    // Verificar errores HTTP 4xx y 5xx
+    if (response.status >= 400) {
+      const errorMessage = response.data?.message || response.data?.error || 'Error desconocido'
+      
+      let statusMessage = ''
+      if (response.status === 400) {
+        statusMessage = `⚠️ ${t('common.information')}: ${errorMessage}`
+      } else if (response.status === 500) {
+        statusMessage = `⛔️ Error: ${errorMessage}`
+      } else {
+        statusMessage = `⚠️ Error (${response.status}): ${errorMessage}`
+      }
+
+      return {
+        success: false,
+        errorMessage: statusMessage
+      }
+    }
+
+    // Extraer datos de la respuesta
+    const data = typeof response === 'string' ? JSON.parse(response).data : response.data
+    
+    return {
+      success: true,
+      data
+    }
+  }, [])
+
+  /**
+   * Procesa una verificación facial exitosa y registra la asistencia
+   * @param {ILocationCoordinates} location - Ubicación actual del usuario
+   * @returns {Promise<void>}
+   */
+  const handleSuccessfulVerification = useCallback(async (location: ILocationCoordinates) => {
+    setIsButtonLocked(true)
+    
+    // Registrar asistencia en el servidor
+    const registrationSuccess = await registerAttendance(location.latitude, location.longitude, location.accuracy)
+    
+    if (registrationSuccess) {
+      try {
+        // Recargar los datos de asistencia desde el servidor
+        await setShiftDateData()
+        setShowFaceScreen(false)
+        setIsAttendanceSucess(true)
+      } catch (reloadError) {
+        console.error('Error recargando datos de asistencia:', reloadError)
+        // No mostramos error al usuario, ya que el registro fue exitoso
+      }
+    }
+
+    // Desbloquear el botón después de 2 segundos
+    setTimeout(() => {
+      setIsButtonLocked(false)
+    }, 2000)
+  }, [registerAttendance, setShiftDateData])
+
+  /**
+   * Maneja errores durante el proceso de captura y verificación
+   * @param {Error | unknown} error - Error capturado
+   */
+  const handleVerificationError = useCallback((error: Error | unknown) => {
+    console.error(t('screens.attendanceCheck.faceVerificationError'), error)
+    setStatus(`⚠️ ${t('screens.attendanceCheck.imageSendError')} ${error}`)
+    setIsLoading(false)
+  }, [t])
+
+  /**
+   * Orquesta el proceso completo de captura y verificación facial
+   * - Valida ubicación actual
+   * - Captura fotografía
+   * - Obtiene datos de autenticación
+   * - Verifica identidad con el servidor
+   * - Registra asistencia si la verificación es exitosa
+   * @returns {Promise<void>}
+   */
+  const captureAndSend = useCallback(async () => {
+    // Validar ubicación actual
     if (!currentLocation) {
       setStatus(`❌ ${t('screens.attendanceCheck.locationAccessFailed')}`)
       return
     }
-    if (!cameraRef.current) return
-    if (cameraRef.current) {
-     
-      try {
-        const photo = await cameraRef.current.takePictureAsync({
-          base64: true,
-          quality: 0.4
-        })
-        setIsLoading(true)
-        setStatus(`⏳ ${t('screens.attendanceCheck.verifying')}`)
-        const response = await (await HttpService).post('/verify-face', {
-          imageBase64: photo.base64
-        })
-             
-        const data = typeof response === 'string' ? JSON.parse(response).data : response.data
-        if (data.match) {
-          setIsButtonLocked(true)
-          // Registrar asistencia en el servidor
-          const registrationSuccess = await registerAttendance(currentLocation.latitude, currentLocation.longitude)
-        
-          if (registrationSuccess) {
-            // Si el registro fue exitoso, actualizar los datos locales
-            
-            // Recargar los datos de asistencia desde el servidor
-            try {
-              await setShiftDateData()
-              setShowFaceScreen(false)
-              setIsAttendanceSucess(true)
-             
-            } catch (reloadError) {
-              console.error('Error recargando datos de asistencia:', reloadError)
-              // No mostramos error al usuario, ya que el registro fue exitoso
-            }
-          }
-          setTimeout(() => {
-            setIsButtonLocked(false)
-          }, (2 * 1000))
-        } else {
-          setStatus(`❌ ${t('screens.attendanceCheck.identityNotVerified')}`)
-        }
-      } catch (err) {
-        console.error(err)
-        setStatus(`⚠️ ${t('screens.attendanceCheck.imageSendError')} ${err}`)
-      }
+
+    // Validar disponibilidad de la cámara
+    if (!cameraRef.current) {
+      return
     }
-    setIsLoading(false)
-  }
+
+    try {
+      // 1. Capturar fotografía
+      const photo = await capturePhoto()
+      if (!photo.base64) {
+        setStatus(`❌ ${t('screens.attendanceCheck.photoCaptureError')}`)
+        return
+      }
+      setIsLoading(true)
+
+      // 2. Obtener datos de autenticación
+      const { token, employeeId } = await getAuthenticationData()
+
+      // 3. Actualizar estado de verificación
+      setStatus(`⏳ ${t('screens.attendanceCheck.verifying')}`)
+
+      // 4. Verificar identidad con el servidor
+      const response = await verifyFaceWithServer(photo.base64, employeeId, token)
+
+      // 5. Procesar respuesta del servidor
+      const result = handleServerResponse(response)
+
+      if (!result.success) {
+        if (result.errorMessage) {
+          setStatus(result.errorMessage)
+        }
+        setIsLoading(false)
+        return
+      }
+
+      // 6. Verificar si hay coincidencia facial
+      if (result.data?.match) {
+        await handleSuccessfulVerification(currentLocation)
+      } else {
+        setStatus(`❌ ${t('screens.attendanceCheck.identityNotVerified')}`)
+      }
+    } catch (error) {
+      handleVerificationError(error)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [
+    currentLocation,
+    cameraRef,
+    capturePhoto,
+    getAuthenticationData,
+    verifyFaceWithServer,
+    handleServerResponse,
+    handleSuccessfulVerification,
+    handleVerificationError,
+    t
+  ])
 
   const goBack = () => {
     setStatus(`${t('common.loading')}`)
@@ -632,15 +818,12 @@ const AttendanceCheckScreenController = () => {
   }, [i18n, dateSelect,dateSelectFormat ,setShiftDateData, setDateSelect, setDateSelectFormat, setLocalDate])
 
   const handleNextDay =  useCallback(async (): Promise<void> => {
-    const today = new Date()
     const newDate = new Date(dateSelect)
     newDate.setDate(newDate.getDate() + 1)
-
-    if (newDate <= today) {
-      setDateSelect(newDate)
-      setLocalDate(newDate)
-      await setShiftDateData()
-    }
+    setDateSelect(newDate)
+    setLocalDate(newDate)
+    await setShiftDateData()
+   
   }, [i18n,dateSelect, dateSelectFormat, setShiftDateData, setDateSelect, setDateSelectFormat, setLocalDate])
 
   const getHoursList = useCallback(async (): Promise<void> => {

@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { t } from 'i18next'
 import { getApi } from '../../../../../../presentation/utils/get-api-url'
 import { AuthStateController } from '../../../../authentication/infrastructure/controllers/auth-state.controller'
 import { AttendanceEntity } from '../../../domain/entities/attendance-entity'
@@ -12,7 +13,7 @@ import { AttendancePorts } from '../../../domain/ports/attendance.ports.js'
 export class ZoneCoordinatesRepository implements Pick<AttendancePorts, 'getAttendance'>
 {
   getAttendance(): Promise<AttendanceEntity | null> {
-    throw new Error('Method not implemented.')
+    throw new Error(t('screens.attendanceCheck.methodNotImplemented'))
   }
   /**
    * Obtiene las asistencias del usuario
@@ -26,26 +27,23 @@ export class ZoneCoordinatesRepository implements Pick<AttendancePorts, 'getAtte
     const token = authState?.props.authState?.token
 
     if (!token) {
-      throw new Error('Token de autenticación no encontrado')
+      throw new Error(t('errors.authTokenNotFound'))
     }
-    
-    if (!token) {
-      throw new Error('Token de autenticación no encontrado')
-    }
-
+   
     const employeeId = authState?.props.authState?.user?.props.person?.props.employee?.props?.id?.value || null
-    const response = await axios.get(`${apiUrl}/get-coordinates/&employeeId=${employeeId}`, {
+     
+    const response = await axios.get(`${apiUrl}/employees/${employeeId}/zones`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
     })
-
     if (response.status !== 200) {
-      throw new Error('Error fetching zone coordinates')
+      throw new Error(t('screens.attendanceCheck.errorFetchingZoneCoordinates'))
     }
     const responseData = response.data.data.coordinates as []
     
     
     return responseData
+   
   }
 }

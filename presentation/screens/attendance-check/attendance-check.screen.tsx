@@ -274,7 +274,7 @@ export const AttendanceCheckScreen: React.FC = React.memo(() => {
                           <View style={[buttonWrapperStyles, { zIndex: 10 }]}>
                             <AnimatedTouchableOpacity
                               style={[buttonStyles, { zIndex: 10 }, 
-                                !controller.showButtonAssist && { backgroundColor: 'orange' }]}
+                                !controller.showButtonAssist && { backgroundColor: 'gray' }]}
                               onPress={controller.handleCheckIn}
                               disabled={controller.isButtonDisabled || !controller.showButtonAssist}
                               activeOpacity={0.8}
@@ -302,9 +302,8 @@ export const AttendanceCheckScreen: React.FC = React.memo(() => {
                       <TouchableOpacity
                         style={[styles.arrowButton]}
                         onPress={controller.handleNextDay}
-                        disabled={controller.showButtonAssist}
                       >
-                        <MaterialIcons name="chevron-right" size={30} color={controller.showButtonAssist ? 'rgba(114,136,162,0.4)' : '#7288A2'} />
+                        <MaterialIcons name="chevron-right" size={30} color='#7288A2' />
                       </TouchableOpacity>
 
                     </View>
@@ -439,10 +438,8 @@ export const AttendanceCheckScreen: React.FC = React.memo(() => {
                 mode="date"
                 display={Platform.OS === 'android' ? 'calendar' : 'spinner'}
                 onChange={controller.handleDateChange}
-                maximumDate={new Date()}
               />
             </View>
-            
           )}
           {controller.showHoursList && (
             <HourList
