@@ -25,9 +25,12 @@ const createAuthenticationStyle = (theme: IAppTheme, themeType: EThemeType) =>
       minHeight: height - 250
     },
     logoImage: {
-      width: '100%',
-      height: 300,
-      resizeMode: 'cover'
+      width: '60%',
+      height: 120,
+      resizeMode: 'contain',
+      alignSelf: 'center',
+      marginTop: 60,
+      marginBottom: 20
     },
     backButton: {
       position: 'absolute',

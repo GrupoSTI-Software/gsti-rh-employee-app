@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
 import { RootStackParamList } from '../../../navigation/types/types'
+import { GetSystemSettingsController } from '../../../src/features/attendance/infraestructure/controllers/get-system-setting/get-system-settings.controller'
 import { ELoginTypes } from '../../../src/features/authentication/application/types/login-types.enum'
 import { AuthStateController } from '../../../src/features/authentication/infrastructure/controllers/auth-state.controller'
 import { LoginController } from '../../../src/features/authentication/infrastructure/controllers/login.controller'
@@ -35,9 +36,10 @@ const AuthenticationScreenController = () => {
   const [hasBiometricsPromptBeenShown, setHasBiometricsPromptBeenShown] = useState(false)
   const [currentLocation, setCurrentLocation] = useState<ILocationCoordinates | null>(null)
   const [settedAPIUrl, setSettedAPIUrl] = useState<string>('')
-
+  const [systemIcon, setIconImage] = useState<string>('')
   const { t } = useTranslation()
   const apiConfigController = ApiConfigScreenController()
+  const getSystemSettingsController = new GetSystemSettingsController()
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>()
 
@@ -80,6 +82,8 @@ const AuthenticationScreenController = () => {
     const apiUrl = await getApi()
     setSettedAPIUrl(apiUrl || 'NOT ASSIGNED')
     await Promise.all([initBiometricAvailability(), setAuthStateData()])
+    const systemSettings = await getSystemSettingsController.getSystemSettings()
+    setIconImage(systemSettings?.props.systemSettingLogo || '')
   }
 
   /**
@@ -264,6 +268,7 @@ const AuthenticationScreenController = () => {
     biometricType,
     securityAlert,
     currentLocation,
+    systemIcon,
     setSecurityAlert,
     loginHandler,
     setEmail: handleEmailChange,

@@ -27,14 +27,11 @@ import { Button } from '../../components/button/button.component'
 import { TextInput } from '../../components/text-input/text-input.component'
 import { Typography } from '../../components/typography/typography.component'
 
-import { environment } from '../../../config/environment'
 import { useAppTheme } from '../../theme/theme-context'
 import { AuthenticationScreenController } from './authentication-screen.controller'
 import useAuthenticationStyle from './authentication.style'
 
 const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity)
-
-const APP_VARIANT = environment.APP_VARIANT
 
 /**
  * @description AuthenticationScreen es la pantalla que permite al usuario autenticarse con correo electrónico y contraseña
@@ -45,19 +42,6 @@ export const AuthenticationScreen: React.FC = () => {
   const style = useAuthenticationStyle()
   const { t } = useTranslation()
   const { themeType } = useAppTheme()
-  
-  let headBannerPath = APP_VARIANT === 'sae.production' ? require('../../../assets/sae/app-headbanner-2.png') : require('../../../assets/app-headbanner-2.png')
-
-  switch (APP_VARIANT) {
-  case 'sae-production':
-    headBannerPath = require('../../../assets/sae/app-headbanner-2.png')
-    break
-  case 'gsti-demo-production':
-    headBannerPath = require('../../../assets/gsti/app-headbanner-2.png')
-    break
-  default:
-    headBannerPath = require('../../../assets/app-headbanner-2.png')
-  }
 
   React.useEffect(() => {
     if (Platform.OS === 'ios') {
@@ -68,11 +52,13 @@ export const AuthenticationScreen: React.FC = () => {
   return (
     <View style={[style.container]}>
       <StatusBar style={themeType === 'light' ? 'light' : 'light'} translucent={true} />
-      <Animated.Image
-        entering={FadeInUp.delay(100).duration(400)}
-        source={headBannerPath}
-        style={style.logoImage}
-      />
+      {controller.systemIcon && (
+        <Animated.Image
+          entering={FadeInUp.delay(100).duration(400)}
+          source={{ uri: controller.systemIcon }}
+          style={style.logoImage}
+        />
+      )}
 
       <SafeAreaView style={[style.safeAreaContent]}>
         <KeyboardAvoidingView

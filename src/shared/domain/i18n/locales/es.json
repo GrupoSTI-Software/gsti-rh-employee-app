@@ -222,6 +222,7 @@
     "goToSettingsMessage": "Para resolver este problema, ve a la configuración de tu dispositivo y habilita los permisos de ubicación con alta precisión.",
     "authTokenNotFound": "Token de autenticación no encontrado",
     "employeeIdNotFound": "ID de empleado no encontrado",
-    "httpServiceUrlNotConfigured": "No se pudo crear HttpService: URL de API no configurada"
+    "httpServiceUrlNotConfigured": "No se pudo crear HttpService: URL de API no configurada",
+    "errorFetchingSystemSettings": "Error al obtener la configuración del sistema"
   }
 }
