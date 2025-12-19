@@ -159,7 +159,9 @@
     "RHBO1765380382682 Ajustes en FaceVerification",
     "RHBO1765495092404 Asignar zonas autorizadas a empleado",
     "RHBO1765495092404 Asignar zonas autorizadas a empleado",
-    "RHAPPEMP1765928107717 Próximos días en checador"
+    "RHAPPEMP1765928107717 Próximos días en checador",
+    "RHAPPEMP1765975664873 Excepciones en día seleccionado",
+    "RHAPPEMP1765975664873 Excepciones en día seleccionado"
   ],
   "search.exclude": {
     "**/node_modules": true,

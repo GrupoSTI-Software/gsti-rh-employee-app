@@ -31,6 +31,7 @@ import { AttendanceCheckScreenController } from './attendance-check-screen.contr
 import useAttendanceCheckStyle from './attendance-check.style'
 // import { PasswordBottomSheet } from './password-bottom-sheet.component'
 import Svg, { Circle, Path } from 'react-native-svg'
+import ExceptionList from '../../components/attendance-exceptions-list/attendance-exceptions-list'
 import HourList from '../../components/attendance-hours-list/attendance-hours-list'
 import { getIconColor } from './utils/get-icon-color'
 import { getIndicatorStyles } from './utils/get-indicator-styles'
@@ -208,6 +209,30 @@ export const AttendanceCheckScreen: React.FC = React.memo(() => {
                     {/* Contenido normal cuando hay conexión */}
                     
                     <View style={styles.containerCalendar}>
+                      {/* Botón de excepciones */}
+                      <TouchableOpacity style={styles.hoursButton} onPress={() => controller.getExceptionsList()}>
+                        <Svg
+                          width={22}
+                          height={22}
+                          viewBox="0 0 24 24"
+                          fill="none"
+                        >
+                          {/* Icono de notas/mensaje */}
+                          <Path
+                            d="M3 3h18v18H3V3z"
+                            stroke="#88a4bf"
+                            strokeWidth="2"
+                            fill="none"
+                          />
+                          {/* Líneas de texto */}
+                          <Path
+                            d="M7 8h10M7 12h10M7 16h6"
+                            stroke="#88a4bf"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                          />
+                        </Svg>
+                      </TouchableOpacity>
                       {/* Botón  con calendario */}
                       <TouchableOpacity style={styles.hoursButton} onPress={() => controller.getHoursList()}>
                         <Svg
@@ -445,6 +470,13 @@ export const AttendanceCheckScreen: React.FC = React.memo(() => {
             <HourList
               hours={controller.attendanceData.assitFlatList}
               onClose={() => controller.setShowHoursList(false)}
+              dateString={controller.dateSelectFormat} 
+            />
+          )}
+          {controller.showExceptionsList && (
+            <ExceptionList
+              exceptions={controller.attendanceData.exceptions}
+              onClose={() => controller.setShowExceptionsList(false)}
               dateString={controller.dateSelectFormat} 
             />
           )}

@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
 import { RootStackParamList } from '../../../navigation/types/types'
 import { IAssistance } from '../../../src/features/attendance/domain/types/assistance.interface'
+import { IException } from '../../../src/features/attendance/domain/types/exception.interface'
 import { GetAttendanceController } from '../../../src/features/attendance/infraestructure/controllers/get-attendance/get-attendance.controller'
 import { GetAuthorizeAnyZoneController } from '../../../src/features/attendance/infraestructure/controllers/get-authorize-any-zone/get-authorize-any-zone.controller'
 import { GetZoneCoordinatesController } from '../../../src/features/attendance/infraestructure/controllers/get-zone-coordinates/get-zone-coordinates.controller'
@@ -43,7 +44,8 @@ interface IAttendanceData {
   isWorkDisabilityDate: boolean
   isVacationDate: boolean
   isHoliday: boolean
-  assitFlatList: Array<IAssistance>
+  assitFlatList: Array<IAssistance>,
+  exceptions: Array<IException>
 }
 
 /**
@@ -78,7 +80,8 @@ const AttendanceCheckScreenController = () => {
     isWorkDisabilityDate: false,
     isVacationDate: false,
     isHoliday: false,
-    assitFlatList: [] 
+    assitFlatList: [],
+    exceptions: []
   })
   const [shiftEndTime, setShiftEndTime] = useState<string | null>(null)
   const [hasConnectionError, setHasConnectionError] = useState<boolean>(false)
@@ -110,6 +113,7 @@ const AttendanceCheckScreenController = () => {
   const [dateSelectFormat, setDateSelectFormat] = useState('')
   const [showHoursList, setShowHoursList] = useState(false)
   const [isOutsideZone, setIsOutSideZone] = useState(false)
+  const [showExceptionsList, setShowExceptionsList] = useState(false)
   useEffect(() => {
     const checkPermission = async () => {
       if (!permission) return
@@ -144,8 +148,11 @@ const AttendanceCheckScreenController = () => {
 
 
   // Definir setShiftDateData antes de usarlo en useEffect
-  const setShiftDateData = useCallback(async (): Promise<string> => {
+  const setShiftDateData = useCallback(async (customDate?: Date): Promise<string> => {
     try {
+      // Usar la fecha proporcionada o la fecha del estado
+      const targetDate = customDate || dateSelect
+      
       setAttendanceData({
         checkInTime: null,
         checkOutTime: null,
@@ -159,13 +166,14 @@ const AttendanceCheckScreenController = () => {
         isWorkDisabilityDate: false,
         isVacationDate: false,
         isHoliday: false,
-        assitFlatList: []
+        assitFlatList: [],
+        exceptions: []
       })
       setShiftEndTime(null)
-      const date = dateSelect.toISOString().split('T')[0]
+      const date = targetDate.toISOString().split('T')[0]
       const todayDate = new Date().toISOString().split('T')[0]
       setShowButtonAssist(date === todayDate)
-      const dateFormat = DateTime.fromJSDate(dateSelect).setLocale(i18n.language).toFormat('DDDD')
+      const dateFormat = DateTime.fromJSDate(targetDate).setLocale(i18n.language).toFormat('DDDD')
       setDateSelectFormat(dateFormat)
 
       const attendanceController = new GetAttendanceController()
@@ -204,10 +212,10 @@ const AttendanceCheckScreenController = () => {
         isWorkDisabilityDate: attendanceProps.isWorkDisabilityDate ?? false,
         isVacationDate: attendanceProps.isVacationDate ?? false,
         isHoliday: attendanceProps.isHoliday ?? false,
-        assitFlatList: attendanceProps.assitFlatList ?? []
+        assitFlatList: attendanceProps.assitFlatList ?? [],
+        exceptions: attendanceProps.exceptions ?? []
       }
       setAttendanceData(newAttendanceData)
-
       return shiftInfo
     } catch (error) {
       console.error('Error fetching shift data:', error)
@@ -256,7 +264,8 @@ const AttendanceCheckScreenController = () => {
         isWorkDisabilityDate: false,
         isVacationDate: false,
         isHoliday: false,
-        assitFlatList: []
+        assitFlatList: [],
+        exceptions: []
       })
       setShiftEndTime(null)
       
@@ -274,7 +283,7 @@ const AttendanceCheckScreenController = () => {
     }
   }, [showPasswordDrawer])
 
-  // Ejecutar la petición al cargar el screen
+  // Ejecutar la petición al cargar el screen - SOLO una vez
   useEffect(() => {
     const loadShiftData = async () => {
       try {
@@ -285,7 +294,8 @@ const AttendanceCheckScreenController = () => {
     }
     
     void loadShiftData()
-  }, [setShiftDateData])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Validar contraseña
   const handlePasswordSubmit = useCallback(async () => {
@@ -806,7 +816,7 @@ const AttendanceCheckScreenController = () => {
     if (!selectedDate) return
     setLocalDate(selectedDate)
     setDateSelect(selectedDate)
-    await setShiftDateData()
+    await setShiftDateData(selectedDate) // Pasar la nueva fecha directamente
   }, [i18n,dateSelect, dateSelectFormat, setShiftDateData, setDateSelect,setDateSelectFormat, setLocalDate])
 
   const handlePreviousDay = useCallback(async (): Promise<void> => {
@@ -814,7 +824,7 @@ const AttendanceCheckScreenController = () => {
     newDate.setDate(newDate.getDate() - 1)
     setDateSelect(newDate)
     setLocalDate(newDate)
-    await setShiftDateData()
+    await setShiftDateData(newDate) // Pasar la nueva fecha directamente
   }, [i18n, dateSelect,dateSelectFormat ,setShiftDateData, setDateSelect, setDateSelectFormat, setLocalDate])
 
   const handleNextDay =  useCallback(async (): Promise<void> => {
@@ -822,13 +832,17 @@ const AttendanceCheckScreenController = () => {
     newDate.setDate(newDate.getDate() + 1)
     setDateSelect(newDate)
     setLocalDate(newDate)
-    await setShiftDateData()
+    await setShiftDateData(newDate) // Pasar la nueva fecha directamente
    
   }, [i18n,dateSelect, dateSelectFormat, setShiftDateData, setDateSelect, setDateSelectFormat, setLocalDate])
 
   const getHoursList = useCallback(async (): Promise<void> => {
     setShowHoursList(true)
   }, [i18n,dateSelect, setShowHoursList, attendanceData])
+
+  const getExceptionsList = useCallback(async (): Promise<void> => {
+    setShowExceptionsList(true)
+  }, [])
 
   // Memorizar el objeto de retorno completo para evitar recreaciones innecesarias
   const controllerValue = useMemo(() => ({
@@ -894,8 +908,11 @@ const AttendanceCheckScreenController = () => {
     showHoursList,
     setShowHoursList,
     getHoursList,
+    getExceptionsList,
     isOutsideZone,
-    setIsOutSideZone
+    setIsOutSideZone,
+    showExceptionsList,
+    setShowExceptionsList
   }), [
     themeType,
     shiftDate,
@@ -960,8 +977,11 @@ const AttendanceCheckScreenController = () => {
     showHoursList,
     setShowHoursList,
     getHoursList,
+    getExceptionsList,
     isOutsideZone,
-    setIsOutSideZone
+    setIsOutSideZone,
+    showExceptionsList,
+    setShowExceptionsList
   ])
 
   return controllerValue
