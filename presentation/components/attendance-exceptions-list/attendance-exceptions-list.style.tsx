@@ -45,14 +45,10 @@ const createAttendanceExceptionsListStyles = (theme: IAppTheme)  =>
       marginBottom: 16,
       borderLeftWidth: 4,
       borderLeftColor: '#5F7FA6',
-      shadowColor: '#000',
-      shadowOffset: {
-        width: 0,
-        height: 2
-      },
-      shadowOpacity: 0.1,
-      shadowRadius: 3.84,
-      elevation: 5
+      elevation: 5,
+      borderWidth: 1,
+      borderColor: theme.colors.border
+
     },
     exceptionHeader: {
       flexDirection: 'row',
@@ -118,34 +114,31 @@ const createAttendanceExceptionsListStyles = (theme: IAppTheme)  =>
       marginBottom: 8
     },
     evidencesScroll: {
-      flexDirection: 'row'
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      justifyContent: 'flex-start'
     },
     evidenceItem: {
-      marginRight: 12,
+      width: '23%',
+      aspectRatio: 0.75,
+      marginRight: '2%',
+      marginBottom: 12,
       borderRadius: 8,
       overflow: 'hidden',
-      shadowColor: '#000',
-      shadowOffset: {
-        width: 0,
-        height: 2
-      },
-      shadowOpacity: 0.2,
-      shadowRadius: 3.84,
-      elevation: 5
+      backgroundColor: theme.colors.background
     },
     evidenceThumbnail: {
-      width: 120,
-      height: 120,
+      width: '100%',
+      height: '100%',
       borderRadius: 8
     },
     fileThumbnailContainer: {
-      width: 120,
-      height: 120,
+      flex: 1,
       borderRadius: 8,
       backgroundColor: '#F0F0F0',
       justifyContent: 'center',
       alignItems: 'center',
-      padding: 8,
+      paddingBottom: 0,
       borderWidth: 1,
       borderColor: '#E0E0E0'
     },
@@ -153,8 +146,10 @@ const createAttendanceExceptionsListStyles = (theme: IAppTheme)  =>
       fontSize: 10,
       color: '#5F7FA6',
       textAlign: 'center',
-      marginTop: 4,
-      fontWeight: '500'
+      fontWeight: '500',
+      paddingHorizontal: 4,
+      paddingTop: 4,
+      paddingBottom: 2
     },
     fileTypeBadge: {
       position: 'absolute',

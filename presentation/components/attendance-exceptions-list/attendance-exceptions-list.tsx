@@ -311,10 +311,9 @@ export default function ExceptionList({ exceptions, onClose, dateString }: Excep
                   <Text style={styles.evidencesTitle}>
                     {t('screens.attendanceCheck.evidences')} ({exception.evidences.length}):
                   </Text>
-                  <ScrollView 
-                    horizontal 
-                    showsHorizontalScrollIndicator={false}
-                    style={styles.evidencesScroll}
+                  <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={styles.evidencesScroll}
                   >
                     {exception.evidences.map((evidence, evidenceIndex) => {
                       const fileUrl = getEvidenceUrl(evidence.file)
