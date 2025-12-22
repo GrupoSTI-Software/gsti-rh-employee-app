@@ -1,5 +1,5 @@
-import * as Random from 'expo-random'
-import * as SecureStore from 'expo-secure-store'
+import * as Random from '../../src/shared/infrastructure/platform/random.web'
+import * as SecureStore from '../../src/shared/infrastructure/platform/secure-store.web'
 
 const TOKEN_KEY = 'device_token'
 

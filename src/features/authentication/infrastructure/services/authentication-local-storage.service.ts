@@ -1,8 +1,8 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+ 
+ 
 
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import * as SecureStore from 'expo-secure-store'
+import * as SecureStore from '../../../../shared/infrastructure/platform/secure-store.web'
 import i18next from 'i18next'
 import { environment } from '../../../../../config/environment'
 import { EmployeeEntity } from '../../../employee/domain/entiities/employee.entity'

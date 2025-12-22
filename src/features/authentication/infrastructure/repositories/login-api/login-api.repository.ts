@@ -118,7 +118,7 @@ export class LoginAPIRepository implements Pick<AuthenticationPorts, 'login'> {
     } catch (error) {
       console.error(error)
       if (error instanceof AxiosError && error.response) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+         
         const errorMessage = (error?.response?.data?.message ||
           i18next.t('errors.loginFailed')) as string
         throw {

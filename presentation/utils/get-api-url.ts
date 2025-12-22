@@ -1,4 +1,4 @@
-import * as SecureStore from 'expo-secure-store'
+import * as SecureStore from '../../src/shared/infrastructure/platform/secure-store.web'
 
 /**
  * Obtiene la url del Api

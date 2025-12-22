@@ -41,6 +41,8 @@ const SidebarController = (props: ISidebarProps) => {
   const { themeType } = useAppTheme()
   const [authUserAvatarType, setAuthUserAvatarType] = useState<string>('text')
   const [authUserAvatarSource, setAuthUserAvatarSource] = useState<string>('')
+  const [authUserName, setAuthUserName] = useState<string>('')
+  const [authUserEmail, setAuthUserEmail] = useState<string>('')
 
   useEffect(() => {
     if (props.isOpen) {
@@ -52,6 +54,8 @@ const SidebarController = (props: ISidebarProps) => {
       overlayOpacity.value = withTiming(1, {
         duration: 300
       })
+      // Cargar datos del usuario cuando se abre el sidebar
+      void loadUserData()
     } else {
       // Cerrar sidebar
       translateX.value = withTiming(-width, {
@@ -61,8 +65,6 @@ const SidebarController = (props: ISidebarProps) => {
         duration: 200
       })
     }
-    
-    void authUserAvatar()
   }, [props.isOpen, width])
 
   const navigation =
@@ -106,33 +108,22 @@ const SidebarController = (props: ISidebarProps) => {
   }
 
   /**
-   * Obtiene el nombre de usuario de la sesión actual
-   * @returns {Promise<string>} Nombre de usuario
-   */
-  const authUserName = async (): Promise<string> => {
-    const authStateController = new AuthStateController()
-    const authState = await authStateController.getAuthState()
-    return authState?.props.authState?.user?.props.person?.getFullName() || ''
-  }
-
-  /**
-   * Obtiene el correo electrónico del usuario de la sesión actual
-   * @returns {Promise<string>} Correo electrónico
-   */
-  const authUserEmail = async (): Promise<string> => {
-    const authStateController = new AuthStateController()
-    const authState = await authStateController.getAuthState()
-    const email = authState?.props.authState?.user?.props?.email?.value
-    return `${(email || '')}`.toString().toLocaleLowerCase()
-  }
-
-  /**
-   * Establece el tipo y fuente del avatar del usuario de la sesión actual
+   * Carga todos los datos del usuario de la sesión actual
    * @returns {Promise<void>}
    */
-  const authUserAvatar = async (): Promise<void> => {
+  const loadUserData = async (): Promise<void> => {
     const authStateController = new AuthStateController()
     const authState = await authStateController.getAuthState()
+    
+    // Obtener nombre completo
+    const fullName = authState?.props.authState?.user?.props.person?.getFullName() || ''
+    setAuthUserName(fullName)
+    
+    // Obtener email
+    const email = authState?.props.authState?.user?.props?.email?.value
+    setAuthUserEmail(`${(email || '')}`.toString().toLocaleLowerCase())
+    
+    // Obtener avatar
     const avatar = authState?.props.authState?.user?.props?.person?.props?.employee?.props?.photo || ''
     const initial = authState?.props.authState?.user?.props?.person?.props?.firstname?.charAt(0).toUpperCase() || ''
 

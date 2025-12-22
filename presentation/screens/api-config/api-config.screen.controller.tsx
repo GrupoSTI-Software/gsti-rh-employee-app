@@ -1,6 +1,6 @@
 import { useNavigation } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import * as SecureStore from 'expo-secure-store'
+import * as SecureStore from '../../../src/shared/infrastructure/platform/secure-store.web'
 import { useEffect, useState } from 'react'
 import { RootStackParamList } from '../../../navigation/types/types'
 import { AuthStateController } from '../../../src/features/authentication/infrastructure/controllers/auth-state.controller'

@@ -5,7 +5,7 @@ import {
 import { useNavigation } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import axios, { AxiosError } from 'axios'
-import { CameraView, useCameraPermissions } from 'expo-camera'
+import { useCameraPermissions, CameraRef } from '../../../presentation/components/camera/camera.component'
 import { DateTime } from 'luxon'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -97,7 +97,7 @@ const AttendanceCheckScreenController = () => {
   const [permission, requestPermission] = useCameraPermissions()
   const [permissionDeniedMessage, setPermissionDeniedMessage] = useState(false)
   const [permissionDenied, setPermissionDenied] = useState(false)
-  const cameraRef = useRef<CameraView | null>(null)
+  const cameraRef = useRef<CameraRef | null>(null)
   const [status, setStatus] = useState(`📷 ${t('screens.attendanceCheck.waitingPermission')}`)
   const [isLoading, setIsLoading] = useState(false)
   const [attendanceSuccess, setIsAttendanceSucess] = useState(false)
@@ -741,7 +741,7 @@ const AttendanceCheckScreenController = () => {
     try {
       // 1. Capturar fotografía
       const photo = await capturePhoto()
-      if (!photo.base64) {
+      if (!photo || !photo.base64) {
         setStatus(`❌ ${t('screens.attendanceCheck.photoCaptureError')}`)
         return
       }
