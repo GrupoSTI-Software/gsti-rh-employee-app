@@ -1,7 +1,7 @@
 import { Ionicons, MaterialIcons } from '@expo/vector-icons'
-import DateTimePicker from '@react-native-community/datetimepicker'
+import DateTimePicker from '../../components/date-time-picker/date-time-picker.component'
 // import BottomSheet from '@gorhom/bottom-sheet'
-import { CameraView } from 'expo-camera'
+import Camera from '../../components/camera/camera.component'
 import { StatusBar } from 'expo-status-bar'
 import React, { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -120,7 +120,7 @@ export const AttendanceCheckScreen: React.FC = React.memo(() => {
   if (controller.showFaceScreen) {
     return (
       <View style={styles.cameraContainer}>
-        <CameraView ref={controller.cameraRef} style={styles.camera} facing="front" />
+        <Camera ref={controller.cameraRef} style={styles.camera} facing="front" />
         
         <View style={styles.overlay}>
           <TouchableOpacity onPress={controller.goBack} style={styles.backButton}>
@@ -461,7 +461,7 @@ export const AttendanceCheckScreen: React.FC = React.memo(() => {
               <DateTimePicker
                 value={controller.localDate}
                 mode="date"
-                display={Platform.OS === 'android' ? 'calendar' : 'spinner'}
+                display={Platform.OS === 'web' ? 'default' : (Platform.OS === 'android' ? 'calendar' : 'spinner')}
                 onChange={controller.handleDateChange}
               />
             </View>

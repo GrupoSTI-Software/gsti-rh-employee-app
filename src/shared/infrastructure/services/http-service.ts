@@ -18,9 +18,9 @@ class HttpServiceClass {
     this.apiClient = axios.create({
       baseURL: `${apiUrl}`,
       headers: {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+         
         'Content-Type': 'application/json',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+         
         Accept: 'application/json'
       }
     })

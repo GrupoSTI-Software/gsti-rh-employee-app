@@ -1,4 +1,4 @@
-import * as LocalAuthentication from 'expo-local-authentication'
+import * as LocalAuthentication from '../../../../shared/infrastructure/platform/local-authentication.web'
 import i18next from 'i18next'
 
 /**

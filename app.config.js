@@ -32,9 +32,9 @@ export default ({ config }) => {
       userInterfaceStyle: "light",
       newArchEnabled: true,
       splash: {
-        image: variantConfig.splash.image || "",
+        image: variantConfig.splash?.image || "",
         resizeMode: "contain",
-        backgroundColor: variantConfig.splash.backgroundColor || "#ffffff"
+        backgroundColor: variantConfig.splash?.backgroundColor || "#ffffff"
       },
       ios: {
         supportsTablet: false,
@@ -50,8 +50,8 @@ export default ({ config }) => {
       },
       android: {
         adaptiveIcon: {
-          foregroundImage: variantConfig.android.adaptiveIcon.foregroundImage || "./assets/adaptive-icon.png",
-          backgroundColor: variantConfig.android.adaptiveIcon.backgroundColor || "#ffffff"
+          foregroundImage: variantConfig.android?.adaptiveIcon?.foregroundImage || "./assets/adaptive-icon.png",
+          backgroundColor: variantConfig.android?.adaptiveIcon?.backgroundColor || "#ffffff"
         },
         edgeToEdgeEnabled: true,
         package: process.env.ANDROID_PACKAGE_NAME,
@@ -60,6 +60,16 @@ export default ({ config }) => {
           "ACCESS_FINE_LOCATION",
           "ACCESS_COARSE_LOCATION"
         ]
+      },
+      web: {
+        bundler: "metro",
+        favicon: variantConfig.favicon || "./assets/favicon.png",
+        output: "single",
+        name: variantConfig.name || config.name || "SAE Empleados",
+        shortName: variantConfig.shortName || "SAE",
+        description: "Sistema de Asistencia de Empleados",
+        backgroundColor: "#ffffff",
+        themeColor: "#003366"
       },
       extra: {
         eas: {

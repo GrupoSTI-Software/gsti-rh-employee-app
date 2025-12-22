@@ -81,7 +81,7 @@ const Header: React.FC<IHeaderProps> = ({ onMenuPress }) => {
             entering={isFirstLaunch ? FadeInRight.delay(1100).duration(800).springify() : undefined}
           >
             <Typography variant="h3" style={[styles.greeting]}>
-              {controller.authUserName()}
+              {controller.authUserName}
             </Typography>
           </Animated.View>
 

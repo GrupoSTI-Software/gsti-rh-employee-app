@@ -124,14 +124,14 @@ const SidebarLayout: React.FC<ISidebarProps> = ({ isOpen, onClose }) => {
                   entering={FadeInRight.delay(150).duration(200)}
                   style={styles.profileName}
                 >
-                  {controller.authUserName()}
+                  {controller.authUserName}
                 </Animated.Text>
                 
                 <Animated.Text 
                   entering={FadeInRight.delay(180).duration(200)}
                   style={styles.profileEmail}
                 >
-                  {controller.authUserEmail()}
+                  {controller.authUserEmail}
                 </Animated.Text>
               </Animated.View>
             )}
