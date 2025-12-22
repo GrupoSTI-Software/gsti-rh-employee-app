@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { RootStackParamList } from '../../../navigation/types/types'
 import { AuthStateController } from '../../../src/features/authentication/infrastructure/controllers/auth-state.controller'
 import { ClearSessionController } from '../../../src/features/authentication/infrastructure/controllers/clear-seassion.controller'
+import { environment } from '../../../config/environment'
 /**
  * Controlador de la pantalla de configuración del api
  * @description Gestiona la lógica de negocio para configurar la dirección del API
@@ -33,10 +34,25 @@ export const ApiConfigScreenController = () => {
     }
   }
   
-  // Obtener URL guardada
+  // Obtener URL del environment (.env) como fuente de verdad
   const  loadApi = async (): Promise<string | null> => {
     try {
-      return await SecureStore.getItemAsync(STORAGE_KEY)
+      // Siempre usar la URL del environment (.env) como fuente de verdad
+      const envApiUrl = environment.API_URL
+      
+      if (envApiUrl && envApiUrl !== 'NOT ASSIGNED') {
+        // Guardar/actualizar en SecureStore para que otros servicios la usen
+        await SecureStore.setItemAsync(STORAGE_KEY, envApiUrl)
+        return envApiUrl
+      }
+      
+      // Fallback: obtener del SecureStore si no hay en environment
+      const storedUrl = await SecureStore.getItemAsync(STORAGE_KEY)
+      if (storedUrl) {
+        return storedUrl
+      }
+      
+      return null
     } catch (error) {
       console.error('Error cargando API URL:', error)
       return null

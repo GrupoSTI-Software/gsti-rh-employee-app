@@ -13,7 +13,6 @@ import { BiometricsService } from '../../../src/features/authentication/infrastr
 import { ILocationCoordinates, LocationService } from '../../../src/features/authentication/infrastructure/services/location.service'
 import { HttpService } from '../../../src/shared/infrastructure/services/http-service'
 import { getApi } from '../../utils/get-api-url'
-import { ApiConfigScreenController } from '../api-config/api-config.screen.controller'
 
 // import Constants from 'expo-constants'
 
@@ -38,7 +37,6 @@ const AuthenticationScreenController = () => {
   const [settedAPIUrl, setSettedAPIUrl] = useState<string>('')
   const [systemIcon, setIconImage] = useState<string>('')
   const { t } = useTranslation()
-  const apiConfigController = ApiConfigScreenController()
   const getSystemSettingsController = new GetSystemSettingsController()
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>()
@@ -46,21 +44,6 @@ const AuthenticationScreenController = () => {
   useEffect(() => {
     initializeApp().catch(console.error)
   })
-  useEffect(() => {
-    const validateApi = async () => {
-      try {
-      
-        const api = await apiConfigController.loadApi()
-
-        if (!api) {
-          navigation.replace('apiConfig')
-        }
-      } catch (error) {
-        navigation.replace('apiConfig')
-      }
-    }
-    void validateApi()
-  }, [])
   /**
    * Inicializa la aplicación
    * - Inicializa la biometría y los datos de usuario en caso de que existan

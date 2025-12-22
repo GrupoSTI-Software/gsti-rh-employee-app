@@ -294,7 +294,6 @@ const AttendanceCheckScreenController = () => {
     }
     
     void loadShiftData()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Validar contraseña

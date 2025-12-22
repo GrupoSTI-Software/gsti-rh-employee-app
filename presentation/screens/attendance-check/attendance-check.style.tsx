@@ -32,7 +32,9 @@ const createAttendanceCheckStyle = (theme: IAppTheme, themeType: EThemeType) =>
     checkInContainer: {
       alignItems: 'center',
       justifyContent: 'center',
-      flexDirection: 'row'
+      flexDirection: 'row',
+      zIndex: 10,
+      position: 'relative'
     },
     checkInButtonWrapper: {
       borderRadius: wp(100),
@@ -41,7 +43,8 @@ const createAttendanceCheckStyle = (theme: IAppTheme, themeType: EThemeType) =>
       alignItems: 'center',
       justifyContent: 'center',
       marginBottom: hp(-9.5),
-      zIndex: 1,
+      zIndex: 10,
+      position: 'relative',
       backgroundColor: theme.colors.background
     },
     checkInButton: {
@@ -119,7 +122,9 @@ const createAttendanceCheckStyle = (theme: IAppTheme, themeType: EThemeType) =>
       alignSelf: 'center',
       paddingVertical: hp(3.8),
       paddingHorizontal: wp(4.3),
-      backgroundColor: theme.colors.indicator
+      backgroundColor: theme.colors.indicator,
+      zIndex: 1,
+      position: 'relative'
     },
     checkInButtonWrapperLocked: {
       opacity: 1,
@@ -345,7 +350,9 @@ const createAttendanceCheckStyle = (theme: IAppTheme, themeType: EThemeType) =>
       justifyContent: 'space-between',
       paddingHorizontal: 0,
       width: '100%',
-      marginTop: -30
+      marginTop: -30,
+      zIndex: 10,
+      position: 'relative'
     },
     arrowButton: {
       width: 60,
@@ -364,7 +371,9 @@ const createAttendanceCheckStyle = (theme: IAppTheme, themeType: EThemeType) =>
     },
     centerWrapper: {
       flex: 1,
-      alignItems: 'center'
+      alignItems: 'center',
+      zIndex: 10,
+      position: 'relative'
     }
 
   })
