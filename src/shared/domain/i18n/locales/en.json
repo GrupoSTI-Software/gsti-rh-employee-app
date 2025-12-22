@@ -193,6 +193,20 @@
       "label": "Biometric Access"
     }
   },
+  "pwa": {
+    "installed": "App installed",
+    "install": "Install app",
+    "installTitle": "Install app",
+    "installSubtitle": "Quick access from your home screen",
+    "notAvailable": "Installation not available",
+    "openInBrowser": "Open this page in Chrome or Safari",
+    "updateAvailable": "Update available",
+    "updateMessage": "There is a new version of the app. Would you like to update now?",
+    "updateNow": "Update",
+    "updateLater": "Later",
+    "installBannerTitle": "Install app",
+    "installBannerSubtitle": "Install the app for quick access"
+  },
   "errors": {
     "loginFailed": "Login failed",
     "unknownError": "Unknown error occurred, please try again later",

@@ -3,7 +3,7 @@ import { useNavigation } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Alert } from 'react-native'
+import { Alert, Platform } from 'react-native'
 import { RootStackParamList } from '../../../navigation/types/types'
 import { GetSystemSettingsController } from '../../../src/features/attendance/infraestructure/controllers/get-system-setting/get-system-settings.controller'
 import { ELoginTypes } from '../../../src/features/authentication/application/types/login-types.enum'
@@ -12,6 +12,7 @@ import { LoginController } from '../../../src/features/authentication/infrastruc
 import { BiometricsService } from '../../../src/features/authentication/infrastructure/services/biometrics.service'
 import { ILocationCoordinates, LocationService } from '../../../src/features/authentication/infrastructure/services/location.service'
 import { HttpService } from '../../../src/shared/infrastructure/services/http-service'
+import { PWAService } from '../../../src/shared/infrastructure/services/pwa-service'
 import { getApi } from '../../utils/get-api-url'
 
 // import Constants from 'expo-constants'
@@ -67,6 +68,11 @@ const AuthenticationScreenController = () => {
     await Promise.all([initBiometricAvailability(), setAuthStateData()])
     const systemSettings = await getSystemSettingsController.getSystemSettings()
     setIconImage(systemSettings?.props.systemSettingLogo || '')
+    
+    // Aplicar configuración PWA dinámicamente en la web
+    if (Platform.OS === 'web' && systemSettings?.props) {
+      PWAService.applyDynamicManifest(systemSettings.props)
+    }
   }
 
   /**

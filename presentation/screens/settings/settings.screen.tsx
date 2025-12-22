@@ -3,6 +3,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Modal,
+  Platform,
   SafeAreaView,
   ScrollView,
   TouchableOpacity,
@@ -15,6 +16,7 @@ import Animated, {
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 
 import { Typography } from '../../components/typography/typography.component'
+import { PWAInstallButton } from '../../components/pwa-install-button/pwa-install-button'
 import { FingerprintIcon } from '../../icons/fingerprint-icon/fingerprint.icon'
 import { ThemeIcon } from '../../icons/theme-icon/theme.icon'
 import { TranslateIcon } from '../../icons/translate-icon/translate.icon'
@@ -145,6 +147,13 @@ export const SettingsScreen: React.FC = () => {
                   color={style.chevronColor.color} 
                 />
               </AnimatedTouchableOpacity>
+
+              {/* Botón de Instalación PWA (solo en web) */}
+              {Platform.OS === 'web' && (
+                <Animated.View entering={ZoomIn.delay(650).duration(400)}>
+                  <PWAInstallButton showOnlyIfInstallable={false} />
+                </Animated.View>
+              )}
             </View>
           </ScrollView>
         </SafeAreaView>

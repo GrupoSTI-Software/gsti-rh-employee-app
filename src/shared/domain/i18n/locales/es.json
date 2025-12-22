@@ -193,6 +193,20 @@
       "label": "Acceso con Biometría"
     }
   },
+  "pwa": {
+    "installed": "App instalada",
+    "install": "Instalar aplicación",
+    "installTitle": "Instalar aplicación",
+    "installSubtitle": "Acceso rápido desde tu pantalla de inicio",
+    "notAvailable": "Instalación no disponible",
+    "openInBrowser": "Abre esta página en Chrome o Safari",
+    "updateAvailable": "Actualización disponible",
+    "updateMessage": "Hay una nueva versión de la aplicación. ¿Deseas actualizar ahora?",
+    "updateNow": "Actualizar",
+    "updateLater": "Más tarde",
+    "installBannerTitle": "Instala la app",
+    "installBannerSubtitle": "Instala la app para acceso rápido"
+  },
   "errors": {
     "loginFailed": "Error al iniciar sesión",
     "unknownError": "Ocurrió un error desconocido",
