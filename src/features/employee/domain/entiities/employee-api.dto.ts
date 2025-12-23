@@ -58,6 +58,7 @@ export interface EmployeeApiDTO {
   employeeTypeId: number
   employeeBusinessEmail: string | null
   employeeIgnoreConsecutiveAbsences: number
+  employeeAuthorizeAnyZones: number
   employeeCreatedAt: Date | null
   employeeUpdatedAt: Date | null
   employeeDeletedAt: Date | null

@@ -1,25 +1,27 @@
-import { AuthenticationEntity } from '../../../domain/entities/authentication-entity'
-import { AuthenticationPorts } from '../../../domain/ports/authentication.ports'
-import { RequiredFieldException } from '../../../../../shared/domain/exceptions/required-field.exception'
+import { AxiosError } from 'axios'
+import * as Device from 'expo-device'
+import i18next from 'i18next'
+import { getOrCreateDeviceToken } from '../../../../../../presentation/utils/token-manager'
 import { InvalidFieldFormatException } from '../../../../../shared/domain/exceptions/invalid-field-format.exception'
 import { RequiredAllFieldsException } from '../../../../../shared/domain/exceptions/required-all-fields.exception'
-import { HttpService } from '../../../../../shared/infrastructure/services/http-service'
-import { AuthenticationLocalStorageService } from '../../services/authentication-local-storage.service'
-import { AxiosError } from 'axios'
-import i18next from 'i18next'
-import { BiometricsService } from '../../services/biometrics.service'
-import { GetAuthCredentialsUsecase } from '../../../application/get-auth-credentials/get-auth-credentials.usecase'
-import { LocalAuthCredentialsRepository } from '../local-auth-credentials/local-auth-credentials.repository'
-import { IntegerIdVO } from '../../../../../shared/domain/value-objects/integer-id.vo'
-import { EmailVO } from '../../../../../shared/domain/value-objects/email.vo'
+import { RequiredFieldException } from '../../../../../shared/domain/exceptions/required-field.exception'
 import { ActiveVO } from '../../../../../shared/domain/value-objects/active.vo'
-import { UserEntity } from '../../../../user/domain/entities/user.entity'
-import { IEmployee } from '../../../../employee/domain/types/employee.interface'
+import { EmailVO } from '../../../../../shared/domain/value-objects/email.vo'
+import { IntegerIdVO } from '../../../../../shared/domain/value-objects/integer-id.vo'
+import { HttpService } from '../../../../../shared/infrastructure/services/http-service'
 import { EmployeeEntity } from '../../../../employee/domain/entiities/employee.entity'
-import { IPerson } from '../../../../person/domain/types/person.interface'
+import { IEmployee } from '../../../../employee/domain/types/employee.interface'
 import { PersonEntity } from '../../../../person/domain/entities/person.entity'
-import { IUser } from '../../../../user/domain/types/user.interface'
+import { IPerson } from '../../../../person/domain/types/person.interface'
 import { UserApiDTO } from '../../../../user/domain/entities/user-api.dto'
+import { UserEntity } from '../../../../user/domain/entities/user.entity'
+import { IUser } from '../../../../user/domain/types/user.interface'
+import { GetAuthCredentialsUsecase } from '../../../application/get-auth-credentials/get-auth-credentials.usecase'
+import { AuthenticationEntity } from '../../../domain/entities/authentication-entity'
+import { AuthenticationPorts } from '../../../domain/ports/authentication.ports'
+import { AuthenticationLocalStorageService } from '../../services/authentication-local-storage.service'
+import { BiometricsService } from '../../services/biometrics.service'
+import { LocalAuthCredentialsRepository } from '../local-auth-credentials/local-auth-credentials.repository'
 
 interface LoginResponse {
   status: number
@@ -105,13 +107,18 @@ export class LoginBiometricRepository implements Pick<AuthenticationPorts, 'logi
         throw new RequiredAllFieldsException()
       }
 
+      const deviceToken = await getOrCreateDeviceToken()
+
       this.validateCredentials(credentials.email, credentials.password)
-
-      const response: LoginResponse = await HttpService.post('/auth/login', {
+      const response: LoginResponse = await (await HttpService.getInstance()).post('/auth/login', {
         userEmail: credentials.email,
-        userPassword: credentials.password
+        userPassword: credentials.password,
+        deviceToken,
+        deviceModel: Device.modelName,
+        deviceBrand: Device.brand,
+        deviceType: Device.deviceName,
+        deviceOs: `${Device.osName} ${Device.osVersion}`
       })
-
       if (response.status !== 200) {
         throw new Error(response.data.message)
       }
@@ -122,7 +129,7 @@ export class LoginBiometricRepository implements Pick<AuthenticationPorts, 'logi
         throw new Error(i18next.t('errors.loginFailedNoTokenProvided'))
       }
 
-      HttpService.setBearerToken(responseData.token)
+      (await HttpService.getInstance()).setBearerToken(responseData.token)
 
       const sessionUser = await this.getSessionUser()
       const authenticationLocalStorageService = new AuthenticationLocalStorageService()
@@ -148,10 +155,13 @@ export class LoginBiometricRepository implements Pick<AuthenticationPorts, 'logi
       return newAuthentication
     } catch (error) {
       if (error instanceof AxiosError && error.response) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+         
         const errorMessage = (error?.response?.data?.message ||
-          i18next.t('errors.loginFailed')) as string
-        throw new Error(errorMessage)
+        i18next.t('errors.loginFailed')) as string
+        throw {
+          message: errorMessage,
+          status: error.status
+        }
       }
 
       throw new Error(
@@ -175,7 +185,7 @@ export class LoginBiometricRepository implements Pick<AuthenticationPorts, 'logi
    * @private
    */
   private async getSessionUser(): Promise<UserEntity> {
-    const responseUser: SessionResponse = await HttpService.get('/auth/session')
+    const responseUser: SessionResponse = await (await HttpService.getInstance()).get('/auth/session')
 
     if (responseUser.status !== 200) {
       throw new Error(i18next.t('errors.loginFailedNoAuthenticationStatus'))
@@ -214,6 +224,7 @@ export class LoginBiometricRepository implements Pick<AuthenticationPorts, 'logi
       typeId: responseUser.data.person.employee.employeeTypeId ? new IntegerIdVO(parseInt(`${responseUser.data.person.employee.employeeTypeId}`)) : null,
       businessEmail: responseUser.data.person.employee.employeeBusinessEmail ? new EmailVO(responseUser.data.person.employee.employeeBusinessEmail) : null,
       ignoreConsecutiveAbsences: responseUser.data.person.employee.employeeIgnoreConsecutiveAbsences,
+      employeeAuthorizeAnyZones: responseUser.data.person.employee.employeeAuthorizeAnyZones,
       createdAt: responseUser.data.person.employee.employeeCreatedAt ? new Date(responseUser.data.person.employee.employeeCreatedAt) : null,
       updatedAt: responseUser.data.person.employee.employeeUpdatedAt ? new Date(responseUser.data.person.employee.employeeUpdatedAt) : null,
       deletedAt: responseUser.data.person.employee.employeeDeletedAt ? new Date(responseUser.data.person.employee.employeeDeletedAt) : null,
@@ -221,7 +232,6 @@ export class LoginBiometricRepository implements Pick<AuthenticationPorts, 'logi
       userResponsibleEmployeeReadonly: responseUser.data.person.employee.userResponsibleEmployeeReadonly ? true : false,
       userResponsibleEmployeeDirectBoss: responseUser.data.person.employee.userResponsibleEmployeeDirectBoss ? true : false
     }
-
     const employee = new EmployeeEntity(employeeProperties)
 
     const personProperties: IPerson = {

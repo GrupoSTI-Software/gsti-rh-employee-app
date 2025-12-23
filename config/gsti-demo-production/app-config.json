@@ -1,0 +1,15 @@
+{
+  "name": "GrupoSTI Demo",
+  "slug": "demo-rh-attendance",
+  "icon": "./assets/gsti/icon.png",
+  "splash": {
+    "image": "./assets/gsti/splash-icon.png",
+    "backgroundColor": "#ffffff"
+  },
+  "android": {
+    "adaptiveIcon": {
+      "foregroundImage": "./assets/gsti/adaptive-icon.png",
+      "backgroundColor": "#ffffff"
+    }
+  }
+}

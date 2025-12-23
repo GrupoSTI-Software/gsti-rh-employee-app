@@ -1,6 +1,6 @@
-import { StyleSheet, Dimensions } from 'react-native'
-import { useAppTheme } from '../../theme/theme-context'
+import { Dimensions, StyleSheet } from 'react-native'
 import { IAppTheme } from '../../theme/app-theme.interface'
+import { useAppTheme } from '../../theme/theme-context'
 import { EThemeType } from '../../theme/types/theme-type.enum'
 
 const { height, width } = Dimensions.get('window')
@@ -25,9 +25,12 @@ const createAuthenticationStyle = (theme: IAppTheme, themeType: EThemeType) =>
       minHeight: height - 250
     },
     logoImage: {
-      width: '100%',
-      height: 300,
-      resizeMode: 'cover'
+      width: '60%',
+      height: 120,
+      resizeMode: 'contain',
+      alignSelf: 'center',
+      marginTop: 60,
+      marginBottom: 20
     },
     backButton: {
       position: 'absolute',
@@ -125,6 +128,18 @@ const createAuthenticationStyle = (theme: IAppTheme, themeType: EThemeType) =>
       marginBottom: 20,
       marginHorizontal: 20,
       borderRadius: 4
+    },
+    pwaInstallContainer: {
+      marginTop: 20,
+      marginBottom: 10,
+      alignItems: 'center'
+    },
+    pwaInstallMessage: {
+      textAlign: 'center',
+      marginBottom: 20,
+      color: theme.colors.text,
+      fontSize: 16,
+      lineHeight: 24
     }
   })
 

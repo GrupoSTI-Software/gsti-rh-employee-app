@@ -1,13 +1,13 @@
-import { IAppTheme } from './app-theme.interface'
 import { DefaultTheme } from 'react-native-paper'
+import { IAppTheme } from './app-theme.interface'
 
 export const LIGHT_THEME: IAppTheme = {
   ...DefaultTheme,
   dark: false,
   colors: {
     ...DefaultTheme.colors,
-    primary: '#303e67',
-    accent: '#34d4ad',
+    primary: '#2818b3',
+    accent: '#3922FF',
     warning: '#FF993A',
     success: '#34d4ad',
     danger: '#cd360c',

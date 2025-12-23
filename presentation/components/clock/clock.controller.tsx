@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
 import { DateTime } from 'luxon'
+import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { AppState, AppStateStatus } from 'react-native'
 
 /**
@@ -9,12 +10,13 @@ import { AppState, AppStateStatus } from 'react-native'
  * @property {string} date - Fecha actual
  */
 const ClockController = () => {
+  const { i18n } = useTranslation()
   const [currentTime, setCurrentTime] = useState(DateTime.now().setLocale('es'))
   const timerRef = useRef<NodeJS.Timeout | null>(null)
   const appStateRef = useRef(AppState.currentState)
 
   const hour = currentTime.toFormat('HH:mm:ss')
-  const date = currentTime.toFormat('DDDD')
+  const date = currentTime.setLocale(i18n.language).toFormat('DDDD')
 
   useEffect(() => {
     const subscription = AppState.addEventListener(

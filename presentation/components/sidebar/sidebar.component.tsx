@@ -15,7 +15,6 @@ import Animated, {
   useAnimatedStyle
 } from 'react-native-reanimated'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { ChangeAccountIcon } from '../../icons/change-account-icon/change-account.icon'
 import { ClockIcon } from '../../icons/clock-icon/clock.icon'
 import { CloseSidebarIcon } from '../../icons/close-sidebar-icon/close-sidebar.icon'
 import { CogIcon } from '../../icons/cog-icon/cog.icon'
@@ -125,14 +124,14 @@ const SidebarLayout: React.FC<ISidebarProps> = ({ isOpen, onClose }) => {
                   entering={FadeInRight.delay(150).duration(200)}
                   style={styles.profileName}
                 >
-                  {controller.authUserName()}
+                  {controller.authUserName}
                 </Animated.Text>
                 
                 <Animated.Text 
                   entering={FadeInRight.delay(180).duration(200)}
                   style={styles.profileEmail}
                 >
-                  {controller.authUserEmail()}
+                  {controller.authUserEmail}
                 </Animated.Text>
               </Animated.View>
             )}
@@ -170,6 +169,7 @@ const SidebarLayout: React.FC<ISidebarProps> = ({ isOpen, onClose }) => {
                   icon={<ProfileIcon color={styles.sidebarIcon.color} />}
                   label={t('sidebar.menuLinks.profile')}
                   textColor={styles.sidebarIconText.color}
+                  onPress={() => { controller.navigateTo('profile') }}
                   delay={250}
                 />
               </Animated.View>
@@ -198,19 +198,26 @@ const SidebarLayout: React.FC<ISidebarProps> = ({ isOpen, onClose }) => {
               />
             )}
 
+            {isOpen && (
+              <Animated.View 
+                entering={FadeIn.delay(180).duration(150)}
+                style={styles.separator} 
+              />
+            )}
+
             {/* Logout */}
             {isOpen && (
               <Animated.View 
                 entering={SlideInLeft.delay(160).duration(200)}
                 style={styles.menuGroup}
               >
-                <SidebarItem
+                {/* <SidebarItem
                   icon={<ChangeAccountIcon color={styles.sidebarIcon.color} />}
                   label={t('sidebar.menuLinks.changeAccount')}
                   textColor={styles.sidebarIconText.color}
                   onPress={controller.handleFullLogout}
                   delay={350}
-                />
+                /> */}
                 <SidebarItem
                   icon={<LogoutIcon color={styles.logoutIcon.color} />}
                   label={t('sidebar.menuLinks.logout')}

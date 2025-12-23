@@ -9,6 +9,7 @@ import { IBiometricsPreferences } from '../../../src/features/authentication/dom
 import { AuthStateController } from '../../../src/features/authentication/infrastructure/controllers/auth-state.controller'
 import { AuthenticationLocalStorageService } from '../../../src/features/authentication/infrastructure/services/authentication-local-storage.service'
 import { BiometricsService } from '../../../src/features/authentication/infrastructure/services/biometrics.service'
+import { getBiometricText } from './utils/get-biometric-text'
 
 /**
  * Controlador para la pantalla de configuración de biometría
@@ -197,38 +198,6 @@ const BiometricsConfigScreenController = () => {
   }
 
   /**
-   * Obtiene el texto apropiado para el tipo de biometría
-   * @returns {Object} Objeto con el texto y el icono de la biometría
-   */
-  const getBiometricText = () => {
-    if (hasEnrolledFaceID && !hasEnrolledFingerprint) {
-      return {
-        title: t('screens.biometrics.faceID'),
-        description: t('screens.biometrics.faceIDAvailable'),
-        icon: 'scan-outline'
-      }
-    } else if (hasEnrolledFingerprint && !hasEnrolledFaceID) {
-      return {
-        title: t('screens.biometrics.fingerprint'),
-        description: t('screens.biometrics.fingerprintAvailable'),
-        icon: 'finger-print'
-      }
-    } else if (biometricType === 'face') {
-      return {
-        title: t('screens.biometrics.faceID'),
-        description: t('screens.biometrics.primaryBiometricMethod'),
-        icon: 'scan-outline'
-      }
-    } else {
-      return {
-        title: t('screens.biometrics.fingerprint'),
-        description: t('screens.biometrics.primaryBiometricMethod'),
-        icon: 'finger-print'
-      }
-    }
-  }
-
-  /**
    * Verifica si la biometría está habilitada en el estado de autenticación
    * @returns {Promise<void>}
    */
@@ -252,7 +221,7 @@ const BiometricsConfigScreenController = () => {
     setLoading(false)
   }
 
-  const biometricTextInfo = getBiometricText()
+  const biometricTextInfo = getBiometricText(t, hasEnrolledFaceID, hasEnrolledFingerprint, biometricType)
 
   return {
     loading,

@@ -1,3 +1,4 @@
+import { Platform } from 'react-native'
 import * as Updates from 'expo-updates'
 
 /**
@@ -5,10 +6,22 @@ import * as Updates from 'expo-updates'
  */
 export class ExpoUpdatesService {
   /**
+   * Checks if the app is running on web platform
+   * @returns boolean - true if running on web
+   */
+  static isWeb(): boolean {
+    return Platform.OS === 'web'
+  }
+
+  /**
    * Checks if the app is running in development mode (Expo Go)
    * @returns boolean - true if in development mode
    */
   static isInDevelopmentMode(): boolean {
+    // On web, always return true to skip native updates
+    if (this.isWeb()) {
+      return true
+    }
     // In Expo Go, the channel will be null or undefined
     return !Updates.channel
   }

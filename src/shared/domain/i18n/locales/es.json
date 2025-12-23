@@ -2,12 +2,15 @@
   "common": {
     "loading": "Cargando...",
     "error": "Error",
+    "information": "Información",
     "warning": "Advertencia",
     "success": "Éxito",
     "cancel": "Cancelar",
     "ok": "Aceptar",
     "understood": "Entendido",
     "settings": "Configuración",
+    "notAvailable": "No disponible",
+    "retry": "Reintentar",
     "authentication": {
       "biometricPromptMessage": "Autenticación biométrica",
       "biometricFallbackLabel": "Usar contraseña y correo electrónico",
@@ -76,15 +79,133 @@
       }
     },
     "attendanceCheck": {
+      "title": "Registro de Asistencia",
       "password": "Ingresa tu contraseña",
       "confirmButton": "Confirmar",
-      "cancelButton": "Cancelar"
+      "cancelButton": "Cancelar",
+      "cameraNotAvailable": "Cámara no disponible",
+      "faceVerificationError": "Error al verificar la cara:",
+      "connectionError": {
+        "title": "Sin conexión",
+        "message": "No se pudo cargar la información de asistencia",
+        "retryButton": "Volver a cargar",
+        "retrying": "Reintentando..."
+      },
+      "checkTypes": {
+        "checkIn": "Entrada",
+        "checkOut": "Salida",
+        "checkEatIn": "Inicio de comida",
+        "checkEatOut": "Fin de comida"
+      },
+      "button": {
+        "loading": "...",
+        "locked": "---",
+        "register": "Registrar",
+        "complete": "Completo"
+      },
+      "defaultTime": "--:--:--",
+      "sessionExpired": {
+        "title": "Sesión Expirada",
+        "message": "Tu sesión ha expirado. Por favor, inicia sesión nuevamente."
+      },
+      "registrationError": "Error al registrar asistencia",
+      "deviceSettingsError": "No se pudo abrir la configuración del dispositivo",
+      "verifying": "Verificando...",
+      "centerFaceAndMoveCloser": "Centra tu rostro y acércalo a la cámara",
+      "locationAccessFailed": "No se pudo acceder a la ubicación",
+      "waitingPermission": "Esperando permiso...",
+      "cameraReady": "Cámara lista",
+      "identityNotVerified": "No ha sido posible verificar tu identidad. Inténtalo nuevamente.",
+      "imageSendError": "Error enviando imagen",
+      "requestingPermissions": "Solicitando permisos...",
+      "attendanceRegisteredSuccessfully": "Asistencia registrada correctamente",
+      "permissions": "Permisos",
+      "permissionDeniedPermanent": "No otorgaste permisos y el sistema no permite volver a pedir. Actívalos desde Configuración.",
+      "noRecords": "No hay registros de asistencia",
+      "noExceptions": "No hay excepciones registradas",
+      "description": "Descripción",
+      "checkInTime": "Hora de entrada",
+      "checkOutTime": "Hora de salida",
+      "exceptions": "Excepciones",
+      "evidences": "Evidencias",
+      "unknownException": "Excepción desconocida",
+      "cannotOpenFile": "No se puede abrir el archivo",
+      "fileTypeNotSupported": "El tipo de archivo {{type}} no está soportado para visualización en la aplicación",
+      "errorOpeningFile": "Error al abrir el archivo. Intenta abrirlo desde tu navegador.",
+      "outsideAllowedZone": "Está fuera de la zona permitida",
+      "distanceToAllowedZone": "Te encuentras fuera de la zona permitida, acercate aproximadamente {{meters}} metros hacia el {{direction}} para entrar en la zona permitida.",
+      "directions": {
+        "north": "norte",
+        "northeast": "noreste",
+        "east": "este",
+        "southeast": "sureste",
+        "south": "sur",
+        "southwest": "suroeste",
+        "west": "oeste",
+        "northwest": "noroeste"
+      },
+      "errorFetchingShiftData": "Error al obtener los datos del turno",
+      "methodNotImplemented": "Método no implementado",
+      "errorFetchingZoneCoordinates": "Error al obtener las coordenadas de la zona",
+      "photoCaptureError": "Error al capturar la foto",
+      "noZonesAssigned": "No se encontraron zonas asignadas para el empleado",
+      "errorFetchingAuthorizeAnyZone": "Error al obtener el permiso para registrar asistencia en cualquier zona"
+    },
+    "profile": {
+      "title": "Mi Perfil",
+      "subtitle": "Información personal y laboral",
+      "loading": "Cargando perfil...",
+      "error": "Error al cargar el perfil",
+      "personalInfo": "Información Personal",
+      "workInfo": "Información Laboral",
+      "legalInfo": "Información Legal",
+      "email": "Correo Electrónico",
+      "phone": "Teléfono",
+      "gender": "Género",
+      "birthday": "Fecha de Nacimiento",
+      "maritalStatus": "Estado Civil",
+      "placeOfBirth": "Lugar de Nacimiento",
+      "employeeCode": "Código de Empleado",
+      "payrollNumber": "Número de Nómina",
+      "hireDate": "Fecha de Contratación",
+      "contractType": "Tipo de Contrato",
+      "workSchedule": "Horario de Trabajo",
+      "businessEmail": "Correo Laboral",
+      "curp": "CURP",
+      "rfc": "RFC",
+      "imssNss": "NSS (IMSS)"
+    },
+     "apiConfig": {
+      "title": "Configuración del API",
+      "save": "Guardar",
+      "url": "Url del servidor",
+      "placeholder": "https://app.com",
+      "success": "Éxito",
+      "urlSavedSuccessfully": "La URL se guardó correctamente",
+      "couldNotBeSaved": "No se pudo guardar",
+      "urlCannotBeEmpty": "La URL no puede estar vacía",
+      "validation": "Validación",
+      "invalidUrl": "La URL ingresada no es válida. Por favor, verifica el formato."
     }
   },
   "components": {
     "biometricButton": {
       "label": "Acceso con Biometría"
     }
+  },
+  "pwa": {
+    "installed": "App instalada",
+    "install": "Instalar aplicación",
+    "installTitle": "Instalar aplicación",
+    "installSubtitle": "Acceso rápido desde tu pantalla de inicio",
+    "notAvailable": "Instalación no disponible",
+    "openInBrowser": "Abre esta página en Chrome o Safari",
+    "updateAvailable": "Actualización disponible",
+    "updateMessage": "Hay una nueva versión de la aplicación. ¿Deseas actualizar ahora?",
+    "updateNow": "Actualizar",
+    "updateLater": "Más tarde",
+    "installBannerTitle": "Instala la app",
+    "installBannerSubtitle": "Instala la app para acceso rápido"
   },
   "errors": {
     "loginFailed": "Error al iniciar sesión",
@@ -112,6 +233,10 @@
     "invalidPassword": "La contraseña ingresada es incorrecta",
     "noStoredCredentials": "No se encontraron credenciales almacenadas",
     "locationValidationWarning": "El check-in se completó exitosamente, pero hubo un problema con la validación de ubicación:",
-    "goToSettingsMessage": "Para resolver este problema, ve a la configuración de tu dispositivo y habilita los permisos de ubicación con alta precisión."
+    "goToSettingsMessage": "Para resolver este problema, ve a la configuración de tu dispositivo y habilita los permisos de ubicación con alta precisión.",
+    "authTokenNotFound": "Token de autenticación no encontrado",
+    "employeeIdNotFound": "ID de empleado no encontrado",
+    "httpServiceUrlNotConfigured": "No se pudo crear HttpService: URL de API no configurada",
+    "errorFetchingSystemSettings": "Error al obtener la configuración del sistema"
   }
 }

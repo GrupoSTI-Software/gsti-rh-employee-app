@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "abbdaf55-5afc-4045-8792-b927b74af07a"
+      }
+    },
+    "owner": "wilvardosae",
+    "slug": "demo-rh-attendance"
+  }
+}

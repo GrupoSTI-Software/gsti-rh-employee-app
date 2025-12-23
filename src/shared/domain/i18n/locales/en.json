@@ -2,12 +2,15 @@
   "common": {
     "loading": "Loading...",
     "error": "Error",
+    "information": "Information",
     "warning": "Warning",
     "success": "Success",
     "cancel": "Cancel",
     "ok": "OK",
     "understood": "Understood",
     "settings": "Settings",
+    "notAvailable": "Not available",
+    "retry": "Retry",
     "authentication": {
       "biometricPromptMessage": "SAE Biometric Authentication",
       "biometricFallbackLabel": "Use Password and Email",
@@ -76,15 +79,133 @@
       }
     },
     "attendanceCheck": {
+      "title": "Attendance Check",
       "password": "Enter your password",
       "confirmButton": "Confirm",
-      "cancelButton": "Cancel"
+      "cancelButton": "Cancel",
+      "cameraNotAvailable": "Camera not available",
+      "faceVerificationError": "Face verification error:",
+      "connectionError": {
+        "title": "No connection",
+        "message": "Could not load attendance information",
+        "retryButton": "Reload",
+        "retrying": "Retrying..."
+      },
+      "checkTypes": {
+        "checkIn": "Check In",
+        "checkOut": "Check Out",
+        "checkEatIn": "Start Lunch",
+        "checkEatOut": "End Lunch"
+      },
+      "button": {
+        "loading": "...",
+        "locked": "---",
+        "register": "Register",
+        "complete": "Complete"
+      },
+      "defaultTime": "--:--:--",
+      "sessionExpired": {
+        "title": "Session Expired",
+        "message": "Your session has expired. Please log in again."
+      },
+      "registrationError": "Error registering attendance",
+      "deviceSettingsError": "Could not open device settings",
+      "verifying": "Verifying...",
+      "centerFaceAndMoveCloser": "Center your face and move closer to the camera",
+      "locationAccessFailed": "Could not access location",
+      "waitingPermission": "Waiting for permission...",
+      "cameraReady": "Camera ready",
+      "identityNotVerified": "Your identity could not be verified. Please try again.",
+      "imageSendError": "Error sending image",
+      "requestingPermissions": "Requesting permissions...",
+      "attendanceRegisteredSuccessfully": "Correctly registered attendance",
+      "permissions": "Permissions",
+      "permissionDeniedPermanent": "You did not grant permissions and the system does not allow requesting them again. Please enable them from Settings.",
+      "noRecords": "No attendance records",
+      "noExceptions": "No exceptions registered",
+      "description": "Description",
+      "checkInTime": "Check-in time",
+      "checkOutTime": "Check-out time",
+      "exceptions": "Exceptions",
+      "evidences": "Evidences",
+      "unknownException": "Unknown exception",
+      "cannotOpenFile": "Cannot open file",
+      "fileTypeNotSupported": "The file type {{type}} is not supported for viewing in the app",
+      "errorOpeningFile": "Error opening file. Try opening it from your browser.",
+      "outsideAllowedZone": "You are outside the allowed zone",
+      "distanceToAllowedZone": "You are outside the allowed zone. Please move approximately {{meters}} meters towards the {{direction}} to enter the permitted area.",
+        "directions": {
+        "north": "north",
+        "northeast": "northeast",
+        "east": "east",
+        "southeast": "southeast",
+        "south": "south",
+        "southwest": "southwest",
+        "west": "west",
+        "northwest": "northwest"
+       },
+       "errorFetchingShiftData": "Error fetching shift data",
+       "methodNotImplemented": "Method not implemented",
+       "errorFetchingZoneCoordinates": "Error fetching zone coordinates",
+       "photoCaptureError": "Error capturing photo",
+       "noZonesAssigned": "No zones assigned for the employee",
+       "errorFetchingAuthorizeAnyZone": "Error fetching authorize any zone"
+    },
+    "profile": {
+      "title": "My Profile",
+      "subtitle": "Personal and work information",
+      "loading": "Loading profile...",
+      "error": "Error loading profile",
+      "personalInfo": "Personal Information",
+      "workInfo": "Work Information",
+      "legalInfo": "Legal Information",
+      "email": "Email",
+      "phone": "Phone",
+      "gender": "Gender",
+      "birthday": "Birth Date",
+      "maritalStatus": "Marital Status",
+      "placeOfBirth": "Place of Birth",
+      "employeeCode": "Employee Code",
+      "payrollNumber": "Payroll Number",
+      "hireDate": "Hire Date",
+      "contractType": "Contract Type",
+      "workSchedule": "Work Schedule",
+      "businessEmail": "Business Email",
+      "curp": "CURP",
+      "rfc": "RFC",
+      "imssNss": "IMSS NSS"
+    },
+     "apiConfig": {
+        "title": "Config API",
+        "save": "Save",
+        "url": "Server url",
+        "placeholder": "https://app.com",
+        "success": "Success",
+        "urlSavedSuccessfully": "The URL was saved successfully",
+        "couldNotBeSaved": "Could not be saved",
+        "urlCannotBeEmpty": "The URL cannot be empty",
+        "validation": "Validation",
+        "invalidUrl": "The entered URL is not valid. Please check the format."
     }
   },
   "components": {
     "biometricButton": {
       "label": "Biometric Access"
     }
+  },
+  "pwa": {
+    "installed": "App installed",
+    "install": "Install app",
+    "installTitle": "Install app",
+    "installSubtitle": "Quick access from your home screen",
+    "notAvailable": "Installation not available",
+    "openInBrowser": "Open this page in Chrome or Safari",
+    "updateAvailable": "Update available",
+    "updateMessage": "There is a new version of the app. Would you like to update now?",
+    "updateNow": "Update",
+    "updateLater": "Later",
+    "installBannerTitle": "Install app",
+    "installBannerSubtitle": "Install the app for quick access"
   },
   "errors": {
     "loginFailed": "Login failed",
@@ -112,6 +233,10 @@
     "invalidPassword": "The entered password is incorrect",
     "noStoredCredentials": "No stored credentials found",
     "locationValidationWarning": "Check-in completed successfully, but there was an issue with location validation:",
-    "goToSettingsMessage": "To resolve this issue, go to your device settings and enable location permissions with high precision."
+    "goToSettingsMessage": "To resolve this issue, go to your device settings and enable location permissions with high precision.",
+    "authTokenNotFound": "Authentication token not found",
+    "employeeIdNotFound": "Employee ID not found",
+    "httpServiceUrlNotConfigured": "Could not create HttpService: API URL not configured",
+    "errorFetchingSystemSettings": "Error fetching system settings"
   }
 }

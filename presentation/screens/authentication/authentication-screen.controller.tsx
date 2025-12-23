@@ -1,16 +1,19 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useState, useEffect } from 'react'
-import { Alert } from 'react-native'
-import { useTranslation } from 'react-i18next'
 import { useNavigation } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
+import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { Alert, Platform } from 'react-native'
 import { RootStackParamList } from '../../../navigation/types/types'
-import { LoginController } from '../../../src/features/authentication/infrastructure/controllers/login.controller'
+import { GetSystemSettingsController } from '../../../src/features/attendance/infraestructure/controllers/get-system-setting/get-system-settings.controller'
 import { ELoginTypes } from '../../../src/features/authentication/application/types/login-types.enum'
-import { BiometricsService } from '../../../src/features/authentication/infrastructure/services/biometrics.service'
 import { AuthStateController } from '../../../src/features/authentication/infrastructure/controllers/auth-state.controller'
-import { LocationService, ILocationCoordinates } from '../../../src/features/authentication/infrastructure/services/location.service'
-import { environment } from '../../../config/environment'
+import { LoginController } from '../../../src/features/authentication/infrastructure/controllers/login.controller'
+import { BiometricsService } from '../../../src/features/authentication/infrastructure/services/biometrics.service'
+import { ILocationCoordinates, LocationService } from '../../../src/features/authentication/infrastructure/services/location.service'
+import { HttpService } from '../../../src/shared/infrastructure/services/http-service'
+import { PWAService } from '../../../src/shared/infrastructure/services/pwa-service'
+import { getApi } from '../../utils/get-api-url'
 
 // import Constants from 'expo-constants'
 
@@ -21,8 +24,10 @@ import { environment } from '../../../config/environment'
 const AuthenticationScreenController = () => {
   const [loginButtonLoading, setLoginButtonLoading] = useState(false)
   const [userName, setUserName] = useState('')
-  const [email, setEmail] = useState('wramirez@siler-mx.com')
-  const [password, setPassword] = useState('xab@ubm0qyn0BPK5cpj')
+  // const [email, setEmail] = useState('wramirez@siler-mx.com')
+  // const [password, setPassword] = useState('xab@ubm0qyn0BPK5cpj')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [biometricAvailable, setBiometricAvailable] = useState(false)
   const [hasStoredCredentials, setHasStoredCredentials] = useState(false)
   const [securityAlert, setSecurityAlert] = useState<string | null>(null)
@@ -31,15 +36,15 @@ const AuthenticationScreenController = () => {
   const [hasBiometricsPromptBeenShown, setHasBiometricsPromptBeenShown] = useState(false)
   const [currentLocation, setCurrentLocation] = useState<ILocationCoordinates | null>(null)
   const [settedAPIUrl, setSettedAPIUrl] = useState<string>('')
-
+  const [systemIcon, setIconImage] = useState<string>('')
   const { t } = useTranslation()
+  const getSystemSettingsController = new GetSystemSettingsController()
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>()
 
   useEffect(() => {
     initializeApp().catch(console.error)
   })
-
   /**
    * Inicializa la aplicación
    * - Inicializa la biometría y los datos de usuario en caso de que existan
@@ -58,8 +63,16 @@ const AuthenticationScreenController = () => {
    * @returns {Promise<void>}
    */
   const initUserData = async () => {
-    setSettedAPIUrl(environment.SAE_EMPLOYEEAPP_API_URL || 'NOT ASSIGNED')
+    const apiUrl = await getApi()
+    setSettedAPIUrl(apiUrl || 'NOT ASSIGNED')
     await Promise.all([initBiometricAvailability(), setAuthStateData()])
+    const systemSettings = await getSystemSettingsController.getSystemSettings()
+    setIconImage(systemSettings?.props.systemSettingLogo || '')
+    
+    // Aplicar configuración PWA dinámicamente en la web
+    if (Platform.OS === 'web' && systemSettings?.props) {
+      PWAService.applyDynamicManifest(systemSettings.props)
+    }
   }
 
   /**
@@ -78,7 +91,7 @@ const AuthenticationScreenController = () => {
       const locationService = new LocationService()
       
       try {
-        const coordinates = await locationService.getValidatedLocation(30) // Precisión de 30 metros - recomendado para asistencia laboral
+        const coordinates = await locationService.getValidatedLocation(200) // Precisión de 30 metros - recomendado para asistencia laboral
         setCurrentLocation(coordinates)
       } catch (locationError) {
         Alert.alert(
@@ -100,6 +113,10 @@ const AuthenticationScreenController = () => {
 
       await setAuthStateData()
 
+      // Inicializar o reutilizar la instancia de HttpService
+      // Si ya existe, la retorna; si no existe, la crea con la URL configurada
+      const httpServiceInstance = await HttpService.getInstance()
+
       const biometricService = new BiometricsService()
       const isBiometricAvailable = await biometricService.isBiometricAvailable()
       
@@ -108,11 +125,16 @@ const AuthenticationScreenController = () => {
       } else {
         navigation.replace('attendanceCheck')
       }
-    } catch (error) {
-      Alert.alert(
-        t('common.error'),
-        error instanceof Error ? error.message : t('errors.unknownError')
-      )
+    } catch (error: any) {
+      let title = 'common.error'
+      if (error.status === 400) {
+        title = 'common.information'
+      }
+
+      const message =
+        (error.message ? error.message : t('errors.unknownError')) as string
+
+      Alert.alert(t(title), message)
     } finally {
       setTimeout(() => {
         setLoginButtonLoading(false)
@@ -142,7 +164,7 @@ const AuthenticationScreenController = () => {
       }
 
       setHasStoredCredentials(!!authState?.props.authState?.user?.props)
-      setEmail(authState?.props.loginCredentials?.email || '')
+      // setEmail(authState?.props.loginCredentials?.email || '')
       
       // Set biometric enabled state from preferences
       setBiometricEnabled(!!authState?.props.biometricsPreferences?.isEnabled)
@@ -219,7 +241,7 @@ const AuthenticationScreenController = () => {
   const getCurrentLocationCoordinates = async (): Promise<ILocationCoordinates | null> => {
     try {
       const locationService = new LocationService()
-      const coordinates = await locationService.getValidatedLocation(30) // Precisión de 30 metros - recomendado para asistencia laboral
+      const coordinates = await locationService.getValidatedLocation(200) // Precisión de 30 metros - recomendado para asistencia laboral
       setCurrentLocation(coordinates)
       return coordinates
     } catch (error) {
@@ -235,6 +257,7 @@ const AuthenticationScreenController = () => {
     biometricType,
     securityAlert,
     currentLocation,
+    systemIcon,
     setSecurityAlert,
     loginHandler,
     setEmail: handleEmailChange,
