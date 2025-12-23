@@ -128,6 +128,18 @@ const createAuthenticationStyle = (theme: IAppTheme, themeType: EThemeType) =>
       marginBottom: 20,
       marginHorizontal: 20,
       borderRadius: 4
+    },
+    pwaInstallContainer: {
+      marginTop: 20,
+      marginBottom: 10,
+      alignItems: 'center'
+    },
+    pwaInstallMessage: {
+      textAlign: 'center',
+      marginBottom: 20,
+      color: theme.colors.text,
+      fontSize: 16,
+      lineHeight: 24
     }
   })
 

@@ -22,8 +22,10 @@ import Animated, {
 import { StatusBar } from 'expo-status-bar'
 import { useTranslation } from 'react-i18next'
 
+import { PWAService } from '../../../src/shared/infrastructure/services/pwa-service'
 import { BiometricButton } from '../../components/biometric-button/biometric-button.component'
 import { Button } from '../../components/button/button.component'
+import { PWAInstallButton } from '../../components/pwa-install-button/pwa-install-button'
 import { TextInput } from '../../components/text-input/text-input.component'
 import { Typography } from '../../components/typography/typography.component'
 
@@ -42,10 +44,32 @@ export const AuthenticationScreen: React.FC = () => {
   const style = useAuthenticationStyle()
   const { t } = useTranslation()
   const { themeType } = useAppTheme()
+  
+  // Estado para verificar si la PWA está instalada (solo en web)
+  const [isPWAInstalled, setIsPWAInstalled] = React.useState(() => {
+    if (Platform.OS !== 'web') return true // En nativo, siempre mostrar login
+    return PWAService.isInstalledAsPWA()
+  })
 
   React.useEffect(() => {
     if (Platform.OS === 'ios') {
       RNStatusBar.setBarStyle('light-content', true)
+    }
+  }, [])
+
+  // Escuchar cuando se instala la PWA
+  React.useEffect(() => {
+    if (Platform.OS !== 'web') return
+
+    const handleAppInstalled = () => {
+      setIsPWAInstalled(true)
+    }
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('appinstalled', handleAppInstalled)
+      return () => {
+        window.removeEventListener('appinstalled', handleAppInstalled)
+      }
     }
   }, [])
 
@@ -85,84 +109,96 @@ export const AuthenticationScreen: React.FC = () => {
                 </Typography>
               </Animated.View>
 
-
-              
-
-              <Animated.View
-                entering={SlideInLeft.delay(400).duration(250)}
-              >
-                <TextInput
-                  label={t('screens.authentication.email')}
-                  value={controller.email || ''}
-                  onChangeText={(text) => controller.setEmail?.(text)}
-                  keyboardType="email-address"
-                  leftIcon="account"
-                />
-              </Animated.View>
-
-              <Animated.View
-                entering={SlideInRight.delay(500).duration(250)}
-              >
-                <TextInput
-                  label={t('screens.authentication.password')}
-                  value={controller.password || ''}
-                  onChangeText={(text) => controller.setPassword?.(text)}
-                  secureTextEntry
-                  leftIcon="lock"
-                  rightIcon="eye"
-                />
-              </Animated.View>
-
-              <Animated.View 
-                entering={FadeIn.delay(600).duration(200)}
-                style={style.forgotContainer}
-              >
-                <AnimatedTouchableOpacity
-                  entering={FadeIn.delay(650).duration(150)}
+              {/* Si NO está instalada como PWA (solo en web), mostrar solo el botón de instalación */}
+              {!isPWAInstalled ? (
+                <Animated.View
+                  entering={FadeInUp.delay(400).duration(300)}
+                  style={style.pwaInstallContainer}
                 >
-                  <Typography variant="body2" style={[style.forgotText]}>
-                    {t('screens.authentication.forgotPassword')}
+                  <Typography variant="body2" style={style.pwaInstallMessage}>
+                    {t('pwa.installRequired', { defaultValue: 'Para continuar, instala la aplicación en tu dispositivo' })}
                   </Typography>
-                </AnimatedTouchableOpacity>
-              </Animated.View>
-
-              <Animated.View
-                entering={ZoomIn.delay(700).duration(250)}
-              >
-                <Button
-                  title={t('screens.authentication.loginButton')}
-                  onPress={() => controller.loginHandler?.('email')}
-                  loading={Boolean(controller.loginButtonLoading)}
-                />
-              </Animated.View>
-               
-              {controller.shouldShowBiometrics() && (
-                <Animated.View 
-                  entering={FadeInUp.delay(800).duration(300)}
-                  style={style.biometricContainer}
-                >
-                  <Animated.View 
-                    entering={FadeIn.delay(900).duration(200)}
-                    style={style.dividerContainer}
-                  >
-                    <Divider style={[style.divider]} />
-                    <Typography variant="body2" style={[style.orText]}>
-                      {t('screens.authentication.or')}
-                    </Typography>
-                    <Divider style={[style.divider]} />
-                  </Animated.View>
-                  
+                  <PWAInstallButton showOnlyIfInstallable={false} />
+                </Animated.View>
+              ) : (
+                <>
                   <Animated.View
-                    entering={BounceIn.delay(1000).duration(300)}
+                    entering={SlideInLeft.delay(400).duration(250)}
                   >
-                    <BiometricButton
-                      type={controller.biometricType || 'fingerprint'}
-                      onPress={() => controller.loginHandler?.('biometric')}
-                      disabled={Boolean(controller.loginButtonLoading)}
+                    <TextInput
+                      label={t('screens.authentication.email')}
+                      value={controller.email || ''}
+                      onChangeText={(text) => controller.setEmail?.(text)}
+                      keyboardType="email-address"
+                      leftIcon="account"
+                    />
+                  </Animated.View>
+
+                  <Animated.View
+                    entering={SlideInRight.delay(500).duration(250)}
+                  >
+                    <TextInput
+                      label={t('screens.authentication.password')}
+                      value={controller.password || ''}
+                      onChangeText={(text) => controller.setPassword?.(text)}
+                      secureTextEntry
+                      leftIcon="lock"
+                      rightIcon="eye"
+                    />
+                  </Animated.View>
+
+                  <Animated.View 
+                    entering={FadeIn.delay(600).duration(200)}
+                    style={style.forgotContainer}
+                  >
+                    <AnimatedTouchableOpacity
+                      entering={FadeIn.delay(650).duration(150)}
+                    >
+                      <Typography variant="body2" style={[style.forgotText]}>
+                        {t('screens.authentication.forgotPassword')}
+                      </Typography>
+                    </AnimatedTouchableOpacity>
+                  </Animated.View>
+
+                  <Animated.View
+                    entering={ZoomIn.delay(700).duration(250)}
+                  >
+                    <Button
+                      title={t('screens.authentication.loginButton')}
+                      onPress={() => controller.loginHandler?.('email')}
+                      loading={Boolean(controller.loginButtonLoading)}
                     />
                   </Animated.View>
                   
-                </Animated.View>
+                  {controller.shouldShowBiometrics() && (
+                    <Animated.View 
+                      entering={FadeInUp.delay(800).duration(300)}
+                      style={style.biometricContainer}
+                    >
+                      <Animated.View 
+                        entering={FadeIn.delay(900).duration(200)}
+                        style={style.dividerContainer}
+                      >
+                        <Divider style={[style.divider]} />
+                        <Typography variant="body2" style={[style.orText]}>
+                          {t('screens.authentication.or')}
+                        </Typography>
+                        <Divider style={[style.divider]} />
+                      </Animated.View>
+                      
+                      <Animated.View
+                        entering={BounceIn.delay(1000).duration(300)}
+                      >
+                        <BiometricButton
+                          type={controller.biometricType || 'fingerprint'}
+                          onPress={() => controller.loginHandler?.('biometric')}
+                          disabled={Boolean(controller.loginButtonLoading)}
+                        />
+                      </Animated.View>
+                      
+                    </Animated.View>
+                  )}
+                </>
               )}
             </Animated.View>
           </ScrollView>
