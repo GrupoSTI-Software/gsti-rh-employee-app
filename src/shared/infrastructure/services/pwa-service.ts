@@ -125,8 +125,8 @@ class PWAServiceClass {
     const defaultIcon = '/assets/icon.png'
 
     const manifest: IPWAManifest = {
-      name: systemSettings.systemSettingTradeName || defaultName,
-      short_name: systemSettings.systemSettingTradeName?.substring(0, 12) || 'GSTI Plus',
+      name: `${systemSettings.systemSettingTradeName || defaultName} Plus`,
+      short_name: `${systemSettings.systemSettingTradeName?.substring(0, 12) || 'GSTI'} Plus`,
       description: 'Sistema de Asistencia de Empleados',
       start_url: '/',
       display: 'standalone',
@@ -200,14 +200,14 @@ class PWAServiceClass {
 
     // Actualizar título
     if (systemSettings.systemSettingTradeName) {
-      document.title = systemSettings.systemSettingTradeName
+      document.title = `${systemSettings.systemSettingTradeName} Plus`
     }
 
     // Actualizar theme-color
     // this.updateOrCreateMetaTag('theme-color', systemSettings.systemSettingSidebarColor || '#003366')
 
     // Actualizar apple-mobile-web-app-title
-    this.updateOrCreateMetaTag('apple-mobile-web-app-title', systemSettings.systemSettingTradeName || 'GSTI Plus')
+    this.updateOrCreateMetaTag('apple-mobile-web-app-title', `${systemSettings.systemSettingTradeName || 'GSTI'} Plus`)
 
     // Actualizar apple-mobile-web-app-capable
     this.updateOrCreateMetaTag('apple-mobile-web-app-capable', 'yes')

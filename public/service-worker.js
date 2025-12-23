@@ -3,9 +3,9 @@
  * Gestiona el cache y el funcionamiento offline
  */
 
-const CACHE_NAME = 'sae-empleados-v1'
-const DYNAMIC_CACHE_NAME = 'sae-empleados-dynamic-v1'
-const API_CACHE_NAME = 'sae-empleados-api-v1'
+const CACHE_NAME = 'gsti-plus-v1'
+const DYNAMIC_CACHE_NAME = 'gsti-plus-dynamic-v1'
+const API_CACHE_NAME = 'gsti-plus-api-v1'
 
 // Archivos estáticos a cachear durante la instalación
 const STATIC_ASSETS = [

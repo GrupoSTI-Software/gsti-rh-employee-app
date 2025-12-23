@@ -168,13 +168,13 @@ export const AuthenticationScreen: React.FC = () => {
           </ScrollView>
         </KeyboardAvoidingView>
 
-        <Animated.View
+        {/* <Animated.View
           entering={FadeIn.delay(1100).duration(200)}
         >
           <Typography variant="caption" style={{ textAlign: 'center', color: 'rgb(176, 176, 176)', marginBottom: 40 }}>
             API: {controller.settedAPIUrl}
           </Typography>
-        </Animated.View>
+        </Animated.View> */}
 
         <Snackbar
           visible={!!controller.securityAlert}
