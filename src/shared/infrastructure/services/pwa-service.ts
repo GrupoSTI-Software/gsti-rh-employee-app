@@ -12,7 +12,7 @@ export interface IPWAManifest {
   display: 'standalone' | 'fullscreen' | 'minimal-ui' | 'browser'
   orientation: 'portrait' | 'landscape' | 'any'
   background_color: string
-  theme_color: string
+  theme_color?: string
   icons: Array<{
     src: string
     sizes: string
@@ -121,30 +121,41 @@ class PWAServiceClass {
    * @returns {IPWAManifest} Manifest generado
    */
   public generateManifest(systemSettings: ISystemSetting): IPWAManifest {
-    const defaultName = 'SAE Empleados'
+    const defaultName = 'GSTI Plus'
     const defaultIcon = '/assets/icon.png'
 
     const manifest: IPWAManifest = {
       name: systemSettings.systemSettingTradeName || defaultName,
-      short_name: systemSettings.systemSettingTradeName?.substring(0, 12) || 'SAE',
+      short_name: systemSettings.systemSettingTradeName?.substring(0, 12) || 'GSTI Plus',
       description: 'Sistema de Asistencia de Empleados',
       start_url: '/',
       display: 'standalone',
       orientation: 'portrait',
       background_color: '#ffffff',
-      theme_color: systemSettings.systemSettingSidebarColor || '#003366',
       icons: [
         {
-          src: systemSettings.systemSettingLogo || defaultIcon,
+          src: systemSettings.systemSettingFavicon || defaultIcon,
           sizes: '192x192',
           type: 'image/png',
-          purpose: 'any maskable'
+          purpose: 'any'
         },
         {
-          src: systemSettings.systemSettingLogo || defaultIcon,
+          src: systemSettings.systemSettingFavicon || defaultIcon,
+          sizes: '192x192',
+          type: 'image/png',
+          purpose: 'maskable'
+        },
+        {
+          src: systemSettings.systemSettingFavicon || defaultIcon,
           sizes: '512x512',
           type: 'image/png',
-          purpose: 'any maskable'
+          purpose: 'any'
+        },
+        {
+          src: systemSettings.systemSettingFavicon || defaultIcon,
+          sizes: '512x512',
+          type: 'image/png',
+          purpose: 'maskable'
         }
       ]
     }
@@ -193,10 +204,10 @@ class PWAServiceClass {
     }
 
     // Actualizar theme-color
-    this.updateOrCreateMetaTag('theme-color', systemSettings.systemSettingSidebarColor || '#003366')
+    // this.updateOrCreateMetaTag('theme-color', systemSettings.systemSettingSidebarColor || '#003366')
 
     // Actualizar apple-mobile-web-app-title
-    this.updateOrCreateMetaTag('apple-mobile-web-app-title', systemSettings.systemSettingTradeName || 'SAE')
+    this.updateOrCreateMetaTag('apple-mobile-web-app-title', systemSettings.systemSettingTradeName || 'GSTI Plus')
 
     // Actualizar apple-mobile-web-app-capable
     this.updateOrCreateMetaTag('apple-mobile-web-app-capable', 'yes')
@@ -208,7 +219,7 @@ class PWAServiceClass {
     this.updateFavicon(systemSettings.systemSettingFavicon || systemSettings.systemSettingLogo)
 
     // Apple touch icon
-    this.updateAppleTouchIcon(systemSettings.systemSettingLogo)
+    this.updateAppleTouchIcon(systemSettings.systemSettingFavicon || systemSettings.systemSettingLogo)
   }
 
   /**

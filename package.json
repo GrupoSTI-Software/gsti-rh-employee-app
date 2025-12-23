@@ -11,7 +11,7 @@
     "start": "expo start --clear",
     "web": "expo start --web",
     "web:export": "expo export --platform web",
-    "pwa:copy": "cp public/manifest.json dist/ 2>/dev/null || true && cp public/service-worker.js dist/ 2>/dev/null || true && cp assets/icon.png dist/assets/ 2>/dev/null || true && node scripts/inject-pwa-meta.js",
+    "pwa:copy": "cp public/manifest.json dist/ && cp public/service-worker.js dist/ && cp -r public/assets/* dist/assets/ 2>/dev/null || true && node scripts/inject-pwa-meta.js",
     "start:sae:production": "ENVFILE=config/sae-production/.env expo start --clear",
     "web:sae:production": "ENVFILE=config/sae-production/.env expo start --web",
     "build:sae:preview": "ENVFILE=config/sae-production/.env eas build --profile preview",

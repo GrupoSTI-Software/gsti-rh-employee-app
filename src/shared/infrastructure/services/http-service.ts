@@ -211,7 +211,7 @@ class HttpServiceClass {
  * @example
  * // Verificar si existe una instancia antes de usarla
  * if (HttpService.hasInstance()) {
- *   console.log('Instancia ya existe')
+ *   // Instancia ya existe
  * }
  * 
  * @example

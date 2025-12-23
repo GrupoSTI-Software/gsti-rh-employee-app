@@ -24,20 +24,15 @@ const API_CACHE_PATTERNS = [
  * Cachea los archivos estáticos necesarios
  */
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installing Service Worker...')
-  
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('[SW] Pre-caching static assets')
-        return cache.addAll(STATIC_ASSETS).catch((error) => {
-          console.log('[SW] Some static assets failed to cache:', error)
+        return cache.addAll(STATIC_ASSETS).catch(() => {
           // Continuar incluso si algunos assets fallan
           return Promise.resolve()
         })
       })
       .then(() => {
-        console.log('[SW] Installation complete')
         return self.skipWaiting()
       })
   )
@@ -48,8 +43,6 @@ self.addEventListener('install', (event) => {
  * Limpia caches antiguos
  */
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Activating Service Worker...')
-  
   event.waitUntil(
     caches.keys()
       .then((cacheNames) => {
@@ -61,13 +54,11 @@ self.addEventListener('activate', (event) => {
                      name !== API_CACHE_NAME
             })
             .map((name) => {
-              console.log('[SW] Deleting old cache:', name)
               return caches.delete(name)
             })
         )
       })
       .then(() => {
-        console.log('[SW] Activation complete')
         return self.clients.claim()
       })
   )
@@ -122,7 +113,6 @@ async function cacheFirst(request) {
     }
     return networkResponse
   } catch (error) {
-    console.log('[SW] Cache First failed:', error)
     throw error
   }
 }
@@ -141,7 +131,6 @@ async function networkFirst(request) {
     }
     return networkResponse
   } catch (error) {
-    console.log('[SW] Network failed, falling back to cache:', error)
     const cachedResponse = await caches.match(request)
     if (cachedResponse) {
       return cachedResponse
@@ -166,8 +155,7 @@ async function staleWhileRevalidate(request) {
       }
       return networkResponse
     })
-    .catch((error) => {
-      console.log('[SW] Network request failed:', error)
+    .catch(() => {
       return cachedResponse
     })
   
@@ -236,8 +224,6 @@ self.addEventListener('fetch', (event) => {
         return await staleWhileRevalidate(request)
         
       } catch (error) {
-        console.log('[SW] Fetch handler error:', error)
-        
         // Intentar devolver algo del cache como último recurso
         const fallbackResponse = await caches.match(request)
         if (fallbackResponse) {
@@ -260,12 +246,10 @@ self.addEventListener('fetch', (event) => {
  */
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
-    console.log('[SW] Skip waiting requested')
     self.skipWaiting()
   }
   
   if (event.data && event.data.type === 'CLEAR_CACHE') {
-    console.log('[SW] Clearing all caches')
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => caches.delete(cacheName))
@@ -287,8 +271,6 @@ self.addEventListener('message', (event) => {
  * Evento de sincronización en segundo plano
  */
 self.addEventListener('sync', (event) => {
-  console.log('[SW] Background sync triggered:', event.tag)
-  
   if (event.tag === 'sync-attendance') {
     event.waitUntil(
       // Aquí se pueden sincronizar datos de asistencia pendientes
@@ -301,8 +283,6 @@ self.addEventListener('sync', (event) => {
  * Evento de notificación push
  */
 self.addEventListener('push', (event) => {
-  console.log('[SW] Push notification received')
-  
   const options = {
     body: event.data?.text() || 'Nueva notificación',
     icon: '/assets/icon.png',
@@ -323,8 +303,6 @@ self.addEventListener('push', (event) => {
  * Evento de clic en notificación
  */
 self.addEventListener('notificationclick', (event) => {
-  console.log('[SW] Notification click received')
-  
   event.notification.close()
   
   event.waitUntil(
@@ -340,6 +318,3 @@ self.addEventListener('notificationclick', (event) => {
     })
   )
 })
-
-console.log('[SW] Service Worker loaded')
-

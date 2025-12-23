@@ -35,10 +35,10 @@ const swScript = `
       window.addEventListener('load', function() {
         navigator.serviceWorker.register('/service-worker.js')
           .then(function(registration) {
-            console.log('ServiceWorker registration successful:', registration.scope);
+            // ServiceWorker registration successful
           })
           .catch(function(error) {
-            console.log('ServiceWorker registration failed:', error);
+            // ServiceWorker registration failed
           });
       });
     }
@@ -54,25 +54,26 @@ try {
   let html = fs.readFileSync(indexPath, 'utf8')
 
   // Verificar si ya tiene las meta tags de PWA
-  if (html.includes('apple-mobile-web-app-capable')) {
-    console.log('ℹ️  PWA meta tags already present')
-  } else {
+  if (!html.includes('apple-mobile-web-app-capable')) {
     // Inyectar meta tags después del <head>
     html = html.replace('<head>', '<head>' + pwaMeta)
-    console.log('✅ PWA meta tags injected')
   }
 
   // Verificar si ya tiene el script de SW
-  if (html.includes('serviceWorker.register')) {
-    console.log('ℹ️  Service Worker script already present')
-  } else {
+  if (!html.includes('serviceWorker.register')) {
     // Inyectar script antes del </body>
     html = html.replace('</body>', swScript + '</body>')
-    console.log('✅ Service Worker script injected')
+  }
+
+  // Actualizar viewport para deshabilitar zoom
+  const viewportRegex = /<meta\s+name="viewport"\s+content="[^"]*"\s*\/?>/i
+  const newViewport = '<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, shrink-to-fit=no" />'
+  
+  if (viewportRegex.test(html)) {
+    html = html.replace(viewportRegex, newViewport)
   }
 
   fs.writeFileSync(indexPath, html)
-  console.log('✅ PWA meta tags and scripts successfully injected into index.html')
 
 } catch (error) {
   console.error('❌ Error injecting PWA meta:', error)
