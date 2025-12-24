@@ -20,6 +20,7 @@ import { CloseSidebarIcon } from '../../icons/close-sidebar-icon/close-sidebar.i
 import { CogIcon } from '../../icons/cog-icon/cog.icon'
 import { LogoutIcon } from '../../icons/logout-icon/logout.icon'
 import { ProfileIcon } from '../../icons/profile-icon/profile.icon'
+import { getAppVersionDisplay } from '../../utils/app-version'
 import SidebarItem from '../sidebar-item/sidebar-item.component'
 import SidebarController from './sidebar.controller'
 import useSidebarStyles from './sidebar.style'
@@ -225,6 +226,18 @@ const SidebarLayout: React.FC<ISidebarProps> = ({ isOpen, onClose }) => {
                   onPress={controller.handleLogout}
                   delay={380}
                 />
+              </Animated.View>
+            )}
+
+            {/* Versión de la app */}
+            {isOpen && (
+              <Animated.View
+                entering={FadeIn.delay(400).duration(200)}
+                style={styles.versionContainer}
+              >
+                <Text style={styles.versionText}>
+                  {getAppVersionDisplay()}
+                </Text>
               </Animated.View>
             )}
           </ScrollView>

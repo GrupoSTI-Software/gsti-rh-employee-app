@@ -140,6 +140,13 @@ const createAuthenticationStyle = (theme: IAppTheme, themeType: EThemeType) =>
       color: theme.colors.text,
       fontSize: 16,
       lineHeight: 24
+    },
+    versionText: {
+      textAlign: 'center',
+      color: theme.colors.textSecondary || 'rgba(128, 128, 128, 0.7)',
+      fontSize: 12,
+      marginBottom: 20,
+      marginTop: 'auto'
     }
   })
 

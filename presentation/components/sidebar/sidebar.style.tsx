@@ -104,6 +104,16 @@ const createSidebarStyles = (theme: IAppTheme, themeType: EThemeType) =>
     safeAreaView: {
       flex: 1,
       backgroundColor: themeType === EThemeType.LIGHT ? '#FFFFFF' : theme.colors.background
+    },
+    versionContainer: {
+      paddingVertical: 16,
+      paddingHorizontal: 20,
+      marginTop: 'auto'
+    },
+    versionText: {
+      textAlign: 'center',
+      color: theme.colors.textSecondary || 'rgba(128, 128, 128, 0.7)',
+      fontSize: 12
     }
   })
 
