@@ -8,6 +8,7 @@ import { ThemeProvider, useAppTheme } from './presentation/theme/theme-context'
 import { AppNavigator } from './navigation/app-navigator'
 import { ExpoUpdatesService } from './src/shared/infrastructure/services/expo-updates-service'
 import { PWAProvider } from './presentation/providers/pwa-provider'
+import { AlertProvider } from './presentation/providers/alert-provider'
 
 // Wrap everything in our theme provider
 const ThemedApp: React.FC = () => {
@@ -32,9 +33,11 @@ const ThemedApp: React.FC = () => {
 
   return (
     <PaperProvider theme={theme}>
-      <PWAProvider autoShowBanner={true} bannerDelay={8000}>
-        <AppNavigator />
-      </PWAProvider>
+      <AlertProvider>
+        <PWAProvider autoShowBanner={true} bannerDelay={8000}>
+          <AppNavigator />
+        </PWAProvider>
+      </AlertProvider>
     </PaperProvider>
   )
 }

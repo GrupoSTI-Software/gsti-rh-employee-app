@@ -3,7 +3,7 @@ import { useNavigation } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Alert, Platform } from 'react-native'
+import { Platform } from 'react-native'
 import { RootStackParamList } from '../../../navigation/types/types'
 import { GetSystemSettingsController } from '../../../src/features/attendance/infraestructure/controllers/get-system-setting/get-system-settings.controller'
 import { ELoginTypes } from '../../../src/features/authentication/application/types/login-types.enum'
@@ -13,6 +13,7 @@ import { BiometricsService } from '../../../src/features/authentication/infrastr
 import { ILocationCoordinates, LocationService } from '../../../src/features/authentication/infrastructure/services/location.service'
 import { HttpService } from '../../../src/shared/infrastructure/services/http-service'
 import { PWAService } from '../../../src/shared/infrastructure/services/pwa-service'
+import { AlertService } from '../../../src/shared/infrastructure/services/alert-service'
 import { getApi } from '../../utils/get-api-url'
 
 // import Constants from 'expo-constants'
@@ -94,7 +95,7 @@ const AuthenticationScreenController = () => {
         const coordinates = await locationService.getValidatedLocation(200) // Precisión de 30 metros - recomendado para asistencia laboral
         setCurrentLocation(coordinates)
       } catch (locationError) {
-        Alert.alert(
+        AlertService.error(
           t('common.error'),
           locationError instanceof Error 
             ? locationError.message 
@@ -134,7 +135,7 @@ const AuthenticationScreenController = () => {
       const message =
         (error.message ? error.message : t('errors.unknownError')) as string
 
-      Alert.alert(t(title), message)
+      AlertService.show(t(title), message)
     } finally {
       setTimeout(() => {
         setLoginButtonLoading(false)
