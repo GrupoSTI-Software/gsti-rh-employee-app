@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /**
  * Script para inyectar meta tags de PWA en el index.html generado por Expo
+ * y actualizar el manifest.json con datos de la API
  * Este script se ejecuta después de la compilación web
  */
 
@@ -13,19 +14,183 @@ const __dirname = path.dirname(__filename)
 
 const distPath = path.join(__dirname, '..', 'dist')
 const indexPath = path.join(distPath, 'index.html')
+const manifestPath = path.join(distPath, 'manifest.json')
+const rootEnvPath = path.join(__dirname, '..', '.env')
 
-// Meta tags de PWA a inyectar
-const pwaMeta = `
+/**
+ * Lee y parsea el archivo .env de la raíz del proyecto
+ * @returns {Object} Variables de entorno
+ */
+function loadEnvFile() {
+  const envVars = {}
+  
+  if (!fs.existsSync(rootEnvPath)) {
+    console.warn('⚠️  .env file not found in project root, using defaults')
+    return envVars
+  }
+
+  const envContent = fs.readFileSync(rootEnvPath, 'utf8')
+  const lines = envContent.split('\n')
+  
+  for (const line of lines) {
+    const trimmedLine = line.trim()
+    // Ignorar comentarios y líneas vacías
+    if (!trimmedLine || trimmedLine.startsWith('#')) continue
+    
+    const equalIndex = trimmedLine.indexOf('=')
+    if (equalIndex === -1) continue
+    
+    const key = trimmedLine.substring(0, equalIndex).trim()
+    let value = trimmedLine.substring(equalIndex + 1).trim()
+    
+    // Remover comillas si existen
+    if ((value.startsWith('"') && value.endsWith('"')) || 
+        (value.startsWith("'") && value.endsWith("'"))) {
+      value = value.slice(1, -1)
+    }
+    
+    envVars[key] = value
+  }
+  
+  return envVars
+}
+
+/**
+ * Obtiene la configuración del sistema desde la API
+ * @param {string} apiUrl - URL base de la API
+ * @returns {Promise<Object|null>} Configuración del sistema o null si falla
+ */
+async function fetchSystemSettings(apiUrl) {
+  if (!apiUrl || apiUrl === 'NOT ASSIGNED') {
+    console.warn('⚠️  API_URL not configured')
+    return null
+  }
+
+  try {
+    console.log(`📡 Fetching system settings from: ${apiUrl}/system-settings-active`)
+    
+    const response = await fetch(`${apiUrl}/system-settings-active`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    })
+
+    if (!response.ok) {
+      console.warn(`⚠️  API returned status ${response.status}`)
+      return null
+    }
+
+    const data = await response.json()
+    
+    if (data?.data?.systemSetting) {
+      console.log('✅ System settings fetched successfully')
+      return data.data.systemSetting
+    }
+    
+    console.warn('⚠️  No system settings found in API response')
+    return null
+  } catch (error) {
+    console.error('❌ Error fetching system settings:', error.message)
+    return null
+  }
+}
+
+/**
+ * Actualiza el manifest.json con los datos del sistema
+ * @param {Object} systemSettings - Configuración del sistema desde la API
+ */
+function updateManifest(systemSettings) {
+  if (!fs.existsSync(manifestPath)) {
+    console.warn('⚠️  manifest.json not found in dist folder')
+    return
+  }
+
+  try {
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'))
+    const defaultName = 'GSTI Plus'
+    const defaultIcon = '/assets/icon.png'
+
+    // Actualizar nombre
+    if (systemSettings?.systemSettingTradeName) {
+      manifest.name = `${systemSettings.systemSettingTradeName} Plus`
+      manifest.short_name = `${systemSettings.systemSettingTradeName.substring(0, 12)} Plus`
+    } else {
+      manifest.name = defaultName
+      manifest.short_name = 'GSTI Plus'
+    }
+
+    // Actualizar iconos si hay favicon disponible
+    const iconSrc = systemSettings?.systemSettingFavicon || defaultIcon
+    
+    manifest.icons = [
+      {
+        src: iconSrc,
+        sizes: '192x192',
+        type: 'image/png',
+        purpose: 'any'
+      },
+      {
+        src: iconSrc,
+        sizes: '192x192',
+        type: 'image/png',
+        purpose: 'maskable'
+      },
+      {
+        src: iconSrc,
+        sizes: '512x512',
+        type: 'image/png',
+        purpose: 'any'
+      },
+      {
+        src: iconSrc,
+        sizes: '512x512',
+        type: 'image/png',
+        purpose: 'maskable'
+      }
+    ]
+
+    // Agregar theme_color si está disponible
+    if (systemSettings?.systemSettingSidebarColor) {
+      manifest.theme_color = systemSettings.systemSettingSidebarColor
+    }
+
+    fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2))
+    console.log('✅ manifest.json updated successfully')
+    console.log(`   - Name: ${manifest.name}`)
+    console.log(`   - Short Name: ${manifest.short_name}`)
+    console.log(`   - Icon: ${iconSrc}`)
+  } catch (error) {
+    console.error('❌ Error updating manifest:', error.message)
+  }
+}
+
+/**
+ * Genera los meta tags de PWA basados en la configuración del sistema
+ * @param {Object|null} systemSettings - Configuración del sistema
+ * @returns {string} HTML con los meta tags
+ */
+function generatePWAMetaTags(systemSettings) {
+  const appName = systemSettings?.systemSettingTradeName 
+    ? `${systemSettings.systemSettingTradeName} Plus` 
+    : 'GSTI Plus'
+  const themeColor = systemSettings?.systemSettingSidebarColor || '#003366'
+  const iconPath = systemSettings?.systemSettingFavicon || '/assets/icon.png'
+
+  return `
   <!-- PWA Meta Tags -->
-  <meta name="theme-color" content="#003366">
+  <meta name="theme-color" content="${themeColor}">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="SAE Empleados">
-  <meta name="application-name" content="SAE Empleados">
+  <meta name="apple-mobile-web-app-title" content="${appName}">
+  <meta name="application-name" content="${appName}">
   <link rel="manifest" href="/manifest.json">
-  <link rel="apple-touch-icon" href="/assets/icon.png">
+  <link rel="apple-touch-icon" href="${iconPath}">
+  <link rel="icon" href="${iconPath}">
 `
+}
 
 // Script para registrar Service Worker
 const swScript = `
@@ -45,38 +210,90 @@ const swScript = `
   </script>
 `
 
-try {
-  if (!fs.existsSync(indexPath)) {
-    console.error('❌ index.html not found in dist folder')
-    process.exit(1)
-  }
-
-  let html = fs.readFileSync(indexPath, 'utf8')
-
-  // Verificar si ya tiene las meta tags de PWA
-  if (!html.includes('apple-mobile-web-app-capable')) {
-    // Inyectar meta tags después del <head>
-    html = html.replace('<head>', '<head>' + pwaMeta)
-  }
-
-  // Verificar si ya tiene el script de SW
-  if (!html.includes('serviceWorker.register')) {
-    // Inyectar script antes del </body>
-    html = html.replace('</body>', swScript + '</body>')
-  }
-
-  // Actualizar viewport para deshabilitar zoom
-  const viewportRegex = /<meta\s+name="viewport"\s+content="[^"]*"\s*\/?>/i
-  const newViewport = '<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, shrink-to-fit=no" />'
+/**
+ * Actualiza el título del HTML
+ * @param {string} html - Contenido HTML
+ * @param {Object|null} systemSettings - Configuración del sistema
+ * @returns {string} HTML actualizado
+ */
+function updateHTMLTitle(html, systemSettings) {
+  if (!systemSettings?.systemSettingTradeName) return html
   
-  if (viewportRegex.test(html)) {
-    html = html.replace(viewportRegex, newViewport)
+  const newTitle = `${systemSettings.systemSettingTradeName} Plus`
+  const titleRegex = /<title>[^<]*<\/title>/i
+  
+  if (titleRegex.test(html)) {
+    return html.replace(titleRegex, `<title>${newTitle}</title>`)
   }
-
-  fs.writeFileSync(indexPath, html)
-
-} catch (error) {
-  console.error('❌ Error injecting PWA meta:', error)
-  process.exit(1)
+  
+  return html
 }
 
+/**
+ * Función principal que ejecuta el script
+ */
+async function main() {
+  console.log('🚀 Starting PWA meta injection...\n')
+
+  // Cargar variables de entorno desde .env en raíz
+  const envVars = loadEnvFile()
+  const apiUrl = envVars.API_URL
+
+  if (apiUrl) {
+    console.log(`📌 API_URL from .env: ${apiUrl}\n`)
+  }
+
+  // Obtener configuración del sistema desde la API
+  const systemSettings = await fetchSystemSettings(apiUrl)
+
+  // Actualizar manifest.json
+  updateManifest(systemSettings)
+
+  // Procesar index.html
+  try {
+    if (!fs.existsSync(indexPath)) {
+      console.error('❌ index.html not found in dist folder')
+      process.exit(1)
+    }
+
+    let html = fs.readFileSync(indexPath, 'utf8')
+
+    // Generar meta tags con datos de la API
+    const pwaMeta = generatePWAMetaTags(systemSettings)
+
+    // Verificar si ya tiene las meta tags de PWA
+    if (!html.includes('apple-mobile-web-app-capable')) {
+      // Inyectar meta tags después del <head>
+      html = html.replace('<head>', '<head>' + pwaMeta)
+    }
+
+    // Verificar si ya tiene el script de SW
+    if (!html.includes('serviceWorker.register')) {
+      // Inyectar script antes del </body>
+      html = html.replace('</body>', swScript + '</body>')
+    }
+
+    // Actualizar viewport para deshabilitar zoom
+    const viewportRegex = /<meta\s+name="viewport"\s+content="[^"]*"\s*\/?>/i
+    const newViewport = '<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, shrink-to-fit=no" />'
+    
+    if (viewportRegex.test(html)) {
+      html = html.replace(viewportRegex, newViewport)
+    }
+
+    // Actualizar título del documento
+    html = updateHTMLTitle(html, systemSettings)
+
+    fs.writeFileSync(indexPath, html)
+    console.log('✅ index.html updated successfully\n')
+
+    console.log('🎉 PWA meta injection completed!')
+
+  } catch (error) {
+    console.error('❌ Error injecting PWA meta:', error)
+    process.exit(1)
+  }
+}
+
+// Ejecutar el script
+main()
