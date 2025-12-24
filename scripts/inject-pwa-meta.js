@@ -15,6 +15,7 @@ const __dirname = path.dirname(__filename)
 const distPath = path.join(__dirname, '..', 'dist')
 const indexPath = path.join(distPath, 'index.html')
 const manifestPath = path.join(distPath, 'manifest.json')
+const serviceWorkerPath = path.join(distPath, 'service-worker.js')
 const rootEnvPath = path.join(__dirname, '..', '.env')
 
 /**
@@ -230,6 +231,29 @@ function updateHTMLTitle(html, systemSettings) {
 }
 
 /**
+ * Actualiza el service worker con el timestamp del build
+ */
+function updateServiceWorkerTimestamp() {
+  if (!fs.existsSync(serviceWorkerPath)) {
+    console.warn('⚠️  service-worker.js not found in dist folder')
+    return
+  }
+
+  try {
+    let swContent = fs.readFileSync(serviceWorkerPath, 'utf8')
+    const buildTimestamp = new Date().toISOString()
+    
+    // Reemplazar el placeholder del timestamp
+    swContent = swContent.replace('__BUILD_TIMESTAMP__', buildTimestamp)
+    
+    fs.writeFileSync(serviceWorkerPath, swContent)
+    console.log(`✅ service-worker.js updated with build timestamp: ${buildTimestamp}`)
+  } catch (error) {
+    console.error('❌ Error updating service worker:', error.message)
+  }
+}
+
+/**
  * Función principal que ejecuta el script
  */
 async function main() {
@@ -248,6 +272,9 @@ async function main() {
 
   // Actualizar manifest.json
   updateManifest(systemSettings)
+  
+  // Actualizar service worker con timestamp
+  updateServiceWorkerTimestamp()
 
   // Procesar index.html
   try {
