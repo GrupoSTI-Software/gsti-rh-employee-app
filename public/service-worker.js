@@ -1,11 +1,19 @@
 /**
  * Service Worker para PWA
  * Gestiona el cache y el funcionamiento offline
+ * 
+ * IMPORTANTE: Cambiar APP_VERSION cada vez que se despliega una nueva versión
  */
 
-const CACHE_NAME = 'gsti-plus-v1'
-const DYNAMIC_CACHE_NAME = 'gsti-plus-dynamic-v1'
-const API_CACHE_NAME = 'gsti-plus-api-v1'
+// ============================================
+// VERSIÓN DE LA APP - CAMBIAR EN CADA DEPLOY
+// ============================================
+const APP_VERSION = '0.0.1'
+const BUILD_TIMESTAMP = '__BUILD_TIMESTAMP__' // Se reemplaza en el build
+
+const CACHE_NAME = `gsti-plus-cache-v${APP_VERSION}`
+const DYNAMIC_CACHE_NAME = `gsti-plus-dynamic-v${APP_VERSION}`
+const API_CACHE_NAME = `gsti-plus-api-v${APP_VERSION}`
 
 // Archivos estáticos a cachear durante la instalación
 const STATIC_ASSETS = [
@@ -24,6 +32,8 @@ const API_CACHE_PATTERNS = [
  * Cachea los archivos estáticos necesarios
  */
 self.addEventListener('install', (event) => {
+  console.log(`[SW] Installing version ${APP_VERSION}...`)
+  
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
@@ -33,6 +43,8 @@ self.addEventListener('install', (event) => {
         })
       })
       .then(() => {
+        console.log(`[SW] Version ${APP_VERSION} installed`)
+        // Forzar activación inmediata del nuevo SW
         return self.skipWaiting()
       })
   )
@@ -40,26 +52,46 @@ self.addEventListener('install', (event) => {
 
 /**
  * Evento de activación del Service Worker
- * Limpia caches antiguos
+ * Limpia caches antiguos y notifica a los clientes
  */
 self.addEventListener('activate', (event) => {
+  console.log(`[SW] Activating version ${APP_VERSION}...`)
+  
   event.waitUntil(
     caches.keys()
       .then((cacheNames) => {
         return Promise.all(
           cacheNames
             .filter((name) => {
-              return name !== CACHE_NAME && 
-                     name !== DYNAMIC_CACHE_NAME && 
-                     name !== API_CACHE_NAME
+              // Eliminar todos los caches de versiones anteriores
+              const isOldCache = name.startsWith('gsti-plus-') && 
+                                 name !== CACHE_NAME && 
+                                 name !== DYNAMIC_CACHE_NAME && 
+                                 name !== API_CACHE_NAME
+              if (isOldCache) {
+                console.log(`[SW] Deleting old cache: ${name}`)
+              }
+              return isOldCache
             })
-            .map((name) => {
-              return caches.delete(name)
-            })
+            .map((name) => caches.delete(name))
         )
       })
       .then(() => {
+        console.log(`[SW] Version ${APP_VERSION} activated`)
+        // Tomar control de todos los clientes inmediatamente
         return self.clients.claim()
+      })
+      .then(() => {
+        // Notificar a todos los clientes que hay una nueva versión
+        return self.clients.matchAll({ type: 'window' })
+      })
+      .then((clients) => {
+        clients.forEach((client) => {
+          client.postMessage({
+            type: 'SW_UPDATED',
+            version: APP_VERSION
+          })
+        })
       })
   )
 })
@@ -246,23 +278,51 @@ self.addEventListener('fetch', (event) => {
  */
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
+    console.log('[SW] Skip waiting requested')
     self.skipWaiting()
   }
   
   if (event.data && event.data.type === 'CLEAR_CACHE') {
+    console.log('[SW] Clearing all caches...')
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => caches.delete(cacheName))
       )
+    }).then(() => {
+      console.log('[SW] All caches cleared')
+      // Notificar que el cache fue limpiado
+      if (event.ports && event.ports[0]) {
+        event.ports[0].postMessage({ type: 'CACHE_CLEARED' })
+      }
     })
+  }
+  
+  if (event.data && event.data.type === 'GET_VERSION') {
+    if (event.ports && event.ports[0]) {
+      event.ports[0].postMessage({
+        type: 'VERSION_INFO',
+        version: APP_VERSION,
+        buildTimestamp: BUILD_TIMESTAMP
+      })
+    }
   }
   
   if (event.data && event.data.type === 'GET_CACHE_STATUS') {
     caches.keys().then((cacheNames) => {
-      event.ports[0].postMessage({
-        type: 'CACHE_STATUS',
-        caches: cacheNames
-      })
+      if (event.ports && event.ports[0]) {
+        event.ports[0].postMessage({
+          type: 'CACHE_STATUS',
+          caches: cacheNames,
+          version: APP_VERSION
+        })
+      }
+    })
+  }
+  
+  if (event.data && event.data.type === 'CHECK_FOR_UPDATE') {
+    // Forzar verificación de actualización
+    self.registration.update().then(() => {
+      console.log('[SW] Update check completed')
     })
   }
 })

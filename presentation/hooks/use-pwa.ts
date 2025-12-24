@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Platform } from 'react-native'
-import { PWAService } from '../../src/shared/infrastructure/services/pwa-service'
-import { GetSystemSettingsController } from '../../src/features/attendance/infraestructure/controllers/get-system-setting/get-system-settings.controller'
 import { ISystemSetting } from '../../src/features/attendance/domain/types/system-setting.interface'
+import { GetSystemSettingsController } from '../../src/features/attendance/infraestructure/controllers/get-system-setting/get-system-settings.controller'
+import { PWAService } from '../../src/shared/infrastructure/services/pwa-service'
 
 /**
  * Interfaz para el estado de la PWA
@@ -22,6 +22,10 @@ export interface IPWAState {
   error: string | null
   /** Configuración del sistema desde la API */
   systemSettings: ISystemSetting | null
+  /** Indica si hay una actualización disponible */
+  updateAvailable: boolean
+  /** Indica si se está actualizando */
+  isUpdating: boolean
 }
 
 /**
@@ -34,6 +38,12 @@ export interface IPWAActions {
   refreshSettings: () => Promise<void>
   /** Aplica el manifest dinámico manualmente */
   applyManifest: () => void
+  /** Aplica la actualización pendiente (recarga la app) */
+  applyUpdate: () => void
+  /** Verifica si hay actualizaciones disponibles */
+  checkForUpdates: () => Promise<void>
+  /** Limpia todo el cache y recarga */
+  clearCacheAndReload: () => Promise<void>
 }
 
 /**
@@ -48,7 +58,9 @@ export const usePWA = (): [IPWAState, IPWAActions] => {
     manifestApplied: false,
     isLoading: true,
     error: null,
-    systemSettings: null
+    systemSettings: null,
+    updateAvailable: false,
+    isUpdating: false
   })
 
   /**
@@ -158,6 +170,82 @@ export const usePWA = (): [IPWAState, IPWAActions] => {
   }, [fetchSystemSettings, state.isWeb])
 
   /**
+   * Aplica la actualización pendiente recargando la página
+   */
+  const applyUpdate = useCallback(() => {
+    if (!state.isWeb || typeof window === 'undefined') return
+
+    setState(prev => ({ ...prev, isUpdating: true }))
+    
+    // Notificar al SW que aplique la actualización y recargar
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage({ type: 'SKIP_WAITING' })
+    }
+    
+    // Recargar la página después de un breve delay
+    setTimeout(() => {
+      window.location.reload()
+    }, 500)
+  }, [state.isWeb])
+
+  /**
+   * Verifica si hay actualizaciones disponibles
+   */
+  const checkForUpdates = useCallback(async (): Promise<void> => {
+    if (!state.isWeb || typeof navigator === 'undefined') return
+
+    try {
+      if ('serviceWorker' in navigator) {
+        const registration = await navigator.serviceWorker.getRegistration()
+        if (registration) {
+          await registration.update()
+        }
+      }
+    } catch (error) {
+      console.error('usePWA: Error checking for updates:', error)
+    }
+  }, [state.isWeb])
+
+  /**
+   * Limpia todo el cache y recarga la app
+   */
+  const clearCacheAndReload = useCallback(async (): Promise<void> => {
+    if (!state.isWeb || typeof navigator === 'undefined') return
+
+    setState(prev => ({ ...prev, isUpdating: true }))
+
+    try {
+      // Enviar mensaje al SW para limpiar cache
+      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        const messageChannel = new MessageChannel()
+        
+        messageChannel.port1.onmessage = (event) => {
+          if (event.data.type === 'CACHE_CLEARED') {
+            window.location.reload()
+          }
+        }
+        
+        navigator.serviceWorker.controller.postMessage(
+          { type: 'CLEAR_CACHE' },
+          [messageChannel.port2]
+        )
+        
+        // Timeout de seguridad - recargar después de 3 segundos si no hay respuesta
+        setTimeout(() => {
+          window.location.reload()
+        }, 3000)
+      } else {
+        // Si no hay SW, solo recargar
+        window.location.reload()
+      }
+    } catch (error) {
+      console.error('usePWA: Error clearing cache:', error)
+      // Recargar de todos modos
+      window.location.reload()
+    }
+  }, [state.isWeb])
+
+  /**
    * Inicialización del hook
    */
   useEffect(() => {
@@ -174,9 +262,43 @@ export const usePWA = (): [IPWAState, IPWAActions] => {
       updateInstallState()
     }
 
+    // Escuchar mensajes del Service Worker
+    const handleSWMessage = (event: MessageEvent) => {
+      if (event.data && event.data.type === 'SW_UPDATED') {
+        setState(prev => ({
+          ...prev,
+          updateAvailable: true
+        }))
+      }
+    }
+
+    // Detectar cuando hay un nuevo SW esperando
+    const handleSWUpdate = () => {
+      if ('serviceWorker' in navigator) {
+        void navigator.serviceWorker.getRegistration().then((registration) => {
+          if (registration?.waiting) {
+            setState(prev => ({
+              ...prev,
+              updateAvailable: true
+            }))
+          }
+        })
+      }
+    }
+
     if (typeof window !== 'undefined') {
       window.addEventListener('beforeinstallprompt', handleInstallStateChange)
       window.addEventListener('appinstalled', handleInstallStateChange)
+      
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.addEventListener('message', handleSWMessage)
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          // El SW cambió, puede que necesitemos recargar
+        })
+        
+        // Verificar actualizaciones al cargar
+        handleSWUpdate()
+      }
     }
 
     // No cargar configuración automáticamente - dejarlo para cuando la API esté disponible
@@ -186,6 +308,10 @@ export const usePWA = (): [IPWAState, IPWAActions] => {
       if (typeof window !== 'undefined') {
         window.removeEventListener('beforeinstallprompt', handleInstallStateChange)
         window.removeEventListener('appinstalled', handleInstallStateChange)
+        
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.removeEventListener('message', handleSWMessage)
+        }
       }
     }
   }, [state.isWeb, updateInstallState])
@@ -202,11 +328,13 @@ export const usePWA = (): [IPWAState, IPWAActions] => {
   const actions: IPWAActions = {
     promptInstall,
     refreshSettings,
-    applyManifest
+    applyManifest,
+    applyUpdate,
+    checkForUpdates,
+    clearCacheAndReload
   }
 
   return [state, actions]
 }
 
 export default usePWA
-
