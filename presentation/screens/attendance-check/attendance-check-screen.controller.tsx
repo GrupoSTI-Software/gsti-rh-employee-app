@@ -9,8 +9,8 @@ import { useCameraPermissions, CameraRef } from '../../../presentation/component
 import { DateTime } from 'luxon'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Alert } from 'react-native'
 import { RootStackParamList } from '../../../navigation/types/types'
+import { AlertService } from '../../../src/shared/infrastructure/services/alert-service'
 import { IAssistance } from '../../../src/features/attendance/domain/types/assistance.interface'
 import { IException } from '../../../src/features/attendance/domain/types/exception.interface'
 import { GetAttendanceController } from '../../../src/features/attendance/infraestructure/controllers/get-attendance/get-attendance.controller'
@@ -225,7 +225,7 @@ const AttendanceCheckScreenController = () => {
         try {
           // Cerrar sesión y limpiar datos de autenticación
           await clearSessionController.clearSession()
-          Alert.alert(
+          AlertService.show(
             t('screens.attendanceCheck.sessionExpired.title'),
             t('screens.attendanceCheck.sessionExpired.message'),
             [
@@ -327,7 +327,7 @@ const AttendanceCheckScreenController = () => {
         try {
          
           await clearSessionController.clearSession()
-          Alert.alert(
+          AlertService.show(
             t('screens.attendanceCheck.sessionExpired.title'),
             t('screens.attendanceCheck.sessionExpired.message'),
             [{ text: t('common.ok') }]
@@ -343,7 +343,7 @@ const AttendanceCheckScreenController = () => {
             ? error.message 
             : 'Error desconocido al registrar asistencia'
         
-        Alert.alert(
+        AlertService.error(
           t('common.error'),
           `${t('screens.attendanceCheck.registrationError')}: ${errorMessage}`
         )
@@ -363,7 +363,7 @@ const AttendanceCheckScreenController = () => {
       setShowFaceScreen(true)
     } catch (error) {
       console.error('Error en autenticación:', error)
-      Alert.alert(
+      AlertService.error(
         t('common.error'),
         error instanceof Error ? error.message : t('errors.unknownError')
       )
@@ -388,7 +388,7 @@ const AttendanceCheckScreenController = () => {
     try {
       const employeeId = authState?.props.authState?.user?.props.person?.props.employee?.props?.id?.value
       if (!employeeId) {
-        Alert.alert(
+        AlertService.error(
           t('common.error'),
           t('errors.employeeIdNotFound')
         )
@@ -433,7 +433,7 @@ const AttendanceCheckScreenController = () => {
           await performCheckIn()
           setIsLoading(false)
         } else {
-          Alert.alert(
+          AlertService.info(
             t('common.information'),
             t('screens.attendanceCheck.noZonesAssigned')
           )
@@ -450,7 +450,7 @@ const AttendanceCheckScreenController = () => {
       const isPrecisionError = errorMessage.includes('precisión') || errorMessage.includes('precision') || errorMessage.includes('accuracy')
       const isPermissionError = errorMessage.includes('permission') || errorMessage.includes('autorización') || errorMessage.includes('denied')
       if (isPrecisionError || isPermissionError) {
-        Alert.alert(
+        AlertService.show(
           t('common.warning'),
           `${t('errors.locationValidationWarning')}\n\n${errorMessage}`,
           [
@@ -467,7 +467,7 @@ const AttendanceCheckScreenController = () => {
           ]
         )
       } else {
-        Alert.alert(
+        AlertService.error(
           t('common.error'),
           error instanceof Error ? error.message : t('errors.unknownError')
         )
