@@ -1,5 +1,5 @@
 import React from 'react'
-import { Modal, Pressable, StyleSheet, Text, View, Platform, Dimensions } from 'react-native'
+import { Modal, Pressable, StyleSheet, Text, View, Platform } from 'react-native'
 
 interface AlertButton {
   text: string
@@ -37,23 +37,23 @@ export default function CustomAlert({
 
   const getButtonStyle = (button: AlertButton) => {
     switch (button.style) {
-      case 'destructive':
-        return [styles.button, styles.buttonDestructive]
-      case 'cancel':
-        return [styles.button, styles.buttonCancel]
-      default:
-        return [styles.button, styles.buttonDefault]
+    case 'destructive':
+      return [styles.button, styles.buttonDestructive]
+    case 'cancel':
+      return [styles.button, styles.buttonCancel]
+    default:
+      return [styles.button, styles.buttonDefault]
     }
   }
 
   const getButtonTextStyle = (button: AlertButton) => {
     switch (button.style) {
-      case 'destructive':
-        return [styles.buttonText, styles.buttonTextDestructive]
-      case 'cancel':
-        return [styles.buttonText, styles.buttonTextCancel]
-      default:
-        return [styles.buttonText, styles.buttonTextDefault]
+    case 'destructive':
+      return [styles.buttonText, styles.buttonTextDestructive]
+    case 'cancel':
+      return [styles.buttonText, styles.buttonTextCancel]
+    default:
+      return [styles.buttonText, styles.buttonTextDefault]
     }
   }
 
@@ -116,8 +116,6 @@ export default function CustomAlert({
     </Modal>
   )
 }
-
-const { width, height } = Dimensions.get('window')
 
 const styles = StyleSheet.create({
   overlay: {
