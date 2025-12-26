@@ -110,16 +110,16 @@ function updateManifest(systemSettings) {
 
   try {
     const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'))
-    const defaultName = 'GSTI Plus'
+    const defaultName = 'GSTI'
     const defaultIcon = '/assets/icon.png'
 
     // Actualizar nombre
     if (systemSettings?.systemSettingTradeName) {
-      manifest.name = `${systemSettings.systemSettingTradeName} Plus`
-      manifest.short_name = `${systemSettings.systemSettingTradeName.substring(0, 12)} Plus`
+      manifest.name = `${systemSettings.systemSettingTradeName}`
+      manifest.short_name = `${systemSettings.systemSettingTradeName.substring(0, 12)}`
     } else {
       manifest.name = defaultName
-      manifest.short_name = 'GSTI Plus'
+      manifest.short_name = 'GSTI'
     }
 
     // Actualizar iconos si hay favicon disponible
@@ -174,8 +174,8 @@ function updateManifest(systemSettings) {
  */
 function generatePWAMetaTags(systemSettings) {
   const appName = systemSettings?.systemSettingTradeName 
-    ? `${systemSettings.systemSettingTradeName} Plus` 
-    : 'GSTI Plus'
+    ? `${systemSettings.systemSettingTradeName}` 
+    : 'GSTI'
   const themeColor = systemSettings?.systemSettingSidebarColor || '#003366'
   const iconPath = systemSettings?.systemSettingFavicon || '/assets/icon.png'
 
@@ -220,7 +220,7 @@ const swScript = `
 function updateHTMLTitle(html, systemSettings) {
   if (!systemSettings?.systemSettingTradeName) return html
   
-  const newTitle = `${systemSettings.systemSettingTradeName} Plus`
+  const newTitle = `${systemSettings.systemSettingTradeName}`
   const titleRegex = /<title>[^<]*<\/title>/i
   
   if (titleRegex.test(html)) {

@@ -8,12 +8,12 @@
 // ============================================
 // VERSIÓN DE LA APP - CAMBIAR EN CADA DEPLOY
 // ============================================
-const APP_VERSION = '1.0.0'
+const APP_VERSION = '0.0.3'
 const BUILD_TIMESTAMP = '__BUILD_TIMESTAMP__' // Se reemplaza en el build
 
-const CACHE_NAME = `gsti-plus-cache-v${APP_VERSION}`
-const DYNAMIC_CACHE_NAME = `gsti-plus-dynamic-v${APP_VERSION}`
-const API_CACHE_NAME = `gsti-plus-api-v${APP_VERSION}`
+const CACHE_NAME = `gsti-empleado-cache-v${APP_VERSION}`
+const DYNAMIC_CACHE_NAME = `gsti-empleado-dynamic-v${APP_VERSION}`
+const API_CACHE_NAME = `gsti-empleado-api-v${APP_VERSION}`
 
 // Archivos estáticos a cachear durante la instalación
 const STATIC_ASSETS = [
@@ -64,7 +64,7 @@ self.addEventListener('activate', (event) => {
           cacheNames
             .filter((name) => {
               // Eliminar todos los caches de versiones anteriores
-              const isOldCache = name.startsWith('gsti-plus-') && 
+              const isOldCache = name.startsWith('gsti-empleado-') && 
                                  name !== CACHE_NAME && 
                                  name !== DYNAMIC_CACHE_NAME && 
                                  name !== API_CACHE_NAME

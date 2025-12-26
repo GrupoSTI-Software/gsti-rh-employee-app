@@ -1,6 +1,6 @@
 {
-  "name": "Empleados SAE",
-  "slug": "gsti-plus",
+  "name": "GSTI Empleado",
+  "slug": "gsti-empleado",
   "icon": "./assets/sae/icon.png",
   "splash": {
     "image": "./assets/sae/splash-icon.png",

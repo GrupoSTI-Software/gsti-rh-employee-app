@@ -1,7 +1,6 @@
 import { Ionicons, MaterialIcons } from '@expo/vector-icons'
 import DateTimePicker from '../../components/date-time-picker/date-time-picker.component'
 // import BottomSheet from '@gorhom/bottom-sheet'
-import Camera from '../../components/camera/camera.component'
 import { StatusBar } from 'expo-status-bar'
 import React, { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -17,10 +16,10 @@ import {
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import Animated, {
   FadeIn,
-  FadeInDown,
   FadeInLeft,
   ZoomIn
 } from 'react-native-reanimated'
+import Camera from '../../components/camera/camera.component'
 import { Clock } from '../../components/clock/clock.component'
 import CustomAlert from '../../components/custom-alert/custom-alert'
 import { Typography } from '../../components/typography/typography.component'
@@ -152,13 +151,13 @@ export const AttendanceCheckScreen: React.FC = React.memo(() => {
                 showsVerticalScrollIndicator={false}
               >
                 {/* Título con animación */}
-                <Animated.View
+                {/* <Animated.View
                   entering={FadeInDown.delay(100).duration(300)}
                 >
                   <Typography variant="h2">
                     {t('screens.attendanceCheck.title')}
                   </Typography>
-                </Animated.View>
+                </Animated.View> */}
 
                 {/* Mensaje de error de conexión */}
                 {controller.hasConnectionError ? (

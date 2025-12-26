@@ -69,7 +69,7 @@ export default ({ config }) => {
         shortName: variantConfig.shortName || "SAE",
         description: "Sistema de Asistencia de Empleados",
         backgroundColor: "#ffffff",
-        themeColor: "#003366",
+        // themeColor: "#003366",
         // PWA Configuration
         pwa: {
           enabled: true,
