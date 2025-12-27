@@ -1,16 +1,13 @@
 import BottomSheet, { BottomSheetBackdrop } from '@gorhom/bottom-sheet'
-import {
-  DateTimePickerEvent
-} from '@react-native-community/datetimepicker'
+import { DateTimePickerEvent } from '@react-native-community/datetimepicker'
 import { useNavigation } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import axios, { AxiosError } from 'axios'
-import { useCameraPermissions, CameraRef } from '../../../presentation/components/camera/camera.component'
 import { DateTime } from 'luxon'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { RootStackParamList } from '../../../navigation/types/types'
-import { AlertService } from '../../../src/shared/infrastructure/services/alert-service'
+import { CameraRef, useCameraPermissions } from '../../../presentation/components/camera/camera.component'
 import { IAssistance } from '../../../src/features/attendance/domain/types/assistance.interface'
 import { IException } from '../../../src/features/attendance/domain/types/exception.interface'
 import { GetAttendanceController } from '../../../src/features/attendance/infraestructure/controllers/get-attendance/get-attendance.controller'
@@ -22,6 +19,7 @@ import { ClearSessionController } from '../../../src/features/authentication/inf
 import { BiometricsService } from '../../../src/features/authentication/infrastructure/services/biometrics.service'
 import { ILocationCoordinates, LocationService } from '../../../src/features/authentication/infrastructure/services/location.service'
 import { PasswordPromptService } from '../../../src/features/authentication/infrastructure/services/password-prompt.service'
+import { AlertService } from '../../../src/shared/infrastructure/services/alert-service'
 import { useAppTheme } from '../../theme/theme-context'
 import { getApi } from '../../utils/get-api-url'
 import { isCheckOutTimeReached } from './utils/is-checkout-time-reached.util'
@@ -170,8 +168,9 @@ const AttendanceCheckScreenController = () => {
         exceptions: []
       })
       setShiftEndTime(null)
-      const date = targetDate.toISOString().split('T')[0]
-      const todayDate = new Date().toISOString().split('T')[0]
+      // Usar Luxon para obtener la fecha en zona horaria local (no UTC)
+      const date = DateTime.fromJSDate(targetDate).toFormat('yyyy-MM-dd')
+      const todayDate = DateTime.now().toFormat('yyyy-MM-dd')
       setShowButtonAssist(date === todayDate)
       const dateFormat = DateTime.fromJSDate(targetDate).setLocale(i18n.language).toFormat('DDDD')
       setDateSelectFormat(dateFormat)
@@ -525,8 +524,9 @@ const AttendanceCheckScreenController = () => {
 
   // Filtrar datos de salida basándose en la hora del turno
   const filteredAttendanceData = useMemo(() => {
-    const date = dateSelect.toISOString().split('T')[0]
-    const todayDate = new Date().toISOString().split('T')[0]
+    // Usar Luxon para obtener la fecha en zona horaria local (no UTC)
+    const date = DateTime.fromJSDate(dateSelect).toFormat('yyyy-MM-dd')
+    const todayDate = DateTime.now().toFormat('yyyy-MM-dd')
 
     const shouldShowCheckOut = date !== todayDate || !shiftEndTime || isCheckOutTimeReached(shiftEndTime)
     return {
@@ -700,8 +700,8 @@ const AttendanceCheckScreenController = () => {
     
     if (registrationSuccess) {
       try {
-        // Recargar los datos de asistencia desde el servidor
-        await setShiftDateData()
+        // Recargar los datos de asistencia desde el servidor pasando la fecha actual
+        await setShiftDateData(dateSelect)
         setShowFaceScreen(false)
         setIsAttendanceSucess(true)
       } catch (reloadError) {
@@ -714,7 +714,7 @@ const AttendanceCheckScreenController = () => {
     setTimeout(() => {
       setIsButtonLocked(false)
     }, 2000)
-  }, [registerAttendance, setShiftDateData])
+  }, [registerAttendance, setShiftDateData, dateSelect])
 
   /**
    * Maneja errores durante el proceso de captura y verificación

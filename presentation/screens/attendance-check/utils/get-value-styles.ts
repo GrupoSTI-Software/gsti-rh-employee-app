@@ -1,5 +1,4 @@
 import useAttendanceCheckStyle from '../attendance-check.style'
-import { getStatusColor } from './get-status-color.util'
 
 /**
  * Función para obtener estilos de valor según el estatus
@@ -8,17 +7,9 @@ import { getStatusColor } from './get-status-color.util'
  * @returns estilos de valor según el estatus
  */
 export const getValueStyles = 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   (status: string | null, hasTime: boolean) => {
     const styles = useAttendanceCheckStyle()
-    const statusColor = getStatusColor(status)
-    const baseStyles = [
-      styles.indicatorValue,
-      hasTime && styles.indicatorValueActive
-    ]
-    
-    if (statusColor) {
-      return [...baseStyles, { color: statusColor }]
-    }
-    
-    return baseStyles.filter(Boolean)
+    // De momento todos con el mismo estilo base (gris)
+    return [styles.indicatorValue]
   }

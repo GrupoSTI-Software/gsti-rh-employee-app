@@ -107,13 +107,16 @@ const createAttendanceCheckStyle = (theme: IAppTheme, themeType: EThemeType) =>
       color: theme.colors.textSecondary
     },
     indicatorActive: {
-      backgroundColor: theme.colors.indicatorActive
+      // De momento todo gris claro
+      backgroundColor: '#E5E7EB'
     },
     indicatorLabelActive: {
-      color: theme.colors.accent
+      // De momento todo gris oscuro
+      color: '#4B5563'
     },
     indicatorValueActive: {
-      color: theme.colors.accent
+      // De momento todo gris oscuro
+      color: '#374151'
     },
     bottomCard: {
       borderRadius: wp(5),
