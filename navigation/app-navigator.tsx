@@ -11,6 +11,7 @@ import AuthenticationScreen from '../presentation/screens/authentication/authent
 import { BiometricsConfigScreen } from '../presentation/screens/biometrics/biometrics-config.screen'
 import { ProfileScreen } from '../presentation/screens/profile'
 import { SettingsScreen } from '../presentation/screens/settings/settings.screen'
+import { SessionProvider } from '../presentation/providers/session-provider'
 
 const Stack = createNativeStackNavigator<RootStackParamList>()
 
@@ -28,35 +29,37 @@ export const AppNavigator: React.FC = () => {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator
-        initialRouteName={controller.getInitialRouteName()}
-        screenOptions={{ headerShown: false }}
-      >
-        <Stack.Screen
-          name="authenticationScreen"
-          component={AuthenticationScreen}
-        />
-        <Stack.Screen
-          name="biometricsConfigScreen"
-          component={BiometricsConfigScreen}
-        />
-        <Stack.Screen
-          name="attendanceCheck"
-          component={AttendanceCheckScreen}
-        />
-        <Stack.Screen
-          name="settingsScreen"
-          component={SettingsScreen}
-        />
-        <Stack.Screen
-          name="profile"
-          component={ProfileScreen}
-        />
-        <Stack.Screen
-          name="apiConfig"
-          component={ApiConfigScreen}
-        />
-      </Stack.Navigator>
+      <SessionProvider>
+        <Stack.Navigator
+          initialRouteName={controller.getInitialRouteName()}
+          screenOptions={{ headerShown: false }}
+        >
+          <Stack.Screen
+            name="authenticationScreen"
+            component={AuthenticationScreen}
+          />
+          <Stack.Screen
+            name="biometricsConfigScreen"
+            component={BiometricsConfigScreen}
+          />
+          <Stack.Screen
+            name="attendanceCheck"
+            component={AttendanceCheckScreen}
+          />
+          <Stack.Screen
+            name="settingsScreen"
+            component={SettingsScreen}
+          />
+          <Stack.Screen
+            name="profile"
+            component={ProfileScreen}
+          />
+          <Stack.Screen
+            name="apiConfig"
+            component={ApiConfigScreen}
+          />
+        </Stack.Navigator>
+      </SessionProvider>
     </NavigationContainer>
   )
 }

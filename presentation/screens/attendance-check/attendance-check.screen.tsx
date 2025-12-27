@@ -366,73 +366,84 @@ export const AttendanceCheckScreen: React.FC = React.memo(() => {
                         { zIndex: 1 }
                       ]}
                     >
-                      {/* Entrada */}
-                      <Animated.View 
-                        entering={FadeInLeft.delay(500).duration(400)}
-                        style={getIndicatorStyles(controller.attendanceData.checkInStatus, !!controller.attendanceData.checkInTime)}
-                      >
-                        <CheckOutIcon
-                          size={24}
-                          color={getIconColor(controller.attendanceData.checkInStatus)}
-                        />
-                        <Typography variant="body2" style={getLabelStyles(controller.attendanceData.checkInStatus, !!controller.attendanceData.checkInTime) as any}>
-                          {t('screens.attendanceCheck.checkTypes.checkIn')}
-                        </Typography>
-                        <Typography variant="body2" style={getValueStyles(controller.attendanceData.checkInStatus, !!controller.attendanceData.checkInTime) as any}>
-                          {controller.attendanceData.checkInTime || t('screens.attendanceCheck.defaultTime')}
-                        </Typography>
-                      </Animated.View>
+                      {controller.isLoadingRecords ? (
+                        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: 40 }}>
+                          <ActivityIndicator size="large" color="#003366" />
+                          <Typography variant="body2" style={{ marginTop: 12, color: '#666' }}>
+                            {t('common.loading')}
+                          </Typography>
+                        </View>
+                      ) : (
+                        <>
+                          {/* Entrada */}
+                          <Animated.View 
+                            entering={FadeInLeft.delay(500).duration(400)}
+                            style={getIndicatorStyles(controller.attendanceData.checkInStatus, !!controller.attendanceData.checkInTime)}
+                          >
+                            <CheckOutIcon
+                              size={24}
+                              color={getIconColor(controller.attendanceData.checkInStatus)}
+                            />
+                            <Typography variant="body2" style={getLabelStyles(controller.attendanceData.checkInStatus, !!controller.attendanceData.checkInTime) as any}>
+                              {t('screens.attendanceCheck.checkTypes.checkIn')}
+                            </Typography>
+                            <Typography variant="body2" style={getValueStyles(controller.attendanceData.checkInStatus, !!controller.attendanceData.checkInTime) as any}>
+                              {controller.attendanceData.checkInTime || t('screens.attendanceCheck.defaultTime')}
+                            </Typography>
+                          </Animated.View>
 
-                      {/* Iniciar Comida */}
-                      <Animated.View 
-                        entering={FadeInLeft.delay(650).duration(400)}
-                        style={getIndicatorStyles(controller.attendanceData.checkEatInStatus, !!controller.attendanceData.checkEatInTime)}
-                      >
-                        <CheckOutIcon
-                          size={24}
-                          color={getIconColor(controller.attendanceData.checkEatInStatus)}
-                        />
-                        <Typography variant="body2" style={getLabelStyles(controller.attendanceData.checkEatInStatus, !!controller.attendanceData.checkEatInTime) as any}>
-                          {t('screens.attendanceCheck.checkTypes.checkEatIn')}
-                        </Typography>
-                        <Typography variant="body2" style={getValueStyles(controller.attendanceData.checkEatInStatus, !!controller.attendanceData.checkEatInTime) as any}>
-                          {controller.attendanceData.checkEatInTime || t('screens.attendanceCheck.defaultTime')}
-                        </Typography>
-                      </Animated.View>
+                          {/* Iniciar Comida */}
+                          <Animated.View 
+                            entering={FadeInLeft.delay(650).duration(400)}
+                            style={getIndicatorStyles(controller.attendanceData.checkEatInStatus, !!controller.attendanceData.checkEatInTime)}
+                          >
+                            <CheckOutIcon
+                              size={24}
+                              color={getIconColor(controller.attendanceData.checkEatInStatus)}
+                            />
+                            <Typography variant="body2" style={getLabelStyles(controller.attendanceData.checkEatInStatus, !!controller.attendanceData.checkEatInTime) as any}>
+                              {t('screens.attendanceCheck.checkTypes.checkEatIn')}
+                            </Typography>
+                            <Typography variant="body2" style={getValueStyles(controller.attendanceData.checkEatInStatus, !!controller.attendanceData.checkEatInTime) as any}>
+                              {controller.attendanceData.checkEatInTime || t('screens.attendanceCheck.defaultTime')}
+                            </Typography>
+                          </Animated.View>
 
-                      {/* Terminar Comida */}
-                      <Animated.View 
-                        entering={FadeInLeft.delay(800).duration(400)}
-                        style={getIndicatorStyles(controller.attendanceData.checkEatOutStatus, !!controller.attendanceData.checkEatOutTime)}
-                      >
-                        <CheckOutIcon
-                          size={24}
-                          color={getIconColor(controller.attendanceData.checkEatOutStatus)}
-                        />
-                        <Typography variant="body2" style={getLabelStyles(controller.attendanceData.checkEatOutStatus, !!controller.attendanceData.checkEatOutTime) as any}>
-                          {t('screens.attendanceCheck.checkTypes.checkEatOut')}
-                        </Typography>
-                        <Typography variant="body2" style={getValueStyles(controller.attendanceData.checkEatOutStatus, !!controller.attendanceData.checkEatOutTime) as any}>
-                          {controller.attendanceData.checkEatOutTime || t('screens.attendanceCheck.defaultTime')}
-                        </Typography>
-                      </Animated.View>
+                          {/* Terminar Comida */}
+                          <Animated.View 
+                            entering={FadeInLeft.delay(800).duration(400)}
+                            style={getIndicatorStyles(controller.attendanceData.checkEatOutStatus, !!controller.attendanceData.checkEatOutTime)}
+                          >
+                            <CheckOutIcon
+                              size={24}
+                              color={getIconColor(controller.attendanceData.checkEatOutStatus)}
+                            />
+                            <Typography variant="body2" style={getLabelStyles(controller.attendanceData.checkEatOutStatus, !!controller.attendanceData.checkEatOutTime) as any}>
+                              {t('screens.attendanceCheck.checkTypes.checkEatOut')}
+                            </Typography>
+                            <Typography variant="body2" style={getValueStyles(controller.attendanceData.checkEatOutStatus, !!controller.attendanceData.checkEatOutTime) as any}>
+                              {controller.attendanceData.checkEatOutTime || t('screens.attendanceCheck.defaultTime')}
+                            </Typography>
+                          </Animated.View>
 
-                      {/* Salida */}
-                      <Animated.View 
-                        entering={FadeInLeft.delay(950).duration(400)}
-                        style={getIndicatorStyles(controller.attendanceData.checkOutStatus, !!controller.attendanceData.checkOutTime)}
-                      >
-                        <CheckOutIcon
-                          size={24}
-                          color={getIconColor(controller.attendanceData.checkOutStatus)}
-                        />
-                        <Typography variant="body2" style={getLabelStyles(controller.attendanceData.checkOutStatus, !!controller.attendanceData.checkOutTime) as any}>
-                          {t('screens.attendanceCheck.checkTypes.checkOut')}
-                        </Typography>
-                        <Typography variant="body2" style={getValueStyles(controller.attendanceData.checkOutStatus, !!controller.attendanceData.checkOutTime) as any}>
-                          {controller.attendanceData.checkOutTime || t('screens.attendanceCheck.defaultTime')}
-                        </Typography>
-                      </Animated.View>
+                          {/* Salida */}
+                          <Animated.View 
+                            entering={FadeInLeft.delay(950).duration(400)}
+                            style={getIndicatorStyles(controller.attendanceData.checkOutStatus, !!controller.attendanceData.checkOutTime)}
+                          >
+                            <CheckOutIcon
+                              size={24}
+                              color={getIconColor(controller.attendanceData.checkOutStatus)}
+                            />
+                            <Typography variant="body2" style={getLabelStyles(controller.attendanceData.checkOutStatus, !!controller.attendanceData.checkOutTime) as any}>
+                              {t('screens.attendanceCheck.checkTypes.checkOut')}
+                            </Typography>
+                            <Typography variant="body2" style={getValueStyles(controller.attendanceData.checkOutStatus, !!controller.attendanceData.checkOutTime) as any}>
+                              {controller.attendanceData.checkOutTime || t('screens.attendanceCheck.defaultTime')}
+                            </Typography>
+                          </Animated.View>
+                        </>
+                      )}
                     </Animated.View>
                   </>
                 )}

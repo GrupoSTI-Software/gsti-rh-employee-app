@@ -6,6 +6,9 @@ import { getApi } from '../../../../presentation/utils/get-api-url'
  * Servicio HTTP para realizar solicitudes a la API
  * @class HttpServiceClass
  * @singleton
+ * 
+ * Nota: Los errores 401 se manejan automáticamente por el interceptor global 
+ * de axios configurado en SessionService.setupGlobalAxiosInterceptor()
  */
 class HttpServiceClass {
   private readonly apiClient: AxiosInstance

@@ -1,12 +1,9 @@
 import BottomSheet, { BottomSheetBackdrop } from '@gorhom/bottom-sheet'
 import { DateTimePickerEvent } from '@react-native-community/datetimepicker'
-import { useNavigation } from '@react-navigation/native'
-import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import axios, { AxiosError } from 'axios'
 import { DateTime } from 'luxon'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { RootStackParamList } from '../../../navigation/types/types'
 import { CameraRef, useCameraPermissions } from '../../../presentation/components/camera/camera.component'
 import { IAssistance } from '../../../src/features/attendance/domain/types/assistance.interface'
 import { IException } from '../../../src/features/attendance/domain/types/exception.interface'
@@ -15,7 +12,6 @@ import { GetAuthorizeAnyZoneController } from '../../../src/features/attendance/
 import { GetZoneCoordinatesController } from '../../../src/features/attendance/infraestructure/controllers/get-zone-coordinates/get-zone-coordinates.controller'
 import { StoreAssistanceController } from '../../../src/features/attendance/infraestructure/controllers/store-assistance/store-assistance.controller'
 import { AuthStateController } from '../../../src/features/authentication/infrastructure/controllers/auth-state.controller'
-import { ClearSessionController } from '../../../src/features/authentication/infrastructure/controllers/clear-seassion.controller'
 import { BiometricsService } from '../../../src/features/authentication/infrastructure/services/biometrics.service'
 import { ILocationCoordinates, LocationService } from '../../../src/features/authentication/infrastructure/services/location.service'
 import { PasswordPromptService } from '../../../src/features/authentication/infrastructure/services/password-prompt.service'
@@ -51,7 +47,6 @@ interface IAttendanceData {
  * @returns {Object} Objeto con los datos y funciones accesibles desde la pantalla de registro de asistencia
  */
 const AttendanceCheckScreenController = () => {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>()
   const [isButtonLocked, setIsButtonLocked] = useState(false)
   // const [checkInTime, setCheckInTime] = useState<string | null>(null)
   const [currentLocation, setCurrentLocation] = useState<ILocationCoordinates | null>(null)
@@ -90,7 +85,6 @@ const AttendanceCheckScreenController = () => {
   const biometricService = useMemo(() => new BiometricsService(), [])
   const locationService = useMemo(() => new LocationService(), [])
   const passwordService = useMemo(() => new PasswordPromptService(), [])
-  const clearSessionController = useMemo(() => new ClearSessionController(), [])
   
   // Memorizar snapPoints para evitar recreaciones
   const snapPoints = useMemo(() => ['65%'], [])
@@ -112,6 +106,7 @@ const AttendanceCheckScreenController = () => {
   const [showHoursList, setShowHoursList] = useState(false)
   const [isOutsideZone, setIsOutSideZone] = useState(false)
   const [showExceptionsList, setShowExceptionsList] = useState(false)
+  const [isLoadingRecords, setIsLoadingRecords] = useState(true)
   useEffect(() => {
     const checkPermission = async () => {
       if (!permission) return
@@ -148,6 +143,7 @@ const AttendanceCheckScreenController = () => {
   // Definir setShiftDateData antes de usarlo en useEffect
   const setShiftDateData = useCallback(async (customDate?: Date): Promise<string> => {
     try {
+      setIsLoadingRecords(true)
       // Usar la fecha proporcionada o la fecha del estado
       const targetDate = customDate || dateSelect
       
@@ -215,34 +211,18 @@ const AttendanceCheckScreenController = () => {
         exceptions: attendanceProps.exceptions ?? []
       }
       setAttendanceData(newAttendanceData)
+      setIsLoadingRecords(false)
       return shiftInfo
     } catch (error) {
       console.error('Error fetching shift data:', error)
       
-      // Verificar si es error 401 (Unauthorized)
+      // Los errores 401 se manejan automáticamente por el interceptor del HttpService
+      // Solo necesitamos manejar otros errores aquí
       if (error instanceof AxiosError && error.response?.status === 401) {
-        try {
-          // Cerrar sesión y limpiar datos de autenticación
-          await clearSessionController.clearSession()
-          AlertService.show(
-            t('screens.attendanceCheck.sessionExpired.title'),
-            t('screens.attendanceCheck.sessionExpired.message'),
-            [
-              {
-                text: t('common.ok'),
-                onPress: () => {
-                  navigation.replace('authenticationScreen')
-                }
-              }
-            ]
-          )
-          return '---' // Valor por defecto en caso de sesión expirada
-        } catch (clearError) {
-          console.error('Error clearing session:', clearError)
-        }
+        return '---' // Valor por defecto en caso de sesión expirada (el interceptor ya maneja la redirección)
       }
       
-      // Marcar error de conexión
+      // Marcar error de conexión para otros errores
       setHasConnectionError(true)
       
       // Fallback en caso de error
@@ -267,6 +247,7 @@ const AttendanceCheckScreenController = () => {
         exceptions: []
       })
       setShiftEndTime(null)
+      setIsLoadingRecords(false)
       
       return fallbackDate
     }
@@ -320,22 +301,9 @@ const AttendanceCheckScreenController = () => {
     } catch (error) {
       console.error('Error registrando asistencia:', error)
       
-      // Si es error 401, manejar sesión expirada
-      if (error instanceof AxiosError && error.response?.status === 401) {
-        const clearSessionController =  new ClearSessionController()
-        try {
-         
-          await clearSessionController.clearSession()
-          AlertService.show(
-            t('screens.attendanceCheck.sessionExpired.title'),
-            t('screens.attendanceCheck.sessionExpired.message'),
-            [{ text: t('common.ok') }]
-          )
-        } catch (clearError) {
-          console.error('Error clearing session:', clearError)
-        }
-      } else {
-        // Mostrar error específico al usuario
+      // Los errores 401 se manejan automáticamente por el interceptor del HttpService
+      // Solo mostramos error para otros tipos de errores
+      if (!(error instanceof AxiosError && error.response?.status === 401)) {
         const errorMessage = error instanceof AxiosError 
           ? error.response?.data?.message || error.message
           : error instanceof Error 
@@ -349,7 +317,7 @@ const AttendanceCheckScreenController = () => {
       }
       return false
     }
-  }, [authStateController, clearSessionController, t])
+  }, [t])
 
   /**
    * Ejecuta el proceso de check-in después de validar la ubicación
@@ -911,7 +879,8 @@ const AttendanceCheckScreenController = () => {
     isOutsideZone,
     setIsOutSideZone,
     showExceptionsList,
-    setShowExceptionsList
+    setShowExceptionsList,
+    isLoadingRecords
   }), [
     themeType,
     shiftDate,
@@ -959,7 +928,6 @@ const AttendanceCheckScreenController = () => {
     filteredAttendanceData,
     isCheckOutTimeReached,
     hasConnectionError,
-    clearSessionController,
     retryLoadData,
     isRetrying,
     handleDateChange,
@@ -980,7 +948,8 @@ const AttendanceCheckScreenController = () => {
     isOutsideZone,
     setIsOutSideZone,
     showExceptionsList,
-    setShowExceptionsList
+    setShowExceptionsList,
+    isLoadingRecords
   ])
 
   return controllerValue

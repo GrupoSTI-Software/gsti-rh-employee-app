@@ -5,7 +5,6 @@ import {
   StatusBar as RNStatusBar,
   SafeAreaView,
   ScrollView,
-  TouchableOpacity,
   View
 } from 'react-native'
 import { Divider, Snackbar } from 'react-native-paper'
@@ -33,8 +32,6 @@ import { getAppVersionDisplay } from '../../utils/app-version'
 import { useAppTheme } from '../../theme/theme-context'
 import { AuthenticationScreenController } from './authentication-screen.controller'
 import useAuthenticationStyle from './authentication.style'
-
-const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity)
 
 /**
  * @description AuthenticationScreen es la pantalla que permite al usuario autenticarse con correo electrónico y contraseña
@@ -148,7 +145,7 @@ export const AuthenticationScreen: React.FC = () => {
                     />
                   </Animated.View>
 
-                  <Animated.View 
+                  {/* <Animated.View 
                     entering={FadeIn.delay(600).duration(200)}
                     style={style.forgotContainer}
                   >
@@ -159,7 +156,7 @@ export const AuthenticationScreen: React.FC = () => {
                         {t('screens.authentication.forgotPassword')}
                       </Typography>
                     </AnimatedTouchableOpacity>
-                  </Animated.View>
+                  </Animated.View> */}
 
                   <Animated.View
                     entering={ZoomIn.delay(700).duration(250)}
