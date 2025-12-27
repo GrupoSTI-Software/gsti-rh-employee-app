@@ -1,6 +1,6 @@
 {
   "name": "gsti-empleado",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "main": "index.ts",
   "type": "module",
   "engines": {
