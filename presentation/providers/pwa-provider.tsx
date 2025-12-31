@@ -1,8 +1,8 @@
-import React, { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react'
-import { Platform, View, TouchableOpacity, Text, StyleSheet, Animated, Dimensions } from 'react-native'
-import { PWAService } from '../../src/shared/infrastructure/services/pwa-service'
-import { GetSystemSettingsController } from '../../src/features/attendance/infraestructure/controllers/get-system-setting/get-system-settings.controller'
+import React, { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react'
+import { Animated, Dimensions, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { ISystemSetting } from '../../src/features/attendance/domain/types/system-setting.interface'
+import { GetSystemSettingsController } from '../../src/features/attendance/infraestructure/controllers/get-system-setting/get-system-settings.controller'
+import { PWAService } from '../../src/shared/infrastructure/services/pwa-service'
 
 /**
  * Interfaz para el contexto de PWA
@@ -16,6 +16,8 @@ interface IPWAContext {
   isWeb: boolean
   /** Indica si el manifest dinámico fue aplicado */
   manifestApplied: boolean
+  /** Indica si hay una actualización disponible */
+  updateAvailable: boolean
   /** Configuración del sistema desde la API */
   systemSettings: ISystemSetting | null
   /** Inicia el proceso de instalación */
@@ -26,6 +28,8 @@ interface IPWAContext {
   showInstallBanner: () => void
   /** Oculta el banner de instalación */
   hideInstallBanner: () => void
+  /** Recarga la app para aplicar actualizaciones */
+  reloadForUpdate: () => void
 }
 
 const PWAContext = createContext<IPWAContext | null>(null)
@@ -56,6 +60,9 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({
   const [systemSettings, setSystemSettings] = useState<ISystemSetting | null>(null)
   const [bannerVisible, setBannerVisible] = useState(false)
   const [bannerAnimation] = useState(new Animated.Value(-100))
+  const [updateAvailable, setUpdateAvailable] = useState(false)
+  const [updateBannerVisible, setUpdateBannerVisible] = useState(false)
+  const [updateBannerAnimation] = useState(new Animated.Value(-100))
 
   const isWeb = Platform.OS === 'web'
 
@@ -149,6 +156,49 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({
   }, [isWeb, hideInstallBanner])
 
   /**
+   * Muestra el banner de actualización
+   */
+  const showUpdateBanner = useCallback(() => {
+    setUpdateBannerVisible(true)
+    Animated.spring(updateBannerAnimation, {
+      toValue: 0,
+      useNativeDriver: true,
+      friction: 8
+    }).start()
+  }, [updateBannerAnimation])
+
+  /**
+   * Oculta el banner de actualización
+   */
+  const hideUpdateBanner = useCallback(() => {
+    Animated.timing(updateBannerAnimation, {
+      toValue: -100,
+      duration: 300,
+      useNativeDriver: true
+    }).start(() => {
+      setUpdateBannerVisible(false)
+    })
+  }, [updateBannerAnimation])
+
+  /**
+   * Recarga la app para aplicar actualizaciones
+   * Limpia el caché y recarga
+   */
+  const reloadForUpdate = useCallback(() => {
+    if (!isWeb || typeof window === 'undefined') return
+    
+    // Enviar mensaje al SW para limpiar caché
+    if (navigator.serviceWorker?.controller) {
+      navigator.serviceWorker.controller.postMessage({ type: 'CLEAR_CACHE' })
+    }
+    
+    // Esperar un momento y recargar
+    setTimeout(() => {
+      window.location.reload()
+    }, 500)
+  }, [isWeb])
+
+  /**
    * Inicialización
    */
   useEffect(() => {
@@ -162,9 +212,25 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({
       updateInstallState()
     }
 
+    // Escuchar mensajes del Service Worker
+    const handleSWMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'SW_UPDATED') {
+        // console.log('PWAProvider: Nueva versión disponible:', event.data.version)
+        setUpdateAvailable(true)
+        if (event.data.requiresReload) {
+          showUpdateBanner()
+        }
+      }
+    }
+
     if (typeof window !== 'undefined') {
       window.addEventListener('beforeinstallprompt', handleInstallStateChange)
       window.addEventListener('appinstalled', handleInstallStateChange)
+      
+      // Escuchar mensajes del SW
+      if (navigator.serviceWorker) {
+        navigator.serviceWorker.addEventListener('message', handleSWMessage)
+      }
 
       // Mostrar banner automáticamente después del retraso
       if (autoShowBanner && PWAService.canInstall() && !PWAService.isInstalledAsPWA()) {
@@ -176,6 +242,9 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({
           clearTimeout(timer)
           window.removeEventListener('beforeinstallprompt', handleInstallStateChange)
           window.removeEventListener('appinstalled', handleInstallStateChange)
+          if (navigator.serviceWorker) {
+            navigator.serviceWorker.removeEventListener('message', handleSWMessage)
+          }
         }
       }
     }
@@ -184,20 +253,25 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({
       if (typeof window !== 'undefined') {
         window.removeEventListener('beforeinstallprompt', handleInstallStateChange)
         window.removeEventListener('appinstalled', handleInstallStateChange)
+        if (navigator.serviceWorker) {
+          navigator.serviceWorker.removeEventListener('message', handleSWMessage)
+        }
       }
     }
-  }, [isWeb, updateInstallState, autoShowBanner, bannerDelay, showInstallBanner])
+  }, [isWeb, updateInstallState, autoShowBanner, bannerDelay, showInstallBanner, showUpdateBanner])
 
   const contextValue: IPWAContext = {
     canInstall,
     isInstalled,
     isWeb,
     manifestApplied,
+    updateAvailable,
     systemSettings,
     promptInstall,
     refreshSettings,
     showInstallBanner,
-    hideInstallBanner
+    hideInstallBanner,
+    reloadForUpdate
   }
 
   return (
@@ -231,6 +305,41 @@ export const PWAProvider: React.FC<PWAProviderProps> = ({
               <TouchableOpacity
                 style={styles.dismissButton}
                 onPress={hideInstallBanner}
+                accessibilityLabel="Cerrar banner"
+              >
+                <Text style={styles.dismissButtonText}>✕</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Animated.View>
+      )}
+      
+      {/* Banner de actualización disponible */}
+      {isWeb && updateBannerVisible && (
+        <Animated.View
+          style={[
+            styles.updateBanner,
+            { transform: [{ translateY: updateBannerAnimation }] }
+          ]}
+        >
+          <View style={styles.bannerContent}>
+            <View style={styles.bannerTextContainer}>
+              <Text style={styles.bannerTitle}>Nueva versión disponible</Text>
+              <Text style={styles.bannerSubtitle}>
+                Recarga para obtener las últimas actualizaciones
+              </Text>
+            </View>
+            <View style={styles.bannerButtons}>
+              <TouchableOpacity
+                style={styles.updateButton}
+                onPress={reloadForUpdate}
+                accessibilityLabel="Recargar aplicación"
+              >
+                <Text style={styles.updateButtonText}>Recargar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.dismissButton}
+                onPress={hideUpdateBanner}
                 accessibilityLabel="Cerrar banner"
               >
                 <Text style={styles.dismissButtonText}>✕</Text>
@@ -275,6 +384,22 @@ const styles = StyleSheet.create({
     elevation: 8,
     zIndex: 9999
   },
+  updateBanner: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#2e7d32',
+    paddingTop: 40,
+    paddingBottom: 16,
+    paddingHorizontal: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+    zIndex: 10000
+  },
   bannerContent: {
     flexDirection: width > 600 ? 'row' : 'column',
     alignItems: 'center',
@@ -310,6 +435,17 @@ const styles = StyleSheet.create({
   },
   installButtonText: {
     color: '#003366',
+    fontWeight: '600',
+    fontSize: 14
+  },
+  updateButton: {
+    backgroundColor: '#ffffff',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 6
+  },
+  updateButtonText: {
+    color: '#2e7d32',
     fontWeight: '600',
     fontSize: 14
   },

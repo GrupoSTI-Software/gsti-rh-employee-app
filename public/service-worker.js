@@ -8,23 +8,27 @@
 // ============================================
 // VERSIÓN DE LA APP - CAMBIAR EN CADA DEPLOY
 // ============================================
-const APP_VERSION = '0.0.4'
+const APP_VERSION = '0.0.7'
 const BUILD_TIMESTAMP = '__BUILD_TIMESTAMP__' // Se reemplaza en el build
 
 const CACHE_NAME = `gsti-empleado-cache-v${APP_VERSION}`
 const DYNAMIC_CACHE_NAME = `gsti-empleado-dynamic-v${APP_VERSION}`
-const API_CACHE_NAME = `gsti-empleado-api-v${APP_VERSION}`
 
 // Archivos estáticos a cachear durante la instalación
+// NOTA: manifest.json NO se cachea para permitir actualizaciones dinámicas del nombre/icono
 const STATIC_ASSETS = [
   '/',
-  '/index.html',
-  '/manifest.json'
+  '/index.html'
 ]
 
-// URLs de la API que deben cachearse
-const API_CACHE_PATTERNS = [
-  /\/system-settings-active/
+// URLs de la API - NO se cachean para permitir datos actualizados desde el servidor
+const API_PATTERNS = [
+  /\/system-settings-active/,
+  /\/api\//,
+  /\/auth\//,
+  /\/employee/,
+  /\/attendance/,
+  /\/user/
 ]
 
 /**
@@ -63,11 +67,10 @@ self.addEventListener('activate', (event) => {
         return Promise.all(
           cacheNames
             .filter((name) => {
-              // Eliminar todos los caches de versiones anteriores
+              // Eliminar todos los caches de versiones anteriores (incluyendo caches de API antiguos)
               const isOldCache = name.startsWith('gsti-empleado-') && 
                                  name !== CACHE_NAME && 
-                                 name !== DYNAMIC_CACHE_NAME && 
-                                 name !== API_CACHE_NAME
+                                 name !== DYNAMIC_CACHE_NAME
               if (isOldCache) {
                 console.log(`[SW] Deleting old cache: ${name}`)
               }
@@ -89,7 +92,10 @@ self.addEventListener('activate', (event) => {
         clients.forEach((client) => {
           client.postMessage({
             type: 'SW_UPDATED',
-            version: APP_VERSION
+            version: APP_VERSION,
+            // Indicar que se debe recargar para obtener el nuevo manifest (nombre/icono)
+            requiresReload: true,
+            message: 'Nueva versión disponible. Por favor recarga la página.'
           })
         })
       })
@@ -97,12 +103,13 @@ self.addEventListener('activate', (event) => {
 })
 
 /**
- * Verifica si una URL corresponde a un endpoint de API cacheable
+ * Verifica si una URL corresponde a un endpoint de API
+ * Las peticiones a la API NO se cachean para siempre obtener datos frescos
  * @param {string} url - URL a verificar
- * @returns {boolean} True si la URL debe cachearse
+ * @returns {boolean} True si es una petición a la API
  */
 function isApiRequest(url) {
-  return API_CACHE_PATTERNS.some(pattern => pattern.test(url))
+  return API_PATTERNS.some(pattern => pattern.test(url))
 }
 
 /**
@@ -127,6 +134,15 @@ function isStaticAsset(url) {
 }
 
 /**
+ * Verifica si es el manifest.json - NUNCA debe cachearse para permitir actualizaciones dinámicas
+ * @param {string} url - URL a verificar
+ * @returns {boolean} True si es el manifest
+ */
+function isManifestRequest(url) {
+  return url.includes('manifest.json')
+}
+
+/**
  * Estrategia Cache First para assets estáticos
  * @param {Request} request - Request a manejar
  * @returns {Promise<Response>} Respuesta del cache o de la red
@@ -145,28 +161,6 @@ async function cacheFirst(request) {
     }
     return networkResponse
   } catch (error) {
-    throw error
-  }
-}
-
-/**
- * Estrategia Network First para requests de API
- * @param {Request} request - Request a manejar
- * @returns {Promise<Response>} Respuesta de la red o del cache
- */
-async function networkFirst(request) {
-  try {
-    const networkResponse = await fetch(request)
-    if (networkResponse.ok) {
-      const cache = await caches.open(API_CACHE_NAME)
-      cache.put(request, networkResponse.clone())
-    }
-    return networkResponse
-  } catch (error) {
-    const cachedResponse = await caches.match(request)
-    if (cachedResponse) {
-      return cachedResponse
-    }
     throw error
   }
 }
@@ -219,6 +213,20 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     (async () => {
       try {
+        // manifest.json - SIEMPRE de la red, nunca cacheado
+        // Esto permite que el nombre y icono de la PWA se actualicen correctamente
+        if (isManifestRequest(request.url)) {
+          try {
+            return await fetch(request)
+          } catch (error) {
+            // Si falla la red, devolver respuesta vacía pero no del cache
+            return new Response('{}', {
+              status: 200,
+              headers: { 'Content-Type': 'application/json' }
+            })
+          }
+        }
+
         // Requests de navegación - Network First con fallback a index.html
         if (isNavigationRequest(request)) {
           try {
@@ -242,9 +250,10 @@ self.addEventListener('fetch', (event) => {
           }
         }
 
-        // Requests de API - Network First
+        // Requests de API - SIEMPRE de la red, NUNCA del caché
+        // Esto garantiza que siempre se obtengan los datos más recientes del servidor
         if (isApiRequest(request.url)) {
-          return await networkFirst(request)
+          return await fetch(request)
         }
 
         // Assets estáticos - Cache First

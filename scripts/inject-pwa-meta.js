@@ -16,6 +16,8 @@ const distPath = path.join(__dirname, '..', 'dist')
 const indexPath = path.join(distPath, 'index.html')
 const manifestPath = path.join(distPath, 'manifest.json')
 const serviceWorkerPath = path.join(distPath, 'service-worker.js')
+
+// Siempre usar .env de la raíz del proyecto
 const rootEnvPath = path.join(__dirname, '..', '.env')
 
 /**
@@ -178,6 +180,8 @@ function generatePWAMetaTags(systemSettings) {
     : 'GSTI'
   const themeColor = systemSettings?.systemSettingSidebarColor || '#003366'
   const iconPath = systemSettings?.systemSettingFavicon || '/assets/icon.png'
+  // Cache-busting: agregar timestamp para forzar que el navegador descargue el nuevo manifest
+  const manifestCacheBuster = Date.now()
 
   return `
   <!-- PWA Meta Tags -->
@@ -187,7 +191,7 @@ function generatePWAMetaTags(systemSettings) {
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="${appName}">
   <meta name="application-name" content="${appName}">
-  <link rel="manifest" href="/manifest.json">
+  <link rel="manifest" href="/manifest.json?v=${manifestCacheBuster}">
   <link rel="apple-touch-icon" href="${iconPath}">
   <link rel="icon" href="${iconPath}">
 `
@@ -231,6 +235,59 @@ function updateHTMLTitle(html, systemSettings) {
 }
 
 /**
+ * Actualiza o reemplaza el link al manifest con cache-busting
+ * @param {string} html - Contenido HTML
+ * @returns {string} HTML actualizado
+ */
+function updateManifestLink(html) {
+  const manifestCacheBuster = Date.now()
+  const newManifestLink = `<link rel="manifest" href="/manifest.json?v=${manifestCacheBuster}">`
+  
+  // Reemplazar cualquier link existente al manifest (con o sin query params)
+  const manifestLinkRegex = /<link\s+rel=["']manifest["']\s+href=["'][^"']*["']\s*\/?>/gi
+  
+  if (manifestLinkRegex.test(html)) {
+    return html.replace(manifestLinkRegex, newManifestLink)
+  }
+  
+  return html
+}
+
+/**
+ * Extrae la API_URL compilada en el JavaScript del bundle
+ * @returns {string|null} La API_URL encontrada o null
+ */
+function getCompiledApiUrl() {
+  const jsDir = path.join(distPath, '_expo', 'static', 'js', 'web')
+  
+  if (!fs.existsSync(jsDir)) {
+    return null
+  }
+
+  try {
+    const files = fs.readdirSync(jsDir)
+    const indexFile = files.find(f => f.startsWith('index-') && f.endsWith('.js'))
+    
+    if (!indexFile) {
+      return null
+    }
+
+    const jsContent = fs.readFileSync(path.join(jsDir, indexFile), 'utf8')
+    
+    // Buscar el patrón API_URL:"..." en el JavaScript compilado
+    const apiUrlMatch = jsContent.match(/API_URL['":\s]+["']([^"']+)["']/)
+    
+    if (apiUrlMatch && apiUrlMatch[1]) {
+      return apiUrlMatch[1]
+    }
+    
+    return null
+  } catch (error) {
+    return null
+  }
+}
+
+/**
  * Actualiza el service worker con el timestamp del build
  */
 function updateServiceWorkerTimestamp() {
@@ -264,8 +321,23 @@ async function main() {
   const apiUrl = envVars.API_URL
 
   if (apiUrl) {
-    console.log(`📌 API_URL from .env: ${apiUrl}\n`)
+    console.log(`📌 API_URL from .env: ${apiUrl}`)
   }
+
+  // Mostrar la API compilada en el JavaScript
+  const compiledApiUrl = getCompiledApiUrl()
+  if (compiledApiUrl) {
+    console.log(`🔧 API_URL compiled in JS: ${compiledApiUrl}`)
+    
+    // Advertir si son diferentes
+    if (apiUrl && compiledApiUrl !== apiUrl) {
+      console.warn(`⚠️  WARNING: .env API differs from compiled API!`)
+      console.warn(`   PWA config (manifest/icons) will use .env: ${apiUrl}`)
+      console.warn(`   ⚠️  App runtime will still use compiled: ${compiledApiUrl}`)
+      console.warn(`   💡 To fix: delete dist/ folder and rebuild`)
+    }
+  }
+  console.log('')
 
   // Obtener configuración del sistema desde la API
   const systemSettings = await fetchSystemSettings(apiUrl)
@@ -310,6 +382,9 @@ async function main() {
 
     // Actualizar título del documento
     html = updateHTMLTitle(html, systemSettings)
+    
+    // Actualizar link del manifest con cache-busting
+    html = updateManifestLink(html)
 
     fs.writeFileSync(indexPath, html)
     console.log('✅ index.html updated successfully\n')
