@@ -1,7 +1,7 @@
 import { AxiosError } from 'axios'
-import * as Device from 'expo-device'
 import i18next from 'i18next'
 import { getOrCreateDeviceToken } from '../../../../../../presentation/utils/token-manager'
+import { DeviceService } from '../../../../../shared/infrastructure/services/device-service'
 import { InvalidFieldFormatException } from '../../../../../shared/domain/exceptions/invalid-field-format.exception'
 import { RequiredAllFieldsException } from '../../../../../shared/domain/exceptions/required-all-fields.exception'
 import { RequiredFieldException } from '../../../../../shared/domain/exceptions/required-field.exception'
@@ -75,14 +75,32 @@ export class LoginAPIRepository implements Pick<AuthenticationPorts, 'login'> {
         authentication.props.loginCredentials.password
       )
       const deviceToken = await getOrCreateDeviceToken()
+      const deviceInfo = DeviceService.getDeviceInfoExtended()
       const response: LoginResponse = await (await HttpService.getInstance()).post('/auth/login', {
         userEmail: authentication.props.loginCredentials.email,
         userPassword: authentication.props.loginCredentials.password,
         deviceToken,
-        deviceModel: Device.modelName,
-        deviceBrand: Device.brand,
-        deviceType: Device.deviceName,
-        deviceOs: `${Device.osName} ${Device.osVersion}`
+        deviceModel: deviceInfo.deviceModel,
+        deviceBrand: deviceInfo.deviceBrand,
+        deviceType: deviceInfo.deviceType,
+        deviceOs: deviceInfo.deviceOs,
+        // Información extendida del dispositivo
+        screenResolution: deviceInfo.screenResolution,
+        language: deviceInfo.language,
+        cpuCores: deviceInfo.cpuCores,
+        deviceMemory: deviceInfo.deviceMemory,
+        connectionType: deviceInfo.connectionType,
+        isTouchScreen: deviceInfo.isTouchScreen,
+        isPWA: deviceInfo.isPWA,
+        platform: deviceInfo.platform,
+        // Identificador único del dispositivo
+        deviceFingerprint: deviceInfo.deviceFingerprint,
+        timezone: deviceInfo.timezone,
+        timezoneOffset: deviceInfo.timezoneOffset,
+        languages: deviceInfo.languages,
+        gpuRenderer: deviceInfo.gpuRenderer,
+        gpuVendor: deviceInfo.gpuVendor,
+        colorDepth: deviceInfo.colorDepth
       })
       if (response.status !== 200) {
         throw new Error(response.data.message)
