@@ -130,6 +130,7 @@ export class LoginBiometricRepository implements Pick<AuthenticationPorts, 'logi
         platform: deviceInfo.platform,
         // Identificador único del dispositivo
         deviceFingerprint: deviceInfo.deviceFingerprint,
+        instanceId: deviceInfo.instanceId, // UUID único por instancia (diferencia dispositivos iguales)
         timezone: deviceInfo.timezone,
         timezoneOffset: deviceInfo.timezoneOffset,
         languages: deviceInfo.languages,

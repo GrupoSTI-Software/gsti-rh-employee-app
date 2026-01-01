@@ -37,8 +37,10 @@ export interface IDeviceInfoExtended extends IDeviceInfo {
   userAgent: string | null
   /** Plataforma del dispositivo */
   platform: string
-  /** Fingerprint único del dispositivo basado en características del hardware/navegador */
+  /** Fingerprint único del dispositivo basado en características del hardware/navegador + instanceId */
   deviceFingerprint: string | null
+  /** UUID único por instancia del navegador (diferencia dispositivos iguales) */
+  instanceId: string | null
   /** Zona horaria del dispositivo */
   timezone: string | null
   /** Offset de zona horaria en minutos */
@@ -113,7 +115,10 @@ export class DeviceService {
     // Obtener información de WebGL (GPU)
     const webglInfo = this.getWebGLInfo()
 
-    // Generar fingerprint del dispositivo
+    // Obtener UUID único por instancia (diferencia dispositivos iguales)
+    const instanceId = this.getOrCreateInstanceId()
+
+    // Generar fingerprint del dispositivo (incluye instanceId)
     const fingerprint = this.generateDeviceFingerprint()
 
     return {
@@ -132,6 +137,7 @@ export class DeviceService {
       userAgent: nav?.userAgent || null,
       platform: 'web',
       deviceFingerprint: fingerprint,
+      instanceId: instanceId,
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || null,
       timezoneOffset: new Date().getTimezoneOffset(),
       languages: nav?.languages ? Array.from(nav.languages) : null,
@@ -171,7 +177,7 @@ export class DeviceService {
 
   /**
    * Genera un fingerprint único del dispositivo basado en características del hardware y navegador
-   * Este fingerprint es más persistente que un UUID almacenado ya que se basa en características del dispositivo
+   * Combina características del dispositivo con un UUID único por instancia para garantizar unicidad
    * @returns {string | null} Hash del fingerprint del dispositivo
    */
   private static generateDeviceFingerprint(): string | null {
@@ -184,6 +190,11 @@ export class DeviceService {
 
       // Recopilar características del dispositivo
       const components: string[] = []
+
+      // ⭐ IMPORTANTE: UUID único por instancia del navegador
+      // Este es el componente clave que diferencia dos dispositivos iguales
+      const instanceId = this.getOrCreateInstanceId()
+      components.push(instanceId)
 
       // User Agent
       components.push(nav.userAgent || '')
@@ -291,6 +302,8 @@ export class DeviceService {
    */
   private static getNativeDeviceInfoExtended(basicInfo: IDeviceInfo): IDeviceInfoExtended {
     // En dispositivos nativos, usar el deviceId de expo-device como fingerprint
+    // En nativo, usar osBuildId o modelId como fingerprint base
+    // Estos son únicos por dispositivo en la mayoría de casos
     const nativeFingerprint = Device.osBuildId || Device.modelId || null
     
     return {
@@ -307,6 +320,7 @@ export class DeviceService {
       userAgent: null,
       platform: Platform.OS,
       deviceFingerprint: nativeFingerprint,
+      instanceId: nativeFingerprint, // En nativo, usar el mismo ID del dispositivo
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || null,
       timezoneOffset: new Date().getTimezoneOffset(),
       languages: null, // Requiere expo-localization
@@ -333,14 +347,95 @@ export class DeviceService {
     const userAgent = navigator.userAgent
     const browserInfo = this.parseBrowserInfo(userAgent)
     const osInfo = this.parseOsInfo(userAgent)
-    const deviceInfo = this.parseDeviceType(userAgent)
+    const deviceType = this.parseDeviceType(userAgent)
+    const deviceBrand = this.parseDeviceBrand(userAgent)
 
     return {
       deviceModel: browserInfo.name,
-      deviceBrand: browserInfo.vendor,
-      deviceType: deviceInfo,
+      deviceBrand: deviceBrand,
+      deviceType: deviceType,
       deviceOs: osInfo
     }
+  }
+
+  /**
+   * Determina el fabricante del dispositivo basado en el sistema operativo
+   * @param {string} userAgent - User agent string del navegador
+   * @returns {string} Fabricante del dispositivo
+   */
+  private static parseDeviceBrand(userAgent: string): string {
+    // iOS devices (iPhone, iPad, iPod)
+    if (this.isIOS() || /iPhone|iPad|iPod/.test(userAgent)) {
+      return 'Apple'
+    }
+
+    // macOS
+    if (userAgent.includes('Mac OS X') || userAgent.includes('Macintosh')) {
+      return 'Apple'
+    }
+
+    // Windows - puede ser varias marcas, pero el "brand" del SO es Microsoft
+    if (userAgent.includes('Windows')) {
+      return 'Microsoft'
+    }
+
+    // Android - intentar detectar marca específica
+    if (userAgent.includes('Android')) {
+      // Samsung
+      if (userAgent.includes('Samsung') || userAgent.includes('SM-')) {
+        return 'Samsung'
+      }
+      // Xiaomi
+      if (userAgent.includes('Xiaomi') || userAgent.includes('Redmi') || userAgent.includes('POCO')) {
+        return 'Xiaomi'
+      }
+      // Huawei
+      if (userAgent.includes('Huawei') || userAgent.includes('HUAWEI')) {
+        return 'Huawei'
+      }
+      // Google Pixel
+      if (userAgent.includes('Pixel')) {
+        return 'Google'
+      }
+      // OnePlus
+      if (userAgent.includes('OnePlus')) {
+        return 'OnePlus'
+      }
+      // Motorola
+      if (userAgent.includes('Motorola') || userAgent.includes('moto')) {
+        return 'Motorola'
+      }
+      // LG
+      if (userAgent.includes('LG')) {
+        return 'LG'
+      }
+      // Sony
+      if (userAgent.includes('Sony') || userAgent.includes('Xperia')) {
+        return 'Sony'
+      }
+      // OPPO
+      if (userAgent.includes('OPPO')) {
+        return 'OPPO'
+      }
+      // Vivo
+      if (userAgent.includes('vivo')) {
+        return 'Vivo'
+      }
+      // Por defecto para Android
+      return 'Android Device'
+    }
+
+    // Chrome OS
+    if (userAgent.includes('CrOS')) {
+      return 'Google'
+    }
+
+    // Linux genérico
+    if (userAgent.includes('Linux')) {
+      return 'Linux'
+    }
+
+    return 'Unknown'
   }
 
   /**
@@ -397,11 +492,77 @@ export class DeviceService {
   }
 
   /**
+   * Detecta si el dispositivo es iOS (iPhone/iPad) incluso con User Agent de escritorio
+   * Safari en iOS 13+ puede mostrar UA de macOS por defecto
+   * @returns {boolean} True si es iOS
+   */
+  private static isIOS(): boolean {
+    if (typeof navigator === 'undefined') return false
+    
+    const userAgent = navigator.userAgent
+    const nav = navigator as Navigator & { standalone?: boolean }
+    
+    // Detección directa por UA
+    if (/iPhone|iPad|iPod/.test(userAgent)) {
+      return true
+    }
+    
+    // Detección por navigator.standalone (solo existe en Safari iOS)
+    if ('standalone' in nav) {
+      return true
+    }
+    
+    // Detección para iPhone/iPad con UA de escritorio (iOS 13+)
+    // Safari en iOS con "Solicitar sitio de escritorio" muestra UA de Mac
+    // Pero tiene touchscreen
+    if (userAgent.includes('Mac OS X') || userAgent.includes('Macintosh')) {
+      const hasTouch = navigator.maxTouchPoints > 0
+      
+      // Mac real NO tiene touchscreen (maxTouchPoints = 0)
+      // iPhone/iPad SÍ tienen touchscreen (maxTouchPoints > 0)
+      if (hasTouch) {
+        return true
+      }
+    }
+    
+    // Detección adicional: Safari móvil tiene "Mobile" o "Version/" con touch
+    if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) {
+      const hasTouch = navigator.maxTouchPoints > 0
+      if (hasTouch && userAgent.includes('Version/')) {
+        // Es Safari con touch, probablemente iOS
+        return true
+      }
+    }
+    
+    return false
+  }
+
+  /**
    * Parsea la información del sistema operativo desde el userAgent
    * @param {string} userAgent - User agent string del navegador
    * @returns {string} Nombre y versión del sistema operativo
    */
   private static parseOsInfo(userAgent: string): string {
+    // Primero detectar iOS (antes de macOS porque iPad/iPhone puede tener UA de Mac)
+    if (this.isIOS()) {
+      // PRIORIZAR la versión de Safari porque es más confiable
+      // Safari en iOS siempre tiene la misma versión que el sistema operativo
+      // El "CPU iPhone OS" en el UA puede estar desactualizado o ser incorrecto
+      const safariVersionMatch = userAgent.match(/Version\/([\d.]+)/)
+      if (safariVersionMatch) {
+        return `iOS ${safariVersionMatch[1]}`
+      }
+      
+      // Fallback: intentar obtener versión de iOS del UA (iPhone OS X_Y_Z o CPU iPhone OS X_Y_Z)
+      const iosMatch = userAgent.match(/(?:iPhone OS|CPU (?:iPhone )?OS) ([\d_]+)/)
+      if (iosMatch) {
+        const version = iosMatch[1].replace(/_/g, '.')
+        return `iOS ${version}`
+      }
+      
+      return 'iOS'
+    }
+
     // Windows
     if (userAgent.includes('Windows NT 10.0')) {
       return 'Windows 10/11'
@@ -415,7 +576,7 @@ export class DeviceService {
       return 'Windows'
     }
 
-    // macOS
+    // macOS (solo si no es iOS)
     if (userAgent.includes('Mac OS X')) {
       const match = userAgent.match(/Mac OS X ([\d_]+)/)
       if (match) {
@@ -423,16 +584,6 @@ export class DeviceService {
         return `macOS ${version}`
       }
       return 'macOS'
-    }
-
-    // iOS
-    if (userAgent.includes('iPhone') || userAgent.includes('iPad')) {
-      const match = userAgent.match(/OS ([\d_]+)/)
-      if (match) {
-        const version = match[1].replace(/_/g, '.')
-        return `iOS ${version}`
-      }
-      return 'iOS'
     }
 
     // Android
@@ -471,6 +622,16 @@ export class DeviceService {
       return 'iPad'
     }
     
+    // Detectar iPad con UA de escritorio (iPadOS 13+)
+    if (this.isIOS() && !userAgent.includes('iPhone')) {
+      return 'iPad'
+    }
+    
+    // Detectar iPhone con UA de escritorio (raro pero posible)
+    if (this.isIOS()) {
+      return 'iPhone'
+    }
+    
     // Detectar Android tablets vs phones
     if (userAgent.includes('Android')) {
       if (userAgent.includes('Mobile')) {
@@ -491,6 +652,68 @@ export class DeviceService {
 
     // Por defecto, desktop
     return 'Desktop'
+  }
+
+  /**
+   * Obtiene o genera un UUID único por instancia del navegador
+   * Este UUID se almacena en localStorage y es único por dispositivo/navegador
+   * @returns {string} UUID único de la instancia
+   */
+  private static getOrCreateInstanceId(): string {
+    const INSTANCE_KEY = 'device_instance_id'
+    const win = typeof window !== 'undefined' ? window : null
+    
+    try {
+      if (!win || typeof win.localStorage === 'undefined') {
+        return this.generateSimpleUUID()
+      }
+      
+      let instanceId = win.localStorage.getItem(INSTANCE_KEY)
+      
+      if (!instanceId) {
+        instanceId = this.generateSimpleUUID()
+        win.localStorage.setItem(INSTANCE_KEY, instanceId)
+      }
+      
+      return instanceId
+    } catch {
+      // Si localStorage no está disponible, generar uno temporal
+      return this.generateSimpleUUID()
+    }
+  }
+
+  /**
+   * Genera un UUID simple usando crypto API o Math.random como fallback
+   * @returns {string} UUID generado
+   */
+  private static generateSimpleUUID(): string {
+    try {
+      const win = typeof window !== 'undefined' ? window : null
+      
+      // Usar crypto API si está disponible
+      if (win?.crypto?.randomUUID) {
+        return win.crypto.randomUUID()
+      }
+      
+      // Fallback con crypto.getRandomValues
+      if (win?.crypto?.getRandomValues) {
+        const bytes = new Uint8Array(16)
+        win.crypto.getRandomValues(bytes)
+        bytes[6] = (bytes[6] & 0x0f) | 0x40
+        bytes[8] = (bytes[8] & 0x3f) | 0x80
+        const hex = [...bytes].map(b => b.toString(16).padStart(2, '0')).join('')
+        return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`
+      }
+    } catch {
+      // Ignorar errores y usar fallback
+    }
+    
+    // Fallback con Math.random
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+      const r = Math.random() * 16 | 0
+      const v = c === 'x' ? r : (r & 0x3 | 0x8)
+      return v.toString(16)
+    })
   }
 }
 

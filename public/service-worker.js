@@ -8,7 +8,7 @@
 // ============================================
 // VERSIÓN DE LA APP - CAMBIAR EN CADA DEPLOY
 // ============================================
-const APP_VERSION = '0.0.8'
+const APP_VERSION = '0.0.9'
 const BUILD_TIMESTAMP = '__BUILD_TIMESTAMP__' // Se reemplaza en el build
 
 const CACHE_NAME = `gsti-empleado-cache-v${APP_VERSION}`

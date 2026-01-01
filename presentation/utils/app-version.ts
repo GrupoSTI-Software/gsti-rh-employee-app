@@ -2,7 +2,7 @@
  * Versión de la aplicación
  * Se sincroniza con la versión del package.json y el service worker
  */
-export const APP_VERSION = '0.0.8'
+export const APP_VERSION = '0.0.9'
 
 /**
  * Obtiene el string de versión formateado para mostrar en la UI

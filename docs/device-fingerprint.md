@@ -2,7 +2,12 @@
 
 ## Descripción General
 
-El **Device Fingerprint** es un identificador único generado a partir de las características del hardware y software del dispositivo del usuario. Este identificador es persistente y no depende del almacenamiento local del navegador, lo que significa que permanece igual incluso si el usuario borra cookies, localStorage o los datos del navegador.
+El **Device Fingerprint** es un identificador único generado a partir de las características del hardware y software del dispositivo del usuario, **combinado con un UUID único por instancia** (`instanceId`). 
+
+Esta combinación garantiza que:
+- **Dos dispositivos iguales** (mismo modelo, misma configuración) tengan **fingerprints diferentes**
+- El identificador sea **único por dispositivo/navegador**
+- Se pueda **diferenciar** correctamente entre dispositivos iOS y macOS
 
 ## Ubicación del Código
 
@@ -40,7 +45,8 @@ interface IDeviceInfoExtended extends IDeviceInfo {
   isPWA: boolean                       // Si es PWA instalada
   userAgent: string | null             // User Agent completo
   platform: string                     // Plataforma (web, ios, android)
-  deviceFingerprint: string | null     // Fingerprint único
+  deviceFingerprint: string | null     // Fingerprint único (hash de todos los componentes)
+  instanceId: string | null            // ⭐ UUID único por instancia (diferencia dispositivos iguales)
   timezone: string | null              // Zona horaria
   timezoneOffset: number | null        // Offset UTC en minutos
   languages: string[] | null           // Idiomas preferidos
@@ -95,21 +101,82 @@ El fingerprint se genera combinando las siguientes características:
 
 | # | Componente | Descripción | Ejemplo |
 |---|------------|-------------|---------|
-| 1 | User Agent | Cadena completa del navegador | `Mozilla/5.0 (Macintosh...)` |
-| 2 | Idiomas | Lista de idiomas preferidos | `es-MX,es,en` |
-| 3 | Resolución | Tamaño de pantalla | `1920x1080` |
-| 4 | Color Depth | Profundidad de color | `24` |
-| 5 | Available Screen | Área disponible | `1920x1055` |
-| 6 | Timezone | Zona horaria | `America/Mexico_City` |
-| 7 | Timezone Offset | Offset UTC | `-360` |
-| 8 | CPU Cores | Núcleos de procesador | `8` |
-| 9 | Device Memory | RAM en GB | `16` |
-| 10 | Touch Points | Puntos táctiles máximos | `0` o `5` |
-| 11 | Platform | Plataforma del navegador | `MacIntel` |
-| 12 | Pixel Ratio | Densidad de píxeles | `2` |
-| 13 | GPU Vendor | Fabricante de GPU | `Apple Inc.` |
-| 14 | GPU Renderer | Modelo de GPU | `Apple M1 Pro` |
-| 15 | Canvas Fingerprint | Hash de renderizado | `data:image/png...` |
+| **1** | **Instance ID** ⭐ | **UUID único por instancia (clave para diferenciar dispositivos iguales)** | `a1b2c3d4-e5f6-...` |
+| 2 | User Agent | Cadena completa del navegador | `Mozilla/5.0 (Macintosh...)` |
+| 3 | Idiomas | Lista de idiomas preferidos | `es-MX,es,en` |
+| 4 | Resolución | Tamaño de pantalla | `1920x1080` |
+| 5 | Color Depth | Profundidad de color | `24` |
+| 6 | Available Screen | Área disponible | `1920x1055` |
+| 7 | Timezone | Zona horaria | `America/Mexico_City` |
+| 8 | Timezone Offset | Offset UTC | `-360` |
+| 9 | CPU Cores | Núcleos de procesador | `8` |
+| 10 | Device Memory | RAM en GB | `16` |
+| 11 | Touch Points | Puntos táctiles máximos | `0` o `5` |
+| 12 | Platform | Plataforma del navegador | `MacIntel` |
+| 13 | Pixel Ratio | Densidad de píxeles | `2` |
+| 14 | GPU Vendor | Fabricante de GPU | `Apple Inc.` |
+| 15 | GPU Renderer | Modelo de GPU | `Apple M1 Pro` |
+| 16 | Canvas Fingerprint | Hash de renderizado | `data:image/png...` |
+
+### Instance ID - Diferenciador de Dispositivos Iguales
+
+El `instanceId` es un **UUID único** que se genera una sola vez y se almacena en `localStorage`. Es el componente **más importante** porque:
+
+```
+Dispositivo A (iPhone 15)     Dispositivo B (iPhone 15)
+├── instanceId: "abc-123"     ├── instanceId: "xyz-789"  ← DIFERENTE
+├── userAgent: igual          ├── userAgent: igual
+├── screen: igual             ├── screen: igual
+└── etc: igual                └── etc: igual
+
+Fingerprint A: "f8a2b1c3"     Fingerprint B: "d4e5f6a7"  ← DIFERENTES
+```
+
+**Nota**: Si el usuario borra localStorage, se genera un nuevo `instanceId`, lo cual es deseable para seguridad.
+
+---
+
+## Detección de iOS vs macOS
+
+### Problema
+
+Safari en iOS 13+ puede mostrar un User Agent idéntico al de macOS cuando el usuario tiene activado "Solicitar sitio de escritorio". Esto causaba que los iPhones/iPads se detectaran como macOS.
+
+### Solución
+
+Se implementó el método `isIOS()` que detecta correctamente dispositivos iOS:
+
+```typescript
+private static isIOS(): boolean {
+  // Detección directa por UA
+  if (/iPhone|iPad|iPod/.test(userAgent)) {
+    return true
+  }
+  
+  // Detección para iPad con UA de escritorio (iPadOS 13+)
+  // iPad con Safari muestra UA de Mac, pero tiene touchscreen
+  if (userAgent.includes('Mac OS X')) {
+    const hasTouch = navigator.maxTouchPoints > 0  // iPad tiene touch
+    const isMacPlatform = navigator.platform === 'MacIntel'
+    
+    // Mac real NO tiene touch, iPad SÍ
+    if (hasTouch && isMacPlatform) {
+      return true  // Es iPad disfrazado de Mac
+    }
+  }
+  
+  return false
+}
+```
+
+### Lógica de Detección
+
+| Característica | Mac Real | iPad (UA escritorio) | iPhone |
+|---------------|----------|---------------------|--------|
+| User Agent | `Mac OS X` | `Mac OS X` | `iPhone` |
+| platform | `MacIntel` | `MacIntel` | `iPhone` |
+| maxTouchPoints | `0` | `5` | `5` |
+| **Resultado** | **macOS** | **iOS** ✅ | **iOS** ✅ |
 
 ---
 
@@ -232,7 +299,7 @@ const response = await httpService.post('/auth/login', {
 
 ## Datos Enviados al Servidor
 
-### Ejemplo de Payload Web
+### Ejemplo de Payload Web (Desktop)
 
 ```json
 {
@@ -240,6 +307,7 @@ const response = await httpService.post('/auth/login', {
   "userPassword": "***",
   "deviceToken": "a3f2b8c1",
   "deviceFingerprint": "a3f2b8c1",
+  "instanceId": "550e8400-e29b-41d4-a716-446655440000",
   "deviceModel": "Google Chrome 120.0.6099.234",
   "deviceBrand": "Google",
   "deviceType": "Desktop",
@@ -261,7 +329,37 @@ const response = await httpService.post('/auth/login', {
 }
 ```
 
-### Ejemplo de Payload Móvil (Expo)
+### Ejemplo de Payload Web (iPhone con Safari)
+
+```json
+{
+  "userEmail": "usuario@empresa.com",
+  "userPassword": "***",
+  "deviceToken": "b7c8d9e0",
+  "deviceFingerprint": "b7c8d9e0",
+  "instanceId": "660f9511-f3ac-52e5-b827-557766551111",
+  "deviceModel": "Safari 17.2",
+  "deviceBrand": "Apple",
+  "deviceType": "iPhone",
+  "deviceOs": "iOS 17.2",
+  "screenResolution": "390x844",
+  "language": "es-MX",
+  "cpuCores": null,
+  "deviceMemory": null,
+  "connectionType": "4g",
+  "isTouchScreen": true,
+  "isPWA": false,
+  "platform": "web",
+  "timezone": "America/Mexico_City",
+  "timezoneOffset": -360,
+  "languages": ["es-MX", "es"],
+  "gpuVendor": "Apple Inc.",
+  "gpuRenderer": "Apple GPU",
+  "colorDepth": 32
+}
+```
+
+### Ejemplo de Payload Móvil (Expo Android)
 
 ```json
 {
@@ -269,6 +367,7 @@ const response = await httpService.post('/auth/login', {
   "userPassword": "***",
   "deviceToken": "RKQ1.211119.001",
   "deviceFingerprint": "RKQ1.211119.001",
+  "instanceId": "RKQ1.211119.001",
   "deviceModel": "Pixel 6",
   "deviceBrand": "Google",
   "deviceType": "Pixel 6",
@@ -321,14 +420,36 @@ El fingerprinting es una técnica que puede identificar usuarios sin su consenti
 
 ### Persistencia del Fingerprint
 
-| Acción del Usuario | UUID Almacenado | Fingerprint |
-|--------------------|-----------------|-------------|
-| Borrar cookies | ❌ Se pierde | ✅ Persiste |
-| Borrar localStorage | ❌ Se pierde | ✅ Persiste |
-| Modo incógnito | ❌ No disponible | ✅ Disponible |
-| Actualizar navegador | ✅ Persiste | ⚠️ Puede cambiar |
-| Cambiar resolución | ✅ Persiste | ⚠️ Puede cambiar |
-| Cambiar GPU/drivers | ✅ Persiste | ⚠️ Puede cambiar |
+| Acción del Usuario | instanceId | Fingerprint | Comportamiento |
+|--------------------|------------|-------------|----------------|
+| Borrar cookies | ✅ Persiste | ✅ Persiste | Sin cambio |
+| Borrar localStorage | ❌ Se regenera | ❌ Cambia | **Nuevo identificador** |
+| Modo incógnito | ❌ Temporal | ❌ Diferente | Fingerprint diferente por sesión |
+| Actualizar navegador | ✅ Persiste | ⚠️ Puede cambiar | Depende de cambios en UA |
+| Cambiar resolución | ✅ Persiste | ⚠️ Puede cambiar | Componente de resolución cambia |
+| Otro dispositivo igual | ❌ Diferente | ❌ Diferente | **Cada dispositivo es único** ✅ |
+
+### Flujo de Identificación
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    Primer acceso al sitio                        │
+├─────────────────────────────────────────────────────────────────┤
+│  1. ¿Existe instanceId en localStorage?                          │
+│     └── NO → Generar UUID → Guardar en localStorage             │
+│     └── SÍ → Usar existente                                      │
+│                                                                   │
+│  2. Recopilar características del dispositivo                    │
+│     └── instanceId + UA + screen + timezone + GPU + canvas...   │
+│                                                                   │
+│  3. Generar hash (djb2) de todos los componentes                │
+│     └── Resultado: deviceFingerprint                             │
+│                                                                   │
+│  4. Enviar al servidor:                                          │
+│     └── deviceToken = deviceFingerprint                          │
+│     └── instanceId (para trazabilidad adicional)                │
+└─────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
